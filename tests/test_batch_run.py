@@ -19,6 +19,7 @@ def _fake_resolve(state, issue, verbose=True, client=None, max_steps=8):
 
 
 """T09 batch agent runner tests using the scripted fake LLM."""
+import json
 import pathlib
 import tempfile
 import unittest
@@ -26,7 +27,7 @@ from unittest.mock import patch
 
 from bureau.agent.loop import run_pending
 from bureau.core.loader import load_event
-from bureau.core.models import Issue
+from bureau.core.models import Issue, ProposedAction
 from tests.fake_llm import FakeClient
 
 PROPOSAL = {
@@ -41,6 +42,16 @@ PROPOSAL = {
 
 def _client_for(count: int) -> FakeClient:
     return FakeClient([[('propose_action', PROPOSAL)] for _ in range(count)])
+
+
+def _propose(state, issue, verbose=False, client=None) -> ProposedAction:
+    action = ProposedAction(
+        id=f"{state.id}:{issue.id}", event_id=state.id, issue_id=issue.id,
+        action_type="ESCALATE", title="Organizer review", description="Needs review",
+    )
+    state.actions.append(action)
+    issue.status = "needs_human"
+    return action
 
 
 class BatchRunTests(unittest.TestCase):
@@ -66,8 +77,8 @@ class BatchRunTests(unittest.TestCase):
 
         first, second, state = self._run_in_temp_runtime(issues, client)
 
-        self.assertEqual(2, len(first))
-        self.assertEqual(0, len(second))
+        self.assertEqual(2, len(first.actions))
+        self.assertEqual(0, len(second.actions))
         self.assertEqual(2, len(state.actions))
         self.assertEqual(2, len(client.requests))
 
@@ -85,7 +96,62 @@ class BatchRunTests(unittest.TestCase):
 
         first, second, state = self._run_in_temp_runtime(issues, client)
 
-        self.assertEqual(["runnable"], [action.issue_id for action in first])
-        self.assertEqual([], second)
+        self.assertEqual(["runnable"], [action.issue_id for action in first.actions])
+        self.assertEqual([], second.actions)
         self.assertEqual("open", next(issue for issue in state.issues if issue.id == "dependent").status)
         self.assertEqual(1, len(client.requests))
+
+    def test_terminal_history_missing_from_detection_is_saved_after_a_batch(self):
+        """A batch save must not discard resolved/dismissed issues from history."""
+        from bureau.core import store
+
+        terminal = [
+            Issue(id="fixed", kind="unprocessed_message", blocking=False,
+                  title="Fixed", status="resolved"),
+            Issue(id="dismissed", kind="unprocessed_message", blocking=False,
+                  title="Dismissed", status="dismissed"),
+        ]
+        runnable = Issue(id="new", kind="unprocessed_message", blocking=False,
+                         title="New", status="open")
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(store, "RUNTIME_DIR", pathlib.Path(tmp)), \
+                 patch("bureau.agent.loop.detect_issues", return_value=[runnable]), \
+                 patch("bureau.agent.loop.resolve_issue", side_effect=_propose):
+                state = load_event("hackathon")
+                state.issues = terminal
+                result = run_pending(state, verbose=False)
+                saved = store.load_state("hackathon")
+
+        self.assertEqual(["new"], [action.issue_id for action in result.actions])
+        self.assertEqual("resolved", next(issue for issue in saved.issues if issue.id == "fixed").status)
+        self.assertEqual("dismissed", next(issue for issue in saved.issues if issue.id == "dismissed").status)
+
+    def test_failure_does_not_lose_other_proposals_and_is_logged(self):
+        """A failed issue logs an error while successful neighbors are persisted."""
+        from bureau.core import store
+
+        issues = [
+            Issue(id=f"issue:{number}", kind="unprocessed_message", blocking=False,
+                  title=str(number), status="open")
+            for number in range(1, 5)
+        ]
+
+        def fail_third(state, issue, verbose=False, client=None):
+            if issue.id == "issue:3":
+                raise RuntimeError("rate limit")
+            return _propose(state, issue, verbose=verbose, client=client)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            runtime = pathlib.Path(tmp)
+            with patch.object(store, "RUNTIME_DIR", runtime), \
+                 patch("bureau.agent.loop.detect_issues", return_value=issues), \
+                 patch("bureau.agent.loop.resolve_issue", side_effect=fail_third):
+                state = load_event("hackathon")
+                result = run_pending(state, verbose=False)
+                saved = store.load_state("hackathon")
+                log = [json.loads(line) for line in (runtime / "hackathon" / "log.jsonl").read_text().splitlines()]
+
+        self.assertEqual(["issue:1", "issue:2", "issue:4"], [action.issue_id for action in result.actions])
+        self.assertEqual([{"issue_id": "issue:3", "error": "rate limit"}], result.errors)
+        self.assertEqual(["issue:1", "issue:2", "issue:4"], [action.issue_id for action in saved.actions])
+        self.assertEqual([{"type": "agent_error", "issue_id": "issue:3", "error": "rate limit"}], log)

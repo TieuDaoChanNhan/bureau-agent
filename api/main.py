@@ -7,13 +7,13 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, StrictStr
 
 from bureau import config
-from bureau.agent.loop import resolve_issue
+from bureau.agent.loop import run_pending, runnable_issues
 from bureau.core import store
 from bureau.core.detect import detect_issues
 from bureau.core.executor import InvariantViolation, apply
@@ -106,21 +106,18 @@ def _todo(task: str):
 
 
 @app.post("/api/events/{event_id}/run")
-def run_agent(event_id: str):
-    """Propose actions for open/needs_human issues with no proposal or dependency."""
+def run_agent(event_id: str, limit: int = Query(5, ge=1)):
+    """Propose up to ``limit`` runnable issues and report the remaining backlog."""
     if event_id not in _events():
         raise HTTPException(404, "unknown event")
     state = _load_and_refresh(event_id)
-    proposed = {a.issue_id for a in state.actions}
-    targets = [i for i in state.issues
-               if i.status in ("open", "needs_human") and not i.depends_on and i.kind != "no_logistics_plan"
-               and i.id not in proposed]
-    if targets and not config.OPENAI_API_KEY:
+    if runnable_issues(state) and not config.OPENAI_API_KEY:
         raise HTTPException(503, "OPENAI_API_KEY is not set")
-    for issue in targets:
-        resolve_issue(state, issue, verbose=False)
-    store.save_state(state)
-    return _event_summary(state)
+    result = run_pending(state, limit=limit, verbose=False)
+    summary = _event_summary(state)
+    summary["remaining"] = result.remaining
+    summary["errors"] = result.errors
+    return summary
 
 
 @app.post("/api/events/{event_id}/plan")

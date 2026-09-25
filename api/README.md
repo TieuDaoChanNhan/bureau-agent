@@ -10,7 +10,7 @@ uvicorn api.main:app --reload     # http://127.0.0.1:8000  (docs at /docs)
 |---|---|---|
 | GET | `/api/events` | done (runtime state, sample fallback) |
 | GET | `/api/events/{event_id}` | done (re-detected issues, stored statuses and actions) |
-| POST | `/api/events/{event_id}/run` | done (proposals only) |
+| POST | `/api/events/{event_id}/run?limit=5` | done (bounded proposals only) |
 | POST | `/api/events/{event_id}/plan` | 501 (T14 / issue #13, outside T05) |
 | GET | `/api/actions/{action_id}` | done |
 | POST | `/api/actions/{action_id}/approve` | done (executor validation, optional edits/selection) |
@@ -20,19 +20,23 @@ uvicorn api.main:app --reload     # http://127.0.0.1:8000  (docs at /docs)
 
 JSON bodies are the dataclasses of `bureau/core/models.py` (`dataclasses.asdict`). Keep it that way so the web UI has one source of truth.
 
-`run`, `approve`, `dismiss`, and `reset` return the same summary as the event GET:
-`{id, name, counts, issues, actions}`. GET routes do not write runtime files.
+`approve`, `dismiss`, and `reset` return the same summary as the event GET:
+`{id, name, counts, issues, actions}`. `run` adds `remaining` and `errors` to
+that summary. GET routes do not write runtime files.
 Issues are re-detected for each summary; repaired issues disappear, and dependent
 issues are unlocked immediately after a travel plan is approved. Completed
 decisions remain in storage to reject repeat approvals, even after other requests.
 Counts describe the issues still detected, so repaired issues that disappear are
 not included in `counts.resolved`.
 
-`run` handles `open` and `needs_human` issues without a proposal, skipping issues
-with dependencies and `no_logistics_plan`. Existing proposals and terminal issues
-are skipped. An OpenAI key is required only when there is work to do. The route
-never applies a proposal. Each mutation saves the current state once; it does not
-mix `save_action` with a stale `save_state` that could erase other proposals.
+`run` delegates to the agent's shared `run_pending` selector. It handles `open`
+and `needs_human` issues without a proposal, skips `no_logistics_plan` and issues
+blocked by an unresolved dependency, and defaults to five attempted issues per
+request. Existing proposals and terminal issues are skipped. Each successful
+proposal is saved before the next issue; an agent error is appended to the audit
+log and does not discard earlier work or stop the rest of the bounded batch.
+An OpenAI key is required only when there is work to do. The route never applies
+a proposal.
 
 Approve accepts an optional JSON body with string fields `edited_description`
 and `option_id`. Errors use FastAPI's `detail` field:
