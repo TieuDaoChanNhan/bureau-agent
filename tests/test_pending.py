@@ -124,7 +124,11 @@ class ExecutorTests(unittest.TestCase):
                                 payload={"to": "p01", "text": "draft text"})
         apply(state, action, edited_description="final text, approved by a human")
         outbox = json.loads((Path(self._tmp.name) / "hackathon" / "outbox.json").read_text(encoding="utf-8"))
-        self.assertEqual(outbox[-1], {"action_id": "a4", "to": "p01", "text": "final text, approved by a human"})
+        entry = outbox[-1]
+        self.assertEqual(entry["action_id"], "a4")
+        self.assertEqual(entry["to"], "p01")
+        self.assertEqual(entry["text"], "final text, approved by a human")
+        self.assertIn("sent_at", entry)  # stamped by store.append_outbox
 
     def test_update_groups_replaces_groups_of_that_kind(self):
         from bureau.core.executor import apply

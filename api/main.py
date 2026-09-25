@@ -2,8 +2,6 @@
 
 JSON shapes are the dataclasses of bureau/core/models.py serialized with
 dataclasses.asdict. The web UI depends only on these shapes.
-
-Two read-only routes are implemented as examples; the others return 501 until done.
 """
 from __future__ import annotations
 
@@ -12,12 +10,22 @@ from dataclasses import asdict
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, StrictStr
 
-from bureau.config import DATA_DIR, ROOT
+from bureau import config
+from bureau.agent.loop import resolve_issue
+from bureau.core import store
 from bureau.core.detect import detect_issues
-from bureau.core.loader import load_event
+from bureau.core.executor import InvariantViolation, apply
+from bureau.core.models import EventState, Issue, ProposedAction
+from bureau.config import DATA_DIR, ROOT
 
 app = FastAPI(title="Bureau Agent API")
+
+
+class ApprovalRequest(BaseModel):
+    edited_description: StrictStr | None = None
+    option_id: StrictStr | None = None
 
 
 def _events() -> list[str]:
@@ -33,25 +41,64 @@ def _counts(issues) -> dict:
     }
 
 
+def _load_and_refresh(event_id: str) -> EventState:
+    """Re-detect issues while retaining terminal decisions to prevent re-approval."""
+    state = store.load_state(event_id)
+    refreshed = store.merge_issue_status(detect_issues(state), state.issues)
+    current_ids = {i.id for i in refreshed}
+    # A repaired issue disappears from detection, but its decision must survive
+    # later writes (run/dismiss/approve) so an old action cannot be executed again.
+    state.issues = refreshed + [i for i in state.issues
+                                if i.id not in current_ids and i.status in ("resolved", "dismissed")]
+    return state
+
+
+def _event_summary(state: EventState) -> dict:
+    issues = store.merge_issue_status(detect_issues(state), state.issues)
+    return {"id": state.id, "name": state.name, "counts": _counts(issues),
+            "issues": [asdict(i) for i in issues], "actions": [asdict(a) for a in state.actions]}
+
+
+def _event_id_of_action(action_id: str) -> str:
+    """Action ids are "<event_id>:<issue_id>" (see agent/loop.py)."""
+    event_id = action_id.split(":", 1)[0]
+    if event_id not in _events():
+        raise HTTPException(404, "unknown action")
+    return event_id
+
+
+def _find_action(state: EventState, action_id: str) -> ProposedAction:
+    action = next((a for a in state.actions if a.id == action_id), None)
+    if action is None:
+        raise HTTPException(404, "unknown action")
+    return action
+
+
+def _pending_issue(state: EventState, action: ProposedAction) -> Issue:
+    issue = state.issue(action.issue_id)
+    if issue is None:
+        raise HTTPException(409, "action no longer has a current issue")
+    if issue.status in ("resolved", "dismissed"):
+        raise HTTPException(409, f"issue {issue.id} is already {issue.status}")
+    return issue
+
+
 @app.get("/api/events")
 def list_events():
-    """Events with issue counts. Example route (uses sample data, no runtime state yet)."""
+    """Events with issue counts, from runtime state (falls back to sample data)."""
     out = []
     for event_id in _events():
-        state = load_event(event_id)
-        out.append({"id": event_id, "name": state.name, "counts": _counts(detect_issues(state))})
+        state = _load_and_refresh(event_id)
+        out.append({"id": event_id, "name": state.name, "counts": _event_summary(state)["counts"]})
     return out
 
 
 @app.get("/api/events/{event_id}")
 def get_event(event_id: str):
-    """Event summary and issues. TODO(T05): read from core.store instead of sample data."""
+    """Event summary and issues, from runtime state (falls back to sample data)."""
     if event_id not in _events():
         raise HTTPException(404, "unknown event")
-    state = load_event(event_id)
-    issues = detect_issues(state)
-    return {"id": event_id, "name": state.name, "counts": _counts(issues),
-            "issues": [asdict(i) for i in issues], "actions": [asdict(a) for a in state.actions]}
+    return _event_summary(_load_and_refresh(event_id))
 
 
 def _todo(task: str):
@@ -60,40 +107,79 @@ def _todo(task: str):
 
 @app.post("/api/events/{event_id}/run")
 def run_agent(event_id: str):
-    """Re-detect issues and run the agent on open issues without a proposal."""
-    _todo("T05")
+    """Propose actions for open/needs_human issues with no proposal or dependency."""
+    if event_id not in _events():
+        raise HTTPException(404, "unknown event")
+    state = _load_and_refresh(event_id)
+    proposed = {a.issue_id for a in state.actions}
+    targets = [i for i in state.issues
+               if i.status in ("open", "needs_human") and not i.depends_on and i.kind != "no_logistics_plan"
+               and i.id not in proposed]
+    if targets and not config.OPENAI_API_KEY:
+        raise HTTPException(503, "OPENAI_API_KEY is not set")
+    for issue in targets:
+        resolve_issue(state, issue, verbose=False)
+    store.save_state(state)
+    return _event_summary(state)
 
 
 @app.post("/api/events/{event_id}/plan")
 def run_planner(event_id: str, body: dict | None = None):
     """Run the travel planner. Body: {"text"?: str, "overrides"?: {"max_cost_per_person_cents": int}}."""
-    _todo("T05")
+    _todo("T14")
 
 
 @app.get("/api/actions/{action_id}")
 def get_action(action_id: str):
-    _todo("T05")
+    event_id = _event_id_of_action(action_id)
+    state = store.load_state(event_id)
+    return asdict(_find_action(state, action_id))
 
 
 @app.post("/api/actions/{action_id}/approve")
-def approve(action_id: str, body: dict | None = None):
+def approve(action_id: str, body: ApprovalRequest | None = None):
     """Body: {"edited_description"?: str, "option_id"?: str}. Calls core.executor.apply."""
-    _todo("T05")
+    body = body or ApprovalRequest()
+    event_id = _event_id_of_action(action_id)
+    state = _load_and_refresh(event_id)
+    action = _find_action(state, action_id)
+    _pending_issue(state, action)
+    try:
+        new_state = apply(state, action, edited_description=body.edited_description,
+                          option_id=body.option_id)
+    except InvariantViolation as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    store.save_state(new_state)
+    return _event_summary(new_state)
 
 
 @app.post("/api/actions/{action_id}/dismiss")
 def dismiss(action_id: str):
-    _todo("T05")
+    event_id = _event_id_of_action(action_id)
+    state = _load_and_refresh(event_id)
+    action = _find_action(state, action_id)
+    issue = _pending_issue(state, action)
+    issue.status = "dismissed"
+    issue.resolved_by_action_id = action.id
+    store.save_state(state)
+    return _event_summary(state)
 
 
 @app.get("/api/events/{event_id}/outbox")
 def outbox(event_id: str):
-    _todo("T05")
+    if event_id not in _events():
+        raise HTTPException(404, "unknown event")
+    return store.load_outbox(event_id)
 
 
 @app.post("/api/events/{event_id}/reset")
 def reset(event_id: str):
-    _todo("T05")
+    if event_id not in _events():
+        raise HTTPException(404, "unknown event")
+    store.reset(event_id)
+    return _event_summary(_load_and_refresh(event_id))
 
 
 # The web UI is served from /web; "/" redirects to it.
