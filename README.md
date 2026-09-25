@@ -15,7 +15,7 @@ Built during the X-IA Hackathon #1 "Rise of Agents X" (25–27 Sep 2026). All co
 |---|---|
 | Understand the product | [docs/product-proposal.md](docs/product-proposal.md) (Vietnamese) · [interactive mockup](https://claude.ai/artifact/JCKLf1tuJLtPUPsfXK1ox4) |
 | Understand the architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (Vietnamese) |
-| Pick a task | [TASKS.md](TASKS.md) (specs) · [GitHub Issues](https://github.com/TieuDaoChanNhan/bureau-agent/issues) (status, assignees) |
+| Pick a task | Claim an unassigned [GitHub issue](https://github.com/TieuDaoChanNhan/bureau-agent/issues) (rules in [CONTRIBUTING.md](CONTRIBUTING.md)) · specs in [TASKS.md](TASKS.md) |
 | Know how we work (branches, PRs, tests) | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Run it | [Quick start](#quick-start) below |
 

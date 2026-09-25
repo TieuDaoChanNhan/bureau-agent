@@ -1,8 +1,8 @@
 # Tasks
 
-Đặc tả các công việc của dự án. **Trạng thái và người làm được theo dõi trên GitHub Issues** (mỗi task một issue, cột "Issue" bên dưới). Tệp này chỉ do trưởng nhóm sửa, để tránh xung đột khi nhiều pull request cùng cập nhật một bảng.
+Đặc tả các công việc của dự án. **Người làm và trạng thái được theo dõi trên GitHub Issues** (mỗi task một issue, cột "Issue" bên dưới). Tệp này chỉ do project manager sửa, để tránh xung đột khi nhiều pull request cùng cập nhật một bảng.
 
-**Cách làm một task:** trưởng nhóm gán issue cho bạn → tạo nhánh theo tên gợi ý → làm → mở pull request có dòng `Closes #<số issue>` → CI xanh và có người review → gộp. Chi tiết trong [CONTRIBUTING.md](CONTRIBUTING.md).
+**Cách làm một task:** tự nhận một issue chưa có người (tự gán mình và bình luận `Mình nhận`) → tạo nhánh theo tên gợi ý → làm → mở pull request có dòng `Closes #<số issue>` → CI xanh và project manager duyệt → gộp. Quy tắc nhận task (ưu tiên, phụ thuộc, mỗi người một issue, nhả issue sau 3 giờ không tiến triển) trong [CONTRIBUTING.md](CONTRIBUTING.md#nhận-task).
 
 **Ưu tiên:** **P0** bắt buộc cho demo · **P1** kịch bản chuyến đi · **P2** nộp bài.
 **Mốc cắt:** 12:00 thứ Bảy 26/09 nếu P0 chưa chạy trọn luồng thì tạm dừng P1.
