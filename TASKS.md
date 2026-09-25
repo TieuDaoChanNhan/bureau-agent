@@ -7,7 +7,7 @@
 **Ưu tiên:** **P0** bắt buộc cho demo · **P1** kịch bản chuyến đi · **P2** nộp bài.
 **Mốc cắt:** 12:00 thứ Bảy 26/09 nếu P0 chưa chạy trọn luồng thì tạm dừng P1.
 
-**Quy ước "Xong khi":** mọi mục phải kiểm được bằng **lệnh**, **test** hoặc **checklist có/không**. Ngoài ra, mọi task đều cần: CI xanh, README của thư mục liên quan được cập nhật, không commit bí mật.
+**Quy ước "Xong khi":** mọi mục phải kiểm được bằng **lệnh**, **test** hoặc **checklist có/không**. Mục ghi "Thêm test: …" nghĩa là viết thêm một hàm test trong thư mục `tests/` (hướng dẫn và mẫu: [tests/README.md](tests/README.md#adding-a-test)). Ngoài ra, mọi task đều cần: CI xanh, README của thư mục liên quan được cập nhật, không commit bí mật.
 
 ## Bảng tổng
 | ID | Ưu tiên | Task | Phụ thuộc | Nhánh | Issue |
