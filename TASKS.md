@@ -28,6 +28,7 @@ Danh sách công việc của dự án. Trưởng nhóm phân công bằng cách
 | T17 | P2 | README cuối, sơ đồ kiến trúc, kịch bản và video demo | P0 xong | | ⬜ |
 | T18 | P2 | Buổi thử với người tổ chức thật | P0 xong | | ⬜ |
 | T19 | P2 | Kiểm tra trước khi nộp: quét bí mật, công khai repo, nộp form | T17 | | ⬜ |
+| T20 | P2 | Triển khai demo miễn phí (Hugging Face Spaces, Docker) | T05, T06 | | ⬜ |
 
 ---
 
@@ -129,3 +130,8 @@ Danh sách công việc của dự án. Trưởng nhóm phân công bằng cách
 ### T19 · Trước khi nộp · P2
 - **Việc:** quét lịch sử commit tìm khóa API; kiểm tra README chạy được trên một máy khác; chuyển repo sang công khai; nộp form trước **22:00 Chủ Nhật 27/09**.
 - **Xong khi:** form đã nộp.
+
+### T20 · Triển khai demo miễn phí · P2
+- **Nhánh:** `t20-deploy` · **Tệp:** `Dockerfile`, `README.md`
+- **Việc:** đóng gói API + web trong một container (FastAPI phục vụ cả hai); triển khai lên Hugging Face Spaces (Docker, gói CPU miễn phí). Khóa API đặt trong mục Secrets của Space, không nằm trong repo. Bản công khai chạy ở **chế độ demo**: dùng đề xuất đã lưu sẵn, chỉ gọi OpenAI khi có mật khẩu demo, để người lạ không tiêu hết credit.
+- **Xong khi:** link công khai mở được giao diện, duyệt được một đề xuất; README có link.
