@@ -12,6 +12,14 @@ class DataModelTests(unittest.TestCase):
         self.assertTrue(all(p.registered_at.tzinfo is not None for p in state.participants))
 
 
+class LoaderTests(unittest.TestCase):
+    def test_travel_request_is_part_of_the_event_state(self):
+        self.assertIsNone(load_event("hackathon").travel)
+        travel = load_event("wei").travel
+        self.assertEqual(travel["destination"], "Trouville-Deauville")
+        self.assertEqual(travel["constraints"]["hard"]["max_cost_per_person_cents"], 12000)
+
+
 class DetectionTests(unittest.TestCase):
     def test_hackathon_issues(self):
         issues = {i.id: i for i in detect_issues(load_event("hackathon"))}

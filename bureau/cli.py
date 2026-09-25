@@ -12,7 +12,6 @@ import sys
 from dataclasses import asdict
 
 from .core.detect import detect_issues
-from .config import DATA_DIR
 from .core.loader import load_event
 from .planner.interface import TravelRequest
 from .planner.planner import extract_constraints, plan_trip
@@ -55,8 +54,9 @@ def cmd_run(args) -> None:
 
 def cmd_plan(args) -> None:
     state = load_event(args.event)
-    t = json.loads((DATA_DIR / args.event / "event.json")
-                   .read_text(encoding="utf-8"))["travel"]
+    t = state.travel
+    if not t:
+        sys.exit(f"Event '{args.event}' has no travel request.")
     from datetime import datetime
     req = TravelRequest(event_id=state.id, text=t["request"], participants=t["participants"],
                         origin=t["origin"], destination=t["destination"],

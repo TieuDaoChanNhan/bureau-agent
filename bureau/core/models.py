@@ -127,6 +127,10 @@ class EventState:
     payments: list[Payment]
     groups: list[Group]
     messages: list[Message]
+    # Trip request of events that involve travel (None otherwise): request text, participants,
+    # origin, destination, depart_after, recorded constraints. Read-only input, like `rules`.
+    travel: Optional[dict[str, Any]] = None
+    # Chosen travel plan, written by the executor when SELECT_TRAVEL_PLAN is approved.
     logistics: Optional[dict[str, Any]] = None
     issues: list[Issue] = field(default_factory=list)
     actions: list[ProposedAction] = field(default_factory=list)
