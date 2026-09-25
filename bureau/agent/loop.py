@@ -10,7 +10,9 @@ import json
 from dataclasses import asdict
 
 from .. import config
+from ..core.detect import detect_issues
 from ..core.models import Check, EventState, Evidence, Issue, ProposedAction
+from ..core.store import merge_issue_status, save_state
 from .prompts import SYSTEM_PROMPT
 from .tool_specs import TOOLS, build_handlers
 
@@ -82,3 +84,42 @@ def resolve_issue(state: EventState, issue: Issue, max_steps: int = MAX_STEPS,
                              "content": json.dumps(result, default=str, ensure_ascii=False)})
 
     raise RuntimeError(f"No action proposed for {issue.id} after {max_steps} steps.")
+
+
+def _is_blocked(issue: Issue, issues_by_id: dict[str, Issue]) -> bool:
+    """Return whether an issue still waits for a detected dependency."""
+    for dependency_id in issue.depends_on:
+        dependency = issues_by_id.get(dependency_id)
+        if dependency is not None and dependency.status not in ("resolved", "dismissed"):
+            return True
+    return False
+
+
+def run_pending(state: EventState, issue_id: str | None = None, *, client=None,
+                verbose: bool = True) -> list[ProposedAction]:
+    """Propose and persist actions for each currently runnable issue.
+
+    An issue is runnable when it is open or needs human input, has no existing
+    proposal, and is not waiting for an unresolved dependency. The travel-plan
+    issue itself is left to the planner rather than the agent.
+    """
+    state.issues = merge_issue_status(detect_issues(state), state.issues)
+    issues_by_id = {issue.id: issue for issue in state.issues}
+    proposed_issue_ids = {action.issue_id for action in state.actions}
+    targets = [
+        issue for issue in state.issues
+        if (issue_id is None or issue.id == issue_id)
+        and issue.status in ("open", "needs_human")
+        and issue.id not in proposed_issue_ids
+        and issue.kind != "no_logistics_plan"
+        and not _is_blocked(issue, issues_by_id)
+    ]
+
+    actions = []
+    for issue in targets:
+        action = resolve_issue(state, issue, client=client, verbose=verbose)
+        actions.append(action)
+
+    if actions:
+        save_state(state)
+    return actions

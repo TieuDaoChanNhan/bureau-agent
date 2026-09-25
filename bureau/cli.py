@@ -11,8 +11,10 @@ import json
 import sys
 from dataclasses import asdict
 
+from .agent.loop import run_pending
 from .core.detect import detect_issues
 from .core.loader import load_event
+from .core.store import load_state
 from .planner.interface import TravelRequest
 from .planner.planner import extract_constraints, plan_trip
 
@@ -36,19 +38,15 @@ def cmd_detect(args) -> None:
 
 def cmd_run(args) -> None:
     from . import config
-    from .agent.loop import resolve_issue
 
-    if not config.OPENAI_API_KEY:
+    if not config.OPENAI_API_KEY and getattr(args, "_client", None) is None:
         sys.exit("OPENAI_API_KEY is not set. Copy .env.example to .env and add the key.")
-    state = load_event(args.event)
-    state.issues = detect_issues(state)
-    targets = [i for i in state.issues if (args.issue is None or i.id == args.issue)
-               and not i.depends_on and i.kind != "no_logistics_plan"]
-    if not targets:
+    state = load_state(args.event)
+    client = getattr(args, "_client", None)
+    actions = run_pending(state, issue_id=args.issue, client=client, verbose=True)
+    if not actions:
         sys.exit("No matching issue that can be resolved now.")
-    for issue in targets:
-        print(f"\n■ {issue.id} — {issue.title}")
-        action = resolve_issue(state, issue)
+    for action in actions:
         print(json.dumps(action.to_dict(), indent=2, ensure_ascii=False, default=str))
 
 
