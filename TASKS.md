@@ -13,25 +13,25 @@
 | ID | Ưu tiên | Task | Phụ thuộc | Nhánh | Issue |
 |---|---|---|---|---|---|
 | T01 | P0 | Khung repo, CI, tài liệu | — | — | ✅ xong |
-| T02 | P0 | Lưu trữ runtime | — | `t02-store` | |
-| T03 | P0 | Thực thi hành động đã duyệt | — | `t03-executor` | |
-| T04 | P0 | Chạy agent với OpenAI thật, chỉnh prompt | khóa OpenAI | `t04-agent-live` | |
-| T05 | P0 | Các route API còn lại | T02, T03 | `t05-api` | |
-| T06 | P0 | Giao diện web: sự kiện, vấn đề, chi tiết, duyệt | — (dùng JSON mẫu) | `t06-web` | |
-| T07 | P0 | Làm giàu dữ liệu mẫu hackathon | — | `t07-sample-data` | |
-| T08 | P0 | Bộ đánh giá offline | T04, T07 | `t08-eval` | |
-| T09 | P0 | Chạy agent hàng loạt và lưu đề xuất | T02 | `t09-batch-run` | |
-| T10 | P1 | Tách ràng buộc bằng LLM (thử Pipelex) | — | `t10-extract` | |
-| T11 | P1 | Client Jinko (live / replay) | khóa Jinko sandbox | `t11-jinko` | |
-| T12 | P1 | Ghép phương án trọn gói bằng code | — | `t12-compose` | |
-| T13 | P1 | Giải thích đánh đổi bằng LLM | — | `t13-explain` | |
-| T14 | P1 | Nối planner với Jinko + ghép phương án, route `/plan` | T05, T11, T12 | `t14-planner-wiring` | |
-| T15 | P1 | Giao diện chuyến đi | T06 | `t15-web-trip` | |
-| T16 | P1 | Dữ liệu một chuyến đi thật | — | `t16-real-trip` | |
-| T17 | P2 | README cuối, sơ đồ, kịch bản và video demo | P0 xong | `t17-docs-demo` | |
-| T18 | P2 | Buổi thử với người tổ chức thật | P0 xong | — | |
-| T19 | P2 | Kiểm tra trước khi nộp, công khai repo, nộp form | T17 | `t19-release` | |
-| T20 | P2 | Triển khai demo miễn phí | T05, T06 | `t20-deploy` | |
+| T02 | P0 | Lưu trữ runtime | — | `t02-store` | [#1](https://github.com/TieuDaoChanNhan/bureau-agent/issues/1) |
+| T03 | P0 | Thực thi hành động đã duyệt | — | `t03-executor` | [#2](https://github.com/TieuDaoChanNhan/bureau-agent/issues/2) |
+| T04 | P0 | Chạy agent với OpenAI thật, chỉnh prompt | khóa OpenAI | `t04-agent-live` | [#3](https://github.com/TieuDaoChanNhan/bureau-agent/issues/3) |
+| T05 | P0 | Các route API còn lại | T02, T03 | `t05-api` | [#4](https://github.com/TieuDaoChanNhan/bureau-agent/issues/4) |
+| T06 | P0 | Giao diện web: sự kiện, vấn đề, chi tiết, duyệt | — (dùng JSON mẫu) | `t06-web` | [#5](https://github.com/TieuDaoChanNhan/bureau-agent/issues/5) |
+| T07 | P0 | Làm giàu dữ liệu mẫu hackathon | — | `t07-sample-data` | [#6](https://github.com/TieuDaoChanNhan/bureau-agent/issues/6) |
+| T08 | P0 | Bộ đánh giá offline | T04, T07 | `t08-eval` | [#7](https://github.com/TieuDaoChanNhan/bureau-agent/issues/7) |
+| T09 | P0 | Chạy agent hàng loạt và lưu đề xuất | T02 | `t09-batch-run` | [#8](https://github.com/TieuDaoChanNhan/bureau-agent/issues/8) |
+| T10 | P1 | Tách ràng buộc bằng LLM (thử Pipelex) | — | `t10-extract` | [#9](https://github.com/TieuDaoChanNhan/bureau-agent/issues/9) |
+| T11 | P1 | Client Jinko (live / replay) | khóa Jinko sandbox | `t11-jinko` | [#10](https://github.com/TieuDaoChanNhan/bureau-agent/issues/10) |
+| T12 | P1 | Ghép phương án trọn gói bằng code | — | `t12-compose` | [#11](https://github.com/TieuDaoChanNhan/bureau-agent/issues/11) |
+| T13 | P1 | Giải thích đánh đổi bằng LLM | — | `t13-explain` | [#12](https://github.com/TieuDaoChanNhan/bureau-agent/issues/12) |
+| T14 | P1 | Nối planner với Jinko + ghép phương án, route `/plan` | T05, T11, T12 | `t14-planner-wiring` | [#13](https://github.com/TieuDaoChanNhan/bureau-agent/issues/13) |
+| T15 | P1 | Giao diện chuyến đi | T06 | `t15-web-trip` | [#14](https://github.com/TieuDaoChanNhan/bureau-agent/issues/14) |
+| T16 | P1 | Dữ liệu một chuyến đi thật | — | `t16-real-trip` | [#15](https://github.com/TieuDaoChanNhan/bureau-agent/issues/15) |
+| T17 | P2 | README cuối, sơ đồ, kịch bản và video demo | P0 xong | `t17-docs-demo` | [#16](https://github.com/TieuDaoChanNhan/bureau-agent/issues/16) |
+| T18 | P2 | Buổi thử với người tổ chức thật | P0 xong | — | [#17](https://github.com/TieuDaoChanNhan/bureau-agent/issues/17) |
+| T19 | P2 | Kiểm tra trước khi nộp, công khai repo, nộp form | T17 | `t19-release` | [#18](https://github.com/TieuDaoChanNhan/bureau-agent/issues/18) |
+| T20 | P2 | Triển khai demo miễn phí | T05, T06 | `t20-deploy` | [#19](https://github.com/TieuDaoChanNhan/bureau-agent/issues/19) |
 
 ---
 
