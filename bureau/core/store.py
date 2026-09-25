@@ -159,12 +159,17 @@ def save_action(action: ProposedAction) -> None:
 
 
 def append_outbox(event_id: str, message: dict) -> None:
-    """Append one simulated sent message to runtime/<event>/outbox.json (T03: SEND_MESSAGE)."""
+    """Append a simulated reply with a timezone-aware sent_at timestamp."""
     path = _event_dir(event_id) / "outbox.json"
     outbox = _read_json(path, [])
-    outbox.append(message)
+    outbox.append({**message, "sent_at": datetime.now().astimezone().isoformat()})
     _write_json(path, outbox)
 
 
+def load_outbox(event_id: str) -> list:
+    """Read runtime/<event>/outbox.json, or [] if nothing has been sent yet (T05)."""
+    return _read_json(_event_dir(event_id) / "outbox.json", [])
+
+
 __all__ = ["RUNTIME_DIR", "load_state", "save_state", "merge_issue_status", "append_log", "reset", "save_action",
-           "append_outbox"]
+           "append_outbox", "load_outbox"]

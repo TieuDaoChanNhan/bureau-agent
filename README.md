@@ -70,7 +70,8 @@ On Windows, set `PYTHONIOENCODING=utf-8` if accented names print incorrectly.
 | Deterministic tools (rules, eligibility, identity, groups) | ✅ done, tested |
 | Planner: hard-constraint gate, ranking, diagnosis | ✅ done, tested |
 | Agent loop (OpenAI tool calling) | 🟡 loop tested with a fake LLM; not yet run against the API |
-| Store, executor, API routes, web UI, evaluation | ⬜ skeletons, see [TASKS.md](TASKS.md) |
+| Store, executor, API routes except `/plan` | ✅ done, tested; messages use a simulated outbox |
+| Web UI, evaluation | ⬜ skeletons, see [TASKS.md](TASKS.md) |
 | Constraint extraction (LLM), Jinko client, package composition | ⬜ skeletons, see [TASKS.md](TASKS.md) |
 
 ## What is real and what is simulated
