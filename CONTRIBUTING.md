@@ -61,3 +61,4 @@ Cần commit gấp khi test đang đỏ (ví dụ lưu việc dở dang): `git c
 - Hàm trong `bureau/tools/` là hàm thuần: nhận `EventState`, trả dữ liệu chuyển được sang JSON.
 - Chỗ chưa làm: `raise NotImplementedError("TASK Txx")`. Tìm `TASK T` để thấy mọi chỗ còn thiếu.
 - Test cho agent dùng `tests/fake_llm.py`, không gọi API thật trong test.
+- Cách viết test (mẫu, đặt test ở đâu, chạy riêng một test): [tests/README.md](tests/README.md#adding-a-test).
