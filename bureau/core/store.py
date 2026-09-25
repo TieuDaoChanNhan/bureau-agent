@@ -158,4 +158,13 @@ def save_action(action: ProposedAction) -> None:
     _write_json(path, actions)
 
 
-__all__ = ["RUNTIME_DIR", "load_state", "save_state", "merge_issue_status", "append_log", "reset", "save_action"]
+def append_outbox(event_id: str, message: dict) -> None:
+    """Append one simulated sent message to runtime/<event>/outbox.json (T03: SEND_MESSAGE)."""
+    path = _event_dir(event_id) / "outbox.json"
+    outbox = _read_json(path, [])
+    outbox.append(message)
+    _write_json(path, outbox)
+
+
+__all__ = ["RUNTIME_DIR", "load_state", "save_state", "merge_issue_status", "append_log", "reset", "save_action",
+           "append_outbox"]

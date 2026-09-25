@@ -8,7 +8,7 @@ The event state and everything that reads or changes it.
 | `loader.py` | Loads `data/<event>/` into an `EventState`; rejects datetimes without timezone | done |
 | `detect.py` | Finds issues with fixed code; issue ids are deterministic fingerprints | done |
 | `store.py` | Runtime persistence under `runtime/<event>/`, status merge after re-detection | done |
-| `executor.py` | Applies an **approved** action; re-checks invariants | skeleton (T03) |
+| `executor.py` | Applies an **approved** action; re-checks invariants | done |
 
 ## Rules of this layer
 - Only `executor.apply` changes state. Nothing else writes.
