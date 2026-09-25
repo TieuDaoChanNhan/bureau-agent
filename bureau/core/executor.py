@@ -1,18 +1,21 @@
-"""Apply an approved ProposedAction to the event state (TASK T03).
+"""Apply an approved ProposedAction to the event state.
 
 This is the only place where state changes. The agent and the planner never
 call it; the API calls it after an organizer approves.
 
 Effects by action_type (payload keys in brackets):
     SEND_MESSAGE        [to, text]                          -> append to outbox
-    LINK_PAYMENT        [payment_id, participant_id]        -> payment.participant_id = ...
+    LINK_PAYMENT        [payment_id, participant_id, to?, message?] -> link payment; optional outbox reply
     MOVE_MEMBER         [participant_id, from_group, to_group?] -> update group members
     UPDATE_GROUPS       [groups]                            -> replace groups of that kind
-    SELECT_TRAVEL_PLAN  [option_id]                         -> state.logistics = chosen option
+    SELECT_TRAVEL_PLAN  [options, option_id?]               -> state.logistics = valid chosen option
     ESCALATE            [note?]                             -> no data change; issue marked handled
 
-After applying, invariants are checked again (tools.groups.check_groups, ...).
-If the action would break one, raise InvariantViolation and change nothing.
+Payments may only be linked to existing participants and cannot change owners
+(explicit participant_id, otherwise an exact email match). Travel selections
+must have valid=True. Group checks are scoped to the affected groups/members.
+Invalid actions leave the input state, outbox and audit log unchanged.
+edited_description replaces SEND_MESSAGE text or an optional LINK_PAYMENT reply.
 """
 from __future__ import annotations
 
@@ -43,7 +46,18 @@ def _apply_send_message(state: EventState, action: ProposedAction, text: str) ->
 
 def _apply_link_payment(state: EventState, action: ProposedAction) -> None:
     payment = _find(state.payments, action.payload["payment_id"])
-    payment.participant_id = action.payload["participant_id"]
+    pid = action.payload["participant_id"]
+    if state.participant(pid) is None:
+        raise ValueError(f"Unknown participant_id: {pid}")
+    owners = {payment.participant_id} if payment.participant_id is not None else {
+        person.id for person in state.participants
+        if payment.payer_email and payment.payer_email.lower() in {e.lower() for e in person.emails}
+    }
+    if owners - {pid}:
+        raise InvariantViolation(f"Payment {payment.id} already belongs to another participant")
+    if action.payload.get("message") is not None and not action.payload.get("to"):
+        raise ValueError("LINK_PAYMENT with a message requires a recipient (to)")
+    payment.participant_id = pid
 
 
 def _apply_move_member(state: EventState, action: ProposedAction) -> None:
@@ -98,7 +112,9 @@ def _apply_select_travel_plan(state: EventState, action: ProposedAction, option_
     row = next((o for o in action.payload.get("options", []) if o["option"]["id"] == chosen_id), None)
     if row is None:
         raise ValueError(f"Unknown option_id: {chosen_id}")
-    state.logistics = row["option"]
+    if row.get("valid") is not True:
+        raise InvariantViolation(f"Travel option {chosen_id} is not valid")
+    state.logistics = copy.deepcopy(row["option"])
 
 
 def apply(state: EventState, action: ProposedAction, edited_description: Optional[str] = None,
@@ -111,6 +127,9 @@ def apply(state: EventState, action: ProposedAction, edited_description: Optiona
         _apply_send_message(new_state, action, text)
     elif action.action_type == "LINK_PAYMENT":
         _apply_link_payment(new_state, action)
+        if action.payload.get("message") is not None:
+            text = edited_description if edited_description is not None else action.payload["message"]
+            _apply_send_message(new_state, action, text)
     elif action.action_type == "MOVE_MEMBER":
         _apply_move_member(new_state, action)
     elif action.action_type == "UPDATE_GROUPS":
@@ -131,4 +150,3 @@ def apply(state: EventState, action: ProposedAction, edited_description: Optiona
         "action_id": action.id, "action_type": action.action_type, "issue_id": action.issue_id,
     })
     return new_state
-    raise NotImplementedError("TASK T03")
