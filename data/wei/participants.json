@@ -1,0 +1,10 @@
+[
+  {"id": "w01", "name": "Camille Dupont", "emails": ["camille.dupont@etu.example.fr"], "registered_at": "2026-09-15T10:00:00+02:00"},
+  {"id": "w02", "name": "Tom Girard", "emails": ["tom.girard@etu.example.fr"], "registered_at": "2026-09-15T11:00:00+02:00"},
+  {"id": "w03", "name": "Inès Roux", "emails": ["ines.roux@etu.example.fr"], "registered_at": "2026-09-15T12:00:00+02:00", "needs": ["step_free"]},
+  {"id": "w04", "name": "Lucas Bernard", "emails": ["lucas.bernard@etu.example.fr"], "registered_at": "2026-09-16T09:00:00+02:00"},
+  {"id": "w05", "name": "Emma Laurent", "emails": ["emma.laurent@etu.example.fr"], "registered_at": "2026-09-16T10:00:00+02:00", "needs": ["step_free"]},
+  {"id": "w06", "name": "Nathan Moreau", "emails": ["nathan.moreau@etu.example.fr"], "registered_at": "2026-09-16T11:00:00+02:00"},
+  {"id": "w07", "name": "Sarah Lefebvre", "emails": ["sarah.lefebvre@etu.example.fr"], "registered_at": "2026-09-17T09:00:00+02:00"},
+  {"id": "w08", "name": "Hugo Garnier", "emails": ["hugo.garnier@etu.example.fr"], "registered_at": "2026-09-17T10:00:00+02:00"}
+]

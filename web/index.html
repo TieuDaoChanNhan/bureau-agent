@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bureau Agent</title>
+  <link rel="stylesheet" href="/web/style.css">
+</head>
+<body>
+  <!--
+    Skeleton only (TASK T06). The target layout is web/reference/mockup.html:
+    event cards -> issue list (blocking first) -> issue detail (input, decision trace,
+    checks, editable proposed action, approve / edit / dismiss) -> option table for trips.
+  -->
+  <header class="top">
+    <h1>Bureau Agent</h1>
+    <p class="muted">Organizers supervise; the agent does the legwork.</p>
+  </header>
+  <main>
+    <section id="events" aria-label="Events"></section>
+    <div class="layout">
+      <section id="issues" aria-label="Issues"></section>
+      <section id="detail" aria-label="Issue detail"><p class="muted">Select an issue.</p></section>
+    </div>
+  </main>
+  <script src="/web/app.js"></script>
+</body>
+</html>

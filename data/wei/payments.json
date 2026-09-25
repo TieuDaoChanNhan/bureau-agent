@@ -1,0 +1,7 @@
+[
+  {"id": "b02", "payer_name": "Tom Girard", "payer_email": "tom.girard@etu.example.fr", "amount_cents": 11200, "currency": "EUR", "paid_at": "2026-09-18T10:00:00+02:00"},
+  {"id": "b03", "payer_name": "Inès Roux", "payer_email": "ines.roux@etu.example.fr", "amount_cents": 11200, "currency": "EUR", "paid_at": "2026-09-18T11:00:00+02:00"},
+  {"id": "b04", "payer_name": "Lucas Bernard", "payer_email": "lucas.bernard@etu.example.fr", "amount_cents": 11200, "currency": "EUR", "paid_at": "2026-09-19T09:00:00+02:00"},
+  {"id": "b05", "payer_name": "Emma Laurent", "payer_email": "emma.laurent@etu.example.fr", "amount_cents": 11200, "currency": "EUR", "paid_at": "2026-09-19T10:00:00+02:00"},
+  {"id": "b90", "payer_name": "C. DUPONT-LAMBERT", "reference": "WEI Cami", "amount_cents": 11200, "currency": "EUR", "paid_at": "2026-09-22T09:30:00+02:00"}
+]

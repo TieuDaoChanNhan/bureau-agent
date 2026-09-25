@@ -1,0 +1,6 @@
+[
+  {"id": "wm01", "channel": "discord", "sender": "nathan_m", "received_at": "2026-09-23T18:00:00+02:00",
+   "text": "On se retrouve à quelle heure et où vendredi ?"},
+  {"id": "wm02", "channel": "email", "sender": "tom.girard@etu.example.fr", "received_at": "2026-09-22T09:12:00+02:00",
+   "text": "Salut, j'ai payé le WEI mais j'ai un rattrapage ce week-end-là. Est-ce que je peux être remboursé ?"}
+]

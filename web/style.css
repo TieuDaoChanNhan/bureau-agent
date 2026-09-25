@@ -1,0 +1,14 @@
+/* Minimal styles for the skeleton (TASK T06). Reuse the tokens of web/reference/mockup.html. */
+:root { --bg: #f2f4f6; --surface: #fff; --ink: #16202b; --muted: #5b6775; --line: #dce2e9; --crit: #b3261e; --accent: #2743a6; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
+.top h1 { margin: 0; }
+.muted { color: var(--muted); }
+#events { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.card { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 12px 14px; background: var(--surface);
+        border: 1px solid var(--line); border-radius: 10px; cursor: pointer; font: inherit; }
+.card[aria-pressed="true"] { border-color: var(--accent); }
+.layout { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px; }
+#issues, #detail { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+#issues li.blocking { border-left: 3px solid var(--crit); padding-left: 6px; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }

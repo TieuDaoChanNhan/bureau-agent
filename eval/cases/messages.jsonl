@@ -1,0 +1,3 @@
+{"id": "c001", "event": "hackathon", "message_id": "m01", "expected_kind": "payment_claim", "expected_tools": ["get_participant", "check_eligibility", "match_person"], "expected_action": "LINK_PAYMENT", "must_ask_human": true, "expected_rule": null}
+{"id": "c002", "event": "hackathon", "message_id": "m02", "expected_kind": "rules_question", "expected_tools": ["search_rules"], "expected_action": "SEND_MESSAGE", "must_ask_human": false, "expected_rule": "§7"}
+{"id": "c003", "event": "hackathon", "message_id": "m04", "expected_kind": "rules_question", "expected_tools": ["search_rules"], "expected_action": "ESCALATE", "must_ask_human": true, "expected_rule": null}

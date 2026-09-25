@@ -1,0 +1,20 @@
+[
+  {"id": "p01", "name": "Antoine Nguyen", "emails": ["a.nguyen@polytechnique.edu"], "registered_at": "2026-09-12T10:00:00+02:00", "skills": ["backend"]},
+  {"id": "p02", "name": "Léa Martin", "emails": ["lea.martin@polytechnique.edu"], "registered_at": "2026-09-11T09:30:00+02:00", "skills": ["data"]},
+  {"id": "p03", "name": "Hugo Petit", "emails": ["hugo.petit@gmail.com"], "registered_at": "2026-09-11T11:00:00+02:00", "skills": ["backend"]},
+  {"id": "p04", "name": "Inès Roux", "emails": ["ines.roux@polytechnique.edu"], "registered_at": "2026-09-12T15:00:00+02:00", "skills": ["frontend"]},
+  {"id": "p05", "name": "Yanis Benali", "emails": ["yanis.benali@gmail.com"], "registered_at": "2026-09-13T08:00:00+02:00", "skills": ["backend"]},
+  {"id": "p06", "name": "Chloé Faure", "emails": ["chloe.faure@polytechnique.edu"], "registered_at": "2026-09-13T12:00:00+02:00", "skills": ["design"]},
+  {"id": "p07", "name": "Tom Girard", "emails": ["tom.girard@gmail.com"], "registered_at": "2026-09-14T18:00:00+02:00", "skills": ["data"]},
+  {"id": "p08", "name": "Marc Lemoine", "emails": ["marc.lemoine@polytechnique.edu"], "registered_at": "2026-09-10T10:00:00+02:00", "skills": ["backend"]},
+  {"id": "p09", "name": "Sofia Duarte", "emails": ["sofia.duarte@gmail.com"], "registered_at": "2026-09-10T11:00:00+02:00", "skills": ["frontend"]},
+  {"id": "p10", "name": "Ben Aït", "emails": ["ben.ait@polytechnique.edu"], "registered_at": "2026-09-10T12:00:00+02:00", "skills": ["data"]},
+  {"id": "p11", "name": "Clara Roy", "emails": ["clara.roy@gmail.com"], "registered_at": "2026-09-10T13:00:00+02:00", "skills": ["pitch"]},
+  {"id": "p12", "name": "Nils Weber", "emails": ["nils.weber@polytechnique.edu"], "registered_at": "2026-09-10T14:00:00+02:00", "skills": ["backend"]},
+  {"id": "p13", "name": "Samir Haddad", "emails": ["samir.haddad@gmail.com"], "registered_at": "2026-09-15T09:00:00+02:00", "skills": ["backend"], "looking_for_group": true},
+  {"id": "p14", "name": "Julie Morel", "emails": ["julie.morel@polytechnique.edu"], "registered_at": "2026-09-15T10:00:00+02:00", "skills": ["frontend"], "looking_for_group": true},
+  {"id": "p15", "name": "Paul Lambert", "emails": ["paul.lambert@gmail.com"], "registered_at": "2026-09-15T11:00:00+02:00", "skills": ["pitch"], "looking_for_group": true},
+  {"id": "p16", "name": "Zoé Blanc", "emails": ["zoe.blanc@polytechnique.edu"], "registered_at": "2026-09-16T09:00:00+02:00", "skills": ["design"], "looking_for_group": true},
+  {"id": "p17", "name": "Karim Saidi", "emails": ["karim.saidi@gmail.com"], "registered_at": "2026-09-16T10:00:00+02:00", "skills": ["data"], "looking_for_group": true},
+  {"id": "p18", "name": "Victor Leroy", "emails": ["victor.leroy@polytechnique.edu"], "registered_at": "2026-09-16T11:00:00+02:00", "skills": ["backend"], "looking_for_group": true}
+]

@@ -1,0 +1,12 @@
+[
+  {"id": "m01", "channel": "email", "sender": "a.nguyen@polytechnique.edu", "received_at": "2026-09-24T21:40:00+02:00",
+   "text": "Bonjour, j'ai déjà payé ma cotisation mais je reçois encore des relances. J'ai utilisé mon adresse perso pour payer."},
+  {"id": "m02", "channel": "email", "sender": "julien.morel@gmail.com", "received_at": "2026-09-24T23:12:00+02:00",
+   "text": "Hi, my team already started a RAG agent project. Can we keep working on it during the hackathon?"},
+  {"id": "m03", "channel": "discord", "sender": "orbit_hugo", "received_at": "2026-09-25T07:55:00+02:00",
+   "text": "La page Luma dit 15 octobre pour la finale mais j'ai vu novembre quelque part, c'est quoi la bonne date ?"},
+  {"id": "m04", "channel": "email", "sender": "mei.tanaka@gmail.com", "received_at": "2026-09-25T08:47:00+02:00",
+   "text": "Hello, our team is mostly international. Can the 2-minute demo video be in English?"},
+  {"id": "m05", "channel": "email", "sender": "partnerships@sponsor.example", "received_at": "2026-09-25T10:15:00+02:00",
+   "text": "Hi team, could you send us the full list of participants with emails and schools so we can reach out to them after the event?"}
+]

@@ -1,0 +1,40 @@
+{
+  "name": "WEI 2026 (sample data)",
+  "deadlines": {
+    "payment": "2026-10-01T23:59:00+02:00",
+    "departure": "2026-10-09T18:00:00+02:00"
+  },
+  "settings": {
+    "needs_logistics": true,
+    "unpaid_kind": "unpaid_participation",
+    "group_kind": "room",
+    "refund_policy": "No refund after 1 October, except exceptional cases decided by the organizers.",
+    "messages_need_plan": [
+      "wm01"
+    ]
+  },
+  "travel": {
+    "request": "WEI for 40 people. Leave Paris Friday 9 Oct after class, back Sunday afternoon. Max €120 per person for travel and lodging. We must arrive before 21:00. No overnight travel. Two people need step-free rooms.",
+    "participants": 40,
+    "origin": "Paris",
+    "depart_after": "2026-10-09T17:00:00+02:00",
+    "constraints": {
+      "hard": {
+        "participants": 40,
+        "arrive_before": "21:00",
+        "no_overnight": true,
+        "step_free_rooms": 2,
+        "max_cost_per_person_cents": 12000
+      },
+      "soft": [
+        "fewer_changes",
+        "near_station",
+        "early_return"
+      ],
+      "organizer_verified": [
+        "step_free_rooms"
+      ]
+    },
+    "destination": "Trouville-Deauville"
+  }
+}

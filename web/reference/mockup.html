@@ -1,0 +1,541 @@
+<title>Bureau Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --surface-2:#f7f8fa; --ink:#16202b; --muted:#5b6775; --line:#dce2e9;
+  --accent:#2743a6; --accent-ink:#ffffff; --accent-soft:#e7ecfa;
+  --ok:#1f7a4d; --ok-soft:#e3f3ea; --warn:#9a5700; --warn-soft:#fbf0dd; --crit:#b3261e; --crit-soft:#fbe6e4;
+  --code:#eef1f5;
+  --sans:"Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:"Geist Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0e1319; --surface:#151c25; --surface-2:#1a222d; --ink:#e5eaf0; --muted:#9aa6b4; --line:#27323f;
+    --accent:#8fa3ff; --accent-ink:#0e1319; --accent-soft:#1d2646;
+    --ok:#4cc38a; --ok-soft:#14301f; --warn:#f0a940; --warn-soft:#352812; --crit:#ff7b70; --crit-soft:#3a1916;
+    --code:#1c2530;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e1319; --surface:#151c25; --surface-2:#1a222d; --ink:#e5eaf0; --muted:#9aa6b4; --line:#27323f;
+  --accent:#8fa3ff; --accent-ink:#0e1319; --accent-soft:#1d2646;
+  --ok:#4cc38a; --ok-soft:#14301f; --warn:#f0a940; --warn-soft:#352812; --crit:#ff7b70; --crit-soft:#3a1916;
+  --code:#1c2530;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:28px 56px}
+.wrap{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1,h2,h3,h4{font-family:var(--sans);line-height:1.15;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(30px,4vw,42px);font-weight:700;letter-spacing:-.025em}
+h2{font-size:22px;font-weight:600}
+h3{font-size:16px;font-weight:600}
+p{margin:0}
+code{font-family:var(--mono)}
+.lede{max-width:72ch;color:var(--muted)}
+.thesis{font-size:18px;font-weight:500;max-width:62ch;border-left:3px solid var(--accent);padding-left:14px}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+header.intro{display:flex;flex-direction:column;gap:12px}
+.note{font-size:13px;color:var(--muted)}
+section{display:flex;flex-direction:column;gap:16px}
+
+.app{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:28px;height:28px;border-radius:7px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-size:15px;flex:none}
+.brand b{font-size:16px;font-weight:600}
+.btn{font:inherit;font-size:13px;font-weight:600;border-radius:8px;padding:8px 12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.danger{color:var(--crit)}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn:focus-visible,.issue:focus-visible,.evcard:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.events{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.evcard{all:unset;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.evcard[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.evtop{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.evtop h3{font-size:16px}
+.evmeta{font-size:12.5px;color:var(--muted)}
+.counts{display:flex;gap:18px;flex-wrap:wrap}
+.count{display:flex;flex-direction:column}
+.count .v{font-size:24px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.count .k{font-size:12px;color:var(--muted)}
+.count.block .v{color:var(--crit)} .count.nonblock .v{color:var(--warn)} .count.you .v{color:var(--accent)} .count.done .v{color:var(--ok)}
+.count.zero .v{color:var(--ok)}
+.ready{font-size:12px;font-weight:600;color:var(--ok)}
+
+.run{padding:9px 18px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;color:var(--muted);min-height:38px;display:flex;align-items:center;gap:10px;overflow-x:auto;white-space:nowrap}
+.run .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.run.busy .dot{background:var(--warn)}
+
+.main{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);min-height:620px}
+.issues{border-right:1px solid var(--line);display:flex;flex-direction:column;overflow-y:auto;max-height:820px}
+.grouphead{padding:10px 16px 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:flex;justify-content:space-between;background:var(--surface);position:sticky;top:0;border-bottom:1px solid var(--line)}
+.issue{all:unset;display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:12px;padding:12px 16px 12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.issue:hover{background:var(--surface-2)}
+.issue[aria-current="true"]{background:var(--accent-soft)}
+.bar-b{background:var(--crit);border-radius:0 3px 3px 0} .bar-n{background:var(--warn);border-radius:0 3px 3px 0}
+.issue.res .bar-b,.issue.res .bar-n{background:var(--ok)}
+.issue .t{font-weight:600;font-size:14px;line-height:1.35;display:block}
+.issue.res .t{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.issue .m{font-size:12px;color:var(--muted);margin-top:2px;display:block}
+.pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap;align-self:start}
+.p-proposed{background:var(--warn-soft);color:var(--warn)}
+.p-human{background:var(--accent-soft);color:var(--accent)}
+.p-res{background:var(--ok-soft);color:var(--ok)}
+.p-wait{background:var(--surface-2);color:var(--muted);border:1px dashed var(--line)}
+.p-rej{background:var(--surface-2);color:var(--muted)}
+
+.detail{padding:18px 20px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.dhead{display:flex;flex-direction:column;gap:6px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em}
+.b-block{background:var(--crit-soft);color:var(--crit)} .b-non{background:var(--warn-soft);color:var(--warn)} .b-kind{background:var(--code);color:var(--muted);font-family:var(--mono);text-transform:none;letter-spacing:0}
+.block{display:flex;flex-direction:column;gap:8px}
+.block > .lbl{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.mail{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;white-space:pre-wrap}
+.mail .from{font-size:12px;color:var(--muted);margin-bottom:6px;display:block}
+.trace{display:grid;grid-template-columns:92px minmax(0,1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px}
+.trace dt{padding:9px 12px;background:var(--surface-2);font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line)}
+.trace dd{margin:0;padding:9px 12px;border-bottom:1px solid var(--line)}
+.trace dt:nth-last-of-type(1),.trace dd:last-child{border-bottom:0}
+.trace ul{margin:0;padding-left:16px;display:flex;flex-direction:column;gap:2px}
+.jk{font-size:10px;font-weight:600;color:var(--ok);background:var(--ok-soft);padding:1px 6px;border-radius:5px;margin-left:4px;letter-spacing:.04em}
+.checks{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none;font-size:13.5px}
+.checks li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:6px}
+.checks .y{color:var(--ok);font-weight:700} .checks .n{color:var(--crit);font-weight:700}
+.checks .d{color:var(--muted);font-size:12.5px}
+.conf{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.meter{flex:1;max-width:180px;height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+.meter span{display:block;height:100%;background:var(--accent)}
+.proposal{border:1px solid var(--accent);border-radius:10px;padding:12px 14px;font-size:14px;white-space:pre-wrap;background:var(--surface)}
+.proposal[contenteditable="true"]{outline:2px solid var(--accent);outline-offset:2px}
+.atype{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:14px}
+
+.cons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cons div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.cons h4{font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.cons .hard h4{color:var(--crit)} .cons .soft h4{color:var(--accent)}
+.cons ul{margin:0;padding-left:16px;font-size:13px;display:flex;flex-direction:column;gap:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;padding:3px;gap:3px;background:var(--surface-2);flex-wrap:wrap}
+.seg button{font:inherit;font-size:12.5px;font-weight:600;border:0;background:transparent;color:var(--muted);padding:5px 10px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.optwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+.opts{border-collapse:collapse;width:100%;min-width:560px;font-size:13px}
+.opts th,.opts td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.opts th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--surface-2);font-weight:600}
+.opts tr:last-child td{border-bottom:0}
+.opts td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.opts tr.rejected td{color:var(--muted)}
+.opts td.bad{color:var(--crit)!important;font-weight:600}
+.verdict{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;display:inline-block}
+.v-pick{background:var(--ok-soft);color:var(--ok)} .v-alt{background:var(--accent-soft);color:var(--accent)} .v-rej{background:var(--crit-soft);color:var(--crit)}
+.why{display:block;font-size:12px;margin-top:3px;color:var(--crit)}
+.diag{border:1px solid var(--crit);background:var(--crit-soft);border-radius:10px;padding:12px 14px;font-size:14px;display:flex;flex-direction:column;gap:6px}
+.diag b{color:var(--crit)}
+.diag ul{margin:0;padding-left:18px}
+
+.loop{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.node{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;position:relative}
+.node h3{font-size:14px}
+.node p{font-size:13px;color:var(--muted)}
+.node .who{font-family:var(--mono);font-size:11px;color:var(--accent)}
+.node:not(:last-child)::after{content:"→";position:absolute;right:-13px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.node.human{border-color:var(--ok)} .node.human .who{color:var(--ok)}
+.layers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.layer{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.layer h3{font-size:15px}
+.layer .role{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.layer ul{margin:0;padding-left:16px;font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.l1 .role{color:var(--accent)} .l2 .role{color:var(--warn)} .l3 .role{color:var(--ok)}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table.cmp{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+table.cmp th,table.cmp td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+table.cmp th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--surface-2)}
+table.cmp tr:last-child td{border-bottom:0}
+.real{color:var(--ok);font-weight:600} .sim{color:var(--warn);font-weight:600}
+
+@media (max-width:960px){
+  .main{grid-template-columns:1fr}
+  .issues{border-right:0;border-bottom:1px solid var(--line);max-height:420px}
+  .events{grid-template-columns:1fr}
+  .loop,.layers{grid-template-columns:1fr}
+  .node:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-15px;transform:translateX(-50%)}
+}
+@media (max-width:520px){
+  .cons{grid-template-columns:1fr}
+  .trace{grid-template-columns:1fr}
+  .trace dt{border-bottom:0}
+}
+</style>
+
+<div class="wrap">
+
+<header class="intro">
+  <span class="eyebrow">Interactive mockup · sample data</span>
+  <h1>Bureau Agent</h1>
+  <p class="thesis">Keeps an event operationally consistent: it detects what needs attention, investigates across internal and external data, proposes valid actions, and lets organizers approve the consequences.</p>
+  <p class="lede">Two sample events share one agent and one loop: the X-IA hackathon, and a student integration weekend where the agent also plans travel and lodging under several constraints. Pick an event, open an issue, read the decision trace, then approve, edit or reject. Resolving an issue can unlock the ones that depend on it.</p>
+  <p class="note">All names, emails, prices and times are fictional. Travel results are shown as they would come from Jinko's sandbox.</p>
+</header>
+
+<section aria-labelledby="app-h">
+  <h2 id="app-h">1 · Event operations</h2>
+  <div class="app">
+    <div class="bar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">B</div>
+        <div><b>Bureau Agent</b><div class="note">Organizers supervise; the agent does the legwork.</div></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="approveSafe" type="button">Approve safe replies</button>
+        <button class="btn primary" id="replay" type="button">Run agent</button>
+      </div>
+    </div>
+    <div class="events" id="events"></div>
+    <div class="run" id="run" aria-live="polite"><span class="dot"></span><span id="runText"></span></div>
+    <div class="main">
+      <div class="issues" id="issues" role="list"></div>
+      <div class="detail" id="detail" aria-live="polite"></div>
+    </div>
+  </div>
+  <p class="note">Nothing is sent, changed, booked or paid before an organizer approves it. Messages drafted by the agent end with: "Drafted with AI assistance, approved by the organizers."</p>
+</section>
+
+<section aria-labelledby="loop-h">
+  <h2 id="loop-h">2 · One loop for every event</h2>
+  <p class="lede">Answering questions, reconciling payments, fixing teams and planning a trip are not separate features. They are different ways of resolving an issue in the same loop.</p>
+  <div class="loop">
+    <div class="node"><span class="who">STATE</span><h3>Event state</h3><p>Participants, payments, groups, logistics, rules, deadlines, messages.</p></div>
+    <div class="node"><span class="who">DETECT</span><h3>Issues</h3><p>Fixed checks find inconsistencies; the LLM reads new messages. Blocking first.</p></div>
+    <div class="node"><span class="who">INVESTIGATE</span><h3>Tools</h3><p>Rules lookup, eligibility, identity matching, group checks, Jinko search, constraint checks.</p></div>
+    <div class="node human"><span class="who">APPROVE</span><h3>Proposed action</h3><p>With evidence, checks and confidence. The organizer approves, edits or rejects.</p></div>
+    <div class="node"><span class="who">UPDATE</span><h3>New state</h3><p>The issue closes; dependent issues unlock; the loop runs again.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="layers-h">
+  <h2 id="layers-h">3 · LLM for ambiguity. Code for invariants. Humans for accountability.</h2>
+  <div class="layers">
+    <div class="layer l1"><span class="role">LLM</span><h3>Handles what is ambiguous</h3><ul><li>Understands messages ("I paid with my personal address")</li><li>Turns a plain request into hard and soft constraints</li><li>Chooses tools and their order</li><li>Decides whether to propose or to ask</li><li>Explains trade-offs</li></ul></div>
+    <div class="layer l2"><span class="role">Fixed code</span><h3>Guarantees what must hold</h3><ul><li><code>team_size ≤ 4</code>, one team per person</li><li>Fee paid before the event</li><li><code>cost_per_person ≤ budget</code>, arrival before the deadline</li><li>Identity score thresholds</li><li>Never relaxes a constraint on its own</li></ul></div>
+    <div class="layer l3"><span class="role">Humans</span><h3>Own the consequences</h3><ul><li>Anything sent outside</li><li>Changing a participant's status</li><li>Anything involving money</li><li>Uncertain identities</li><li>Exceptions to the rules</li></ul></div>
+  </div>
+</section>
+
+<section aria-labelledby="real-h">
+  <h2 id="real-h">4 · Hackathon build vs. real deployment</h2>
+  <div class="tablewrap">
+    <table class="cmp">
+      <thead><tr><th>Component</th><th>Hackathon build</th><th>Real use</th></tr></thead>
+      <tbody>
+        <tr><td>Messages, registrations, payments</td><td><span class="sim">Simulated</span> · sample JSON / CSV with planted inconsistencies</td><td>Inbox, Discord, Luma / HelloAsso exports, bank statements</td></tr>
+        <tr><td>Event state, issue detection, rule checks</td><td><span class="real">Real</span> · Python</td><td>Same</td></tr>
+        <tr><td>Agent (LLM + tool choice)</td><td><span class="real">Real</span> · OpenAI</td><td>Same</td></tr>
+        <tr><td>Travel and lodging search</td><td><span class="real">Real</span> · Jinko sandbox, recorded results as fallback</td><td>Live Jinko search</td></tr>
+        <tr><td>Booking and payment</td><td><span class="sim">Not done</span> · the agent proposes, organizers book</td><td>Organizers book; the agent tracks it</td></tr>
+        <tr><td>Approval queue and decision trace</td><td><span class="real">Real</span> · local web app</td><td>Hosted, with organizer login</td></tr>
+        <tr><td>Evaluation</td><td><span class="real">Real</span> · labelled messages and planning cases</td><td>Track how often proposals are approved unchanged</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</div>
+
+<script>
+const SIGN = "\n— Drafted with AI assistance, approved by the organizers.";
+
+const OPTIONS = [
+  {id:"A", go:"Train, direct · Paris St-Lazare 18:10", stay:"Group hostel, 6 min walk · 10 rooms of 4", cost:112, arrive:"20:15", overnight:false, stepfree:true},
+  {id:"B", go:"Train, 1 change · 17:52 via Lisieux", stay:"Hotel, 12 min walk · 20 twin rooms", cost:118, arrive:"20:40", overnight:false, stepfree:true},
+  {id:"C", go:"Coach · Paris Bercy 18:30", stay:"Hotel, 5 min walk", cost:96, arrive:"22:10", overnight:false, stepfree:true},
+  {id:"D", go:"Train, direct · 18:10", stay:"Seafront hotel · 20 twin rooms", cost:141, arrive:"20:15", overnight:false, stepfree:true},
+  {id:"E", go:"Night coach · 23:00", stay:"Group hostel", cost:78, arrive:"02:30", overnight:true, stepfree:true}
+];
+function evaluate(budget){
+  return OPTIONS.map(o => {
+    const fails = [];
+    if (o.cost > budget) fails.push(`€${o.cost-budget} per person over budget`);
+    if (o.arrive > "21:00" || o.arrive < "12:00") fails.push(`arrives ${o.arrive}, after 21:00`);
+    if (o.overnight) fails.push("overnight travel");
+    if (!o.stepfree) fails.push("no step-free room");
+    return {...o, fails};
+  });
+}
+
+const EVENTS = {
+  hack: {
+    name:"X-IA Hackathon #1", meta:"Online · 108 registrants · launches in 3 days",
+    sources:"Sources: 50 emails · 14 Discord messages · luma_registrations.csv (108) · fees.csv (104) · rules.md",
+    log:["Loading event state: 108 participants, 104 payments, 27 teams","Fixed checks: 9 unpaid, 1 person in 2 teams, 1 team over 4","Reading 64 new messages → 1 payment claim, 5 questions, 1 sensitive request","match_person on the payment claim → score 0.91 → needs confirmation","search_rules on 5 questions → 4 covered, 1 not covered","propose_groups → 3 teams for 9 solo participants","9 issues, 9 proposed actions · 3 need you"],
+    issues:[
+      {id:"h-pay", blocking:true, kind:"unmatched_payment", title:"\"I already paid\": payment not linked to the registrant", meta:"Email · a.nguyen@polytechnique.edu", status:"human", conf:.91,
+       input:"Bonjour, j'ai déjà payé ma cotisation mais je reçois encore des relances. J'ai utilisé mon adresse perso pour payer.\n\n(Hi, I already paid my membership fee but I keep getting reminders. I used my personal address to pay.)",
+       trace:{checked:["Registrations (Luma export)","Unmatched payments (fees.csv)","Rules §3"],found:["Registrant: Antoine Nguyen · a.nguyen@polytechnique.edu · no fee linked","Candidate payment: \"A. Nguyen\" · nguyen.a@gmail.com · €10 · 19 Sep"],applied:["Identity thresholds: ≥ 0.98 propose link · 0.70–0.98 ask a human · < 0.70 treat as different"],proposed:"Ask the organizer to confirm the link, then reply to Antoine."},
+       checks:[["Surname matches",true,"Nguyen = Nguyen"],["First name compatible",true,"\"A.\" is compatible with Antoine"],["Email local part",true,"a.nguyen ↔ nguyen.a (same parts, swapped)"],["Paid after registering",true,"registered 12 Sep, paid 19 Sep"],["Identity score ≥ 0.98",false,"0.91: in the \"ask a human\" band"]],
+       atype:"LINK_PAYMENT", action:"Link payment \"A. Nguyen · nguyen.a@gmail.com · €10\" to registrant Antoine Nguyen.\n\nThen send:\nHi Antoine,\n\nThanks for flagging this. Your 2026 fee, paid from nguyen.a@gmail.com, is now linked to your registration, so you won't get further reminders. You're eligible for the hackathon.\n\nThe X-IA team"+SIGN, approveLabel:"Confirm and link"},
+      {id:"h-dup", blocking:true, kind:"duplicate_membership", title:"Léa Martin is in two teams", meta:"Orbit and NeuralNomads", status:"proposed", conf:.96,
+       input:"Orbit (declared 22 Sep 14:03): Léa Martin, Hugo Petit, Inès Roux\nNeuralNomads (declared 23 Sep 19:40): Léa Martin, Yanis Benali, Chloé Faure, Tom Girard",
+       trace:{checked:["Team declarations","Rules §3"],found:["Léa Martin listed in 2 teams"],applied:["§3: \"Each participant may belong to only one team.\""],proposed:"Keep her in Orbit (declared first); NeuralNomads stays valid with 3."},
+       checks:[["One team per participant",false,"Léa Martin: 2 teams"],["Orbit valid after fix",true,"3 members"],["NeuralNomads valid after fix",true,"3 members (2–4 allowed)"]],
+       atype:"MOVE_MEMBER", action:"Remove Léa Martin from NeuralNomads; keep her in Orbit.\n\nMessage to Léa:\nHi Léa,\n\nUnder the rules (§3) each participant may belong to only one team, and you appear in both Orbit and NeuralNomads. We've kept you in Orbit, declared first. If you'd rather be in NeuralNomads, reply before Friday 9:00.\n\nThe X-IA team"+SIGN},
+      {id:"h-size", blocking:true, kind:"group_over_capacity", title:"Team DataDragons has 5 members", meta:"Declared 24 Sep", status:"proposed", conf:.95,
+       input:"DataDragons: Marc Lemoine, Sofia Duarte, Ben Aït, Clara Roy, Nils Weber",
+       trace:{checked:["Team declarations","Rules §3"],found:["5 members"],applied:["§3: teams of 2 to 4 people"],proposed:"Ask the team to choose who moves; don't remove anyone automatically."},
+       checks:[["Team size ≤ 4",false,"5 members"],["Organizers choose who leaves",false,"Not the organizers' call: ask the team"]],
+       atype:"SEND_MESSAGE", action:"Hi DataDragons,\n\nYour team has 5 members, but the rules (§3) allow at most 4. Please tell us before Friday 9:00 who will join another team. We can suggest one.\n\nThe X-IA team"+SIGN},
+      {id:"h-unpaid", blocking:true, kind:"unpaid_membership", title:"8 registrants haven't paid the membership fee", meta:"Deadline: Friday 9:00", status:"proposed", conf:.97,
+       input:"Registrations (108) × fees (104) → 9 without a linked fee.\n1 of them (Antoine Nguyen) has a pending payment claim.",
+       trace:{checked:["Registrations","Payments (updated 24 Sep 22:14)","Open issues"],found:["9 registrants without a linked fee","Antoine Nguyen has an open payment claim"],applied:["Fee required to take part (rules §3)"],proposed:"Remind 8 people; leave Antoine out until his claim is resolved."},
+       checks:[["Payment list is the latest",true,"24 Sep 22:14"],["No reminder to people with an open claim",true,"Antoine excluded"]],
+       atype:"SEND_MESSAGE", action:"8 individual messages:\n\nHi {first name},\n\nYou're registered for the X-IA Hackathon, but we can't find your 2026 membership fee (€10), which is required to take part and to receive partner credits. Please pay before Friday 9:00. If you paid from another address, just reply.\n\nThe X-IA team"+SIGN},
+      {id:"h-solo", blocking:false, kind:"solo_participants", title:"9 participants are looking for a team", meta:"#looking-for-team", status:"proposed", conf:.84,
+       input:"Skills posted: backend (3), frontend (2), data/ML (2), design (1), pitch (1). Solo participation is allowed; these 9 asked for a team.",
+       trace:{checked:["Discord #looking-for-team","Rules §3"],found:["9 people want a team"],applied:["Teams of 2–4; one team per person"],proposed:"3 teams of 3, each with a backend profile; design and pitch in different teams."},
+       checks:[["Sizes within 2–4",true,"3 × 3"],["Nobody in two teams",true,""],["Each team has backend",true,""]],
+       atype:"SEND_MESSAGE", action:"Team A: Samir (backend), Julie (frontend), Paul (pitch)\nTeam B: Maëlle (backend), Karim (data/ML), Zoé (design)\nTeam C: Victor (backend), Anna (frontend), Ravi (data/ML)\n\nHi! Here's a suggested team based on your skills. Reply \"ok\" to confirm or \"no\" to stay solo."+SIGN},
+      {id:"h-final", blocking:false, kind:"unanswered_question", title:"3 questions: \"Is the final still on 15 October?\"", meta:"Discord #questions", status:"proposed", conf:.95, safe:true,
+       input:"The Luma page says 15 October but I saw November somewhere, which is right? (+2 similar)",
+       trace:{checked:["Rules §4","Confirmation email","Luma page"],found:["Rules: November","Luma page: 15 October (older)"],applied:["Most recent official source wins"],proposed:"One answer for all three; flag the Luma page."},
+       checks:[["Answer covered by the rules",true,"§4"]],
+       atype:"SEND_MESSAGE", action:"The final won't take place on 15 October: it has moved to an X-IA event in November (rules §4). The date will be announced in #general."+SIGN+"\n\nNote for organizers: the Luma page still says 15 October."},
+      {id:"h-reuse", blocking:false, kind:"unanswered_question", title:"\"Can we continue a project we started before?\"", meta:"Email · Julien Morel", status:"proposed", conf:.97, safe:true,
+       input:"Hi, my team already started a RAG agent. Can we keep working on it during the hackathon?",
+       trace:{checked:["Rules §7"],found:["Allowed if declared; only new work is judged"],applied:["§7"],proposed:"Reply quoting §7."},
+       checks:[["Answer covered by the rules",true,"§7"]],
+       atype:"SEND_MESSAGE", action:"Hi Julien,\n\nYes. The rules (§7) allow building on an existing project as long as you declare it when you submit. Only the part built during the hackathon is judged.\n\nThe X-IA team"+SIGN},
+      {id:"h-lang", blocking:false, kind:"unanswered_question", title:"\"Can the video be in English?\"", meta:"Email · Mei Tanaka", status:"human", conf:.40,
+       input:"Hello, our team is mostly international. Can the 2-minute demo video be in English?",
+       trace:{checked:["Rules (all sections)"],found:["No rule about language"],applied:["Never invent a rule"],proposed:"Escalate; suggest adding the answer to the FAQ."},
+       checks:[["Answer covered by the rules",false,"Not covered"]],
+       atype:"ESCALATE", action:"Draft for organizers:\n\nHello Mei,\n\n[Organizers' answer on video language]\n\nThe X-IA team", approveLabel:"Mark as handled"},
+      {id:"h-data", blocking:false, kind:"sensitive_request", title:"A sponsor asks for the full participant list", meta:"Email · partner · personal data", status:"human", conf:.30,
+       input:"Could you send us the full list of participants with emails and schools so we can reach out after the event?",
+       trace:{checked:["Rules §10"],found:["Data used only to run the hackathon"],applied:["GDPR-sensitive → organizers decide"],proposed:"Escalate. No export prepared."},
+       checks:[["Within the purpose in §10",false,"Outreach after the event is outside it"]],
+       atype:"ESCALATE", action:"No action prepared. Forwarded to the president.", approveLabel:"Mark as handled"}
+    ]
+  },
+  wei: {
+    name:"WEI 2026", meta:"Integration weekend · 40 participants · 9–11 Oct",
+    sources:"Sources: planning request · 22 emails · registrations form (40) · bank transfers (33)",
+    log:["Loading event state: 40 participants, 33 transfers, no travel plan","Planning request → 5 hard constraints, 3 soft preferences","Asked organizers: does the budget include meals? → no","search_transport (Jinko sandbox): 9 connections · search_lodging: 14 results","check_constraints on 5 packages → 3 rejected, 2 valid","match_person on 1 unmatched transfer → score 0.78 → needs confirmation","6 issues · 3 waiting for the travel plan"],
+    issues:[
+      {id:"w-plan", blocking:true, kind:"no_logistics_plan", title:"No validated travel and lodging plan", meta:"Planning request from the president", status:"human", conf:.88, plan:true,
+       input:"\"WEI for 40 people. Leave Paris Friday 9 Oct after class, back Sunday afternoon. Max €120 per person for travel and lodging. Arrive before 21:00. No overnight travel. Two people need step-free rooms.\"\n\nAgent asked: \"Does the budget include meals?\" → \"No, travel and lodging only.\"",
+       constraints:{hard:["40 participants","≤ budget per person (travel + lodging)","Arrive before 21:00 on Friday","No overnight travel","≥ 2 step-free rooms"],soft:["Fewer changes","Lodging near the station","Back in Paris before 20:00 Sunday"]},
+       atype:"SELECT_TRAVEL_PLAN"},
+      {id:"w-pay", blocking:true, kind:"unmatched_payment", title:"A €112 transfer matches no registration", meta:"Reference \"WEI Cami\"", status:"human", conf:.78,
+       input:"Transfer 22 Sep · €112 · reference \"WEI Cami\" · sender \"C. DUPONT-LAMBERT\"",
+       trace:{checked:["Bank transfers","Registrations"],found:["No registrant named Dupont-Lambert","Candidate: Camille Dupont (registered, unpaid)"],applied:["Identity thresholds: 0.70–0.98 ask a human"],proposed:"Ask organizers to confirm before marking Camille as paid."},
+       checks:[["First name compatible",true,"\"Cami\" ↔ Camille"],["Surname",true,"Dupont is part of Dupont-Lambert"],["Identity score ≥ 0.98",false,"0.78"]],
+       atype:"LINK_PAYMENT", action:"Link the €112 transfer to Camille Dupont.\n\nHi Camille,\n\nWe've received your €112 for the WEI. See you on 9 October!\n\nThe WEI team"+SIGN, approveLabel:"Confirm and link"},
+      {id:"w-unpaid", blocking:true, kind:"unpaid_participation", title:"6 participants haven't paid", meta:"Deadline 1 Oct", status:"proposed", conf:.96, dependsOn:"w-plan",
+       input:"Registrations (40) × transfers (33) → 7 unpaid, 1 of them with a pending match (Camille).",
+       trace:{checked:["Registrations","Transfers","Chosen plan"],found:["6 unpaid without an open claim"],applied:["Amount = price of the chosen option"],proposed:"Send 6 reminders with the exact amount."},
+       checks:[["Travel plan chosen",true,"required to know the amount"],["No reminder to people with an open claim",true,"Camille excluded"]],
+       atype:"SEND_MESSAGE", action:"Hi {first name},\n\nYour place for the integration weekend (9–11 Oct) is reserved, but we haven't received your payment: €{price} for train and lodging. Please pay before 1 October.\n\nThe WEI team"+SIGN},
+      {id:"w-rooms", blocking:true, kind:"rooms_unassigned", title:"40 participants have no room", meta:"Room wishes from the form", status:"proposed", conf:.86, dependsOn:"w-plan",
+       input:"23 room wishes (\"with Inès\", \"quiet room\") · 2 need step-free access",
+       trace:{checked:["Chosen lodging","Registration form"],found:["Rooms available in the chosen option"],applied:["Room capacity; 1 room per person; step-free needs"],proposed:"Assignment meeting 19/23 wishes; both step-free needs on the ground floor."},
+       checks:[["Capacity respected",true,""],["Nobody in two rooms",true,""],["Step-free needs met",true,"2/2"]],
+       atype:"UPDATE_GROUPS", action:"Room list ready ({rooms}). 19 of 23 wishes met; a group of 6 was split 4 + 2 in neighbouring rooms.\n\nHi! Here's your room for the WEI. If something is wrong, reply before 5 October."+SIGN},
+      {id:"w-meet", blocking:false, kind:"unanswered_question", title:"5 questions: \"What time do we meet?\"", meta:"Discord #wei", status:"proposed", conf:.93, safe:true, dependsOn:"w-plan",
+       input:"What time and where do we meet on Friday? (+4 similar)",
+       trace:{checked:["Chosen plan"],found:["Departure time of the chosen option"],applied:["Meet 30 min before departure"],proposed:"One answer for all 5."},
+       checks:[["Travel plan chosen",true,""]],
+       atype:"SEND_MESSAGE", action:"We meet at {meet} on Friday 9 October in front of the departures board. Bring your ID and a sleeping bag."+SIGN},
+      {id:"w-refund", blocking:false, kind:"refund_request", title:"Refund request from Tom Girard", meta:"Email · exam retake that weekend", status:"human", conf:.35,
+       input:"Hi, I paid for the WEI but I have an exam retake that weekend. Can I get my money back?",
+       trace:{checked:["WEI refund policy"],found:["No refund after 1 October; request is before"],applied:["Money involved → organizers decide"],proposed:"Refund looks allowed; organizers confirm."},
+       checks:[["Request before 1 October",true,"22 Sep"],["Money involved",false,"requires approval"]],
+       atype:"ESCALATE", action:"If you confirm:\n\nHi Tom,\n\nYour request arrived before 1 October, so you'll be refunded within 7 days. Good luck with your exam!\n\nThe WEI team"+SIGN, approveLabel:"Confirm refund"}
+    ]
+  }
+};
+
+const state = {ev:"hack", sel:{hack:"h-pay", wei:"w-plan"}, status:{}, budget:120, choice:null, editing:false};
+function resetStatus(key){ EVENTS[key].issues.forEach(i => state.status[i.id] = i.status); if(key==="wei"){ state.choice=null; state.budget=120; } }
+resetStatus("hack"); resetStatus("wei");
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const cur = () => EVENTS[state.ev];
+const waiting = i => i.dependsOn && state.status[i.dependsOn] !== "resolved";
+const chosen = () => OPTIONS.find(o => o.id===state.choice);
+function fill(t){
+  const c = chosen();
+  return t.replace(/\{price\}/g, c ? c.cost : "—")
+          .replace(/\{rooms\}/g, c ? (c.id==="A" ? "10 rooms of 4" : "20 twin rooms") : "—")
+          .replace(/\{meet\}/g, c ? (c.id==="A" ? "17:40 at Paris Saint-Lazare" : "17:20 at Paris Saint-Lazare") : "—");
+}
+function effStatus(i){ const s=state.status[i.id]; if(s!=="resolved" && s!=="rejected" && waiting(i)) return "waiting"; return s; }
+function counts(key){
+  const its = EVENTS[key].issues;
+  const open = i => !["resolved","rejected"].includes(state.status[i.id]);
+  return {
+    block: its.filter(i => i.blocking && open(i)).length,
+    non: its.filter(i => !i.blocking && open(i)).length,
+    you: its.filter(i => open(i) && !waiting(i)).length,
+    done: its.filter(i => state.status[i.id]==="resolved").length
+  };
+}
+function pill(i){
+  const s = effStatus(i);
+  return {resolved:'<span class="pill p-res">Resolved</span>', rejected:'<span class="pill p-rej">Dismissed</span>', waiting:'<span class="pill p-wait">Waiting</span>', human:'<span class="pill p-human">Needs you</span>', proposed:'<span class="pill p-proposed">Action proposed</span>'}[s];
+}
+
+function renderEvents(){
+  $("#events").innerHTML = Object.entries(EVENTS).map(([k,e]) => {
+    const c = counts(k);
+    return `<button class="evcard" type="button" data-ev="${k}" aria-pressed="${state.ev===k}">
+      <div class="evtop"><h3>${esc(e.name)}</h3>${c.block===0?'<span class="ready">No blocking issues</span>':""}</div>
+      <span class="evmeta">${esc(e.meta)}</span>
+      <div class="counts">
+        <div class="count block ${c.block===0?"zero":""}"><span class="v">${c.block}</span><span class="k">blocking</span></div>
+        <div class="count nonblock ${c.non===0?"zero":""}"><span class="v">${c.non}</span><span class="k">non-blocking</span></div>
+        <div class="count you"><span class="v">${c.you}</span><span class="k">ready for review</span></div>
+        <div class="count done"><span class="v">${c.done}</span><span class="k">resolved</span></div>
+      </div></button>`;
+  }).join("");
+}
+
+function renderIssues(){
+  const its = cur().issues, sel = state.sel[state.ev];
+  const row = i => `<button class="issue ${effStatus(i)==="resolved"?"res":""}" type="button" role="listitem" data-id="${i.id}" aria-current="${sel===i.id}">
+      <span class="${i.blocking?"bar-b":"bar-n"}"></span>
+      <span><span class="t">${esc(i.title)}</span><span class="m">${esc(i.meta)}</span></span>${pill(i)}</button>`;
+  const b = its.filter(i=>i.blocking), n = its.filter(i=>!i.blocking);
+  $("#issues").innerHTML = `<div class="grouphead"><span>Blocking</span><span>${b.length}</span></div>${b.map(row).join("")}
+    <div class="grouphead"><span>Non-blocking</span><span>${n.length}</span></div>${n.map(row).join("")}`;
+}
+
+function traceHTML(t){
+  const li = a => `<ul>${a.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+  return `<dl class="trace"><dt>Checked</dt><dd>${li(t.checked.map(esc))}</dd><dt>Found</dt><dd>${li(t.found.map(esc))}</dd><dt>Applied</dt><dd>${li(t.applied.map(esc))}</dd><dt>Proposed</dt><dd>${esc(t.proposed)}</dd></dl>`;
+}
+function checksHTML(cs){
+  return `<ul class="checks">${cs.map(([n,p,d]) => `<li><span class="${p?"y":"n"}">${p?"✓":"✗"}</span><span>${esc(n)}${d?` <span class="d">· ${esc(d)}</span>`:""}</span></li>`).join("")}</ul>`;
+}
+
+function planDetail(i){
+  const ev = evaluate(state.budget);
+  const valid = ev.filter(o => o.fails.length===0).sort((a,b)=>a.cost-b.cost);
+  const s = state.status[i.id];
+  const closed = s==="resolved";
+  const hard = i.constraints.hard.map(h => h.startsWith("≤ budget") ? `≤ €${state.budget} per person (travel + lodging)` : h);
+  const rows = ev.map(o => {
+    const rej = o.fails.length>0;
+    const isChosen = state.choice===o.id;
+    const label = rej ? "Rejected" : isChosen ? "Chosen" : (valid[0] && valid[0].id===o.id ? "Ranked 1st" : "Valid");
+    const cls = rej ? "v-rej" : (isChosen || (valid[0] && valid[0].id===o.id)) ? "v-pick" : "v-alt";
+    const costBad = o.cost > state.budget, timeBad = o.arrive > "21:00" || o.arrive < "12:00";
+    return `<tr class="${rej?"rejected":""}"><td><b>${o.id}</b></td><td class="${o.overnight?"bad":""}">${esc(o.go)}</td><td>${esc(o.stay)}</td>
+      <td class="num ${costBad?"bad":""}">€${o.cost}</td><td class="num ${timeBad?"bad":""}">${o.arrive}</td>
+      <td><span class="verdict ${cls}">${label}</span>${rej?`<span class="why">${esc(o.fails.join("; "))}</span>`:""}</td></tr>`;
+  }).join("");
+  const nearest = ev.filter(o => o.fails.length===1 && o.cost > state.budget).sort((a,b)=>a.cost-b.cost)[0];
+  const lateCheap = ev.find(o => o.id==="C");
+  const diag = valid.length ? "" : `<div class="diag"><b>No valid option at €${state.budget} per person.</b>
+     <span>Binding constraint: budget ≤ €${state.budget}. I did not relax any constraint.</span>
+     <ul>${nearest?`<li>Raise the budget to €${nearest.cost}: option ${nearest.id} meets every other constraint.</li>`:""}
+     ${lateCheap && lateCheap.cost<=state.budget?"":`<li>Accept arrival at 22:10: option C costs €${lateCheap.cost} (still €${Math.max(0,lateCheap.cost-state.budget)} over at this budget).</li>`}
+     <li>Option E (€78) fits the budget but means overnight travel, which you excluded.</li></ul></div>`;
+  const trace = {checked:["Planning request","Jinko ground-search (9 connections)","Jinko hotel-search (14 results)"],
+    found:[`5 packages built · ${valid.length} pass every hard constraint`],
+    applied:["Hard constraints checked in code; soft preferences used only to rank valid options"],
+    proposed: valid.length ? `Option ${valid[0].id} ranks first under the current preferences (cheapest valid, direct train, lodging near the station). ${valid[1]?`Option ${valid[1].id} is the alternative.`:""}` : "Escalate: no option satisfies the constraints."};
+  let actions;
+  if (closed) actions = `<span class="note">Option ${state.choice} chosen. Dependent issues are unlocked: reminders, rooms, meeting time.</span><button class="btn" type="button" data-act="undo">Undo</button>`;
+  else if (valid.length) actions = valid.map((o,k)=>`<button class="btn ${k===0?"ok":""}" type="button" data-act="pick" data-opt="${o.id}">Choose option ${o.id} · €${o.cost}</button>`).join("");
+  else actions = `<span class="note">Nothing to approve: change the constraints or ask the agent to search other dates or destinations.</span>`;
+  return `
+    <div class="dhead"><div class="badges"><span class="badge b-block">Blocking</span><span class="badge b-kind">${i.kind}</span></div>
+      <h3 style="font-size:20px">${esc(i.title)}</h3>
+      <div class="conf">Agent confidence <span class="meter"><span style="width:${Math.round(i.conf*100)}%"></span></span> ${Math.round(i.conf*100)}%</div></div>
+    <div class="block"><span class="lbl">Input</span><div class="mail"><span class="from">${esc(i.meta)}</span>${esc(i.input)}</div></div>
+    <div class="block"><span class="lbl">Constraints extracted</span><div class="cons">
+      <div class="hard"><h4>Hard · reject if broken</h4><ul>${hard.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>
+      <div class="soft"><h4>Soft · rank valid options</h4><ul>${i.constraints.soft.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div></div></div>
+    ${closed?"":`<div class="block"><span class="lbl">Try it: budget per person</span><div class="seg" role="group" aria-label="Budget">
+      ${[120,90].map(b=>`<button type="button" data-budget="${b}" aria-pressed="${state.budget===b}">€${b}${b===120?" (as requested)":" (what if)"}</button>`).join("")}</div></div>`}
+    <div class="block"><span class="lbl">Decision trace</span>${traceHTML(trace).replace("Jinko ground-search","Jinko ground-search<span class=\"jk\">JINKO</span>").replace("Jinko hotel-search","Jinko hotel-search<span class=\"jk\">JINKO</span>")}</div>
+    <div class="block"><span class="lbl">Options compared (illustrative prices)</span><div class="optwrap"><table class="opts">
+      <thead><tr><th>Option</th><th>Travel</th><th>Lodging</th><th>Per person</th><th>Arrives</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+    ${diag}
+    <div class="block"><span class="lbl">Proposed action · <span class="atype">${valid.length?"SELECT_TRAVEL_PLAN":"ESCALATE"}</span></span>
+      <div class="proposal">${valid.length?"Pick one option. Nothing is booked automatically: organizers book the chosen option. Choosing unlocks payment reminders with the exact amount, room assignment and the meeting-time answer.":"No valid option. Waiting for organizers to change a constraint."}</div></div>
+    <div class="actions">${actions}</div>`;
+}
+
+function renderDetail(){
+  const i = cur().issues.find(x => x.id===state.sel[state.ev]);
+  if(!i){ $("#detail").innerHTML=""; return; }
+  if(i.plan){ $("#detail").innerHTML = planDetail(i); return; }
+  const s = effStatus(i);
+  let actions;
+  if (s==="resolved" || s==="rejected") actions = `<span class="note">${s==="resolved"?"Approved. The action ran and the issue is resolved.":"Dismissed. Nothing was sent."}</span><button class="btn" type="button" data-act="undo">Undo</button>`;
+  else if (s==="waiting") actions = `<span class="note">Waiting for "${esc(cur().issues.find(x=>x.id===i.dependsOn).title)}". Resolve that issue first.</span>`;
+  else actions = `<button class="btn ok" type="button" data-act="ok">${esc(i.approveLabel || "Approve")}</button><button class="btn" type="button" data-act="edit">Edit</button><button class="btn danger" type="button" data-act="rej">Dismiss</button>`;
+  $("#detail").innerHTML = `
+    <div class="dhead"><div class="badges"><span class="badge ${i.blocking?"b-block":"b-non"}">${i.blocking?"Blocking":"Non-blocking"}</span><span class="badge b-kind">${i.kind}</span></div>
+      <h3 style="font-size:20px">${esc(i.title)}</h3>
+      <div class="conf">Agent confidence <span class="meter"><span style="width:${Math.round(i.conf*100)}%"></span></span> ${Math.round(i.conf*100)}%</div></div>
+    <div class="block"><span class="lbl">Input</span><div class="mail"><span class="from">${esc(i.meta)}</span>${esc(i.input)}</div></div>
+    <div class="block"><span class="lbl">Decision trace</span>${traceHTML(i.trace)}</div>
+    <div class="block"><span class="lbl">Checks</span>${checksHTML(i.checks)}</div>
+    <div class="block"><span class="lbl">Proposed action · <span class="atype">${i.atype}</span>${s==="proposed"||s==="human"?" · editable":""}</span><div class="proposal" id="prop">${esc(waiting(i)?i.action.replace(/\{price\}|\{rooms\}|\{meet\}/g,"…"):fill(i.action))}</div></div>
+    <div class="actions">${actions}</div>`;
+}
+
+function render(){ renderEvents(); renderIssues(); renderDetail(); }
+function setRun(t){ $("#runText").textContent = t; }
+
+$("#events").addEventListener("click", e => { const b=e.target.closest(".evcard"); if(!b) return; state.ev=b.dataset.ev; setRun(cur().sources); render(); });
+$("#issues").addEventListener("click", e => { const b=e.target.closest(".issue"); if(!b) return; state.sel[state.ev]=b.dataset.id; renderIssues(); renderDetail(); });
+$("#detail").addEventListener("click", e => {
+  const bud = e.target.closest("[data-budget]");
+  if (bud){ state.budget=+bud.dataset.budget; renderDetail(); setRun(state.budget===120?"Re-checked 5 packages at €120: 2 valid.":"Re-checked 5 packages at €90: 0 valid. Binding constraint: budget."); return; }
+  const b=e.target.closest("[data-act]"); if(!b) return;
+  const i = cur().issues.find(x => x.id===state.sel[state.ev]);
+  const act=b.dataset.act;
+  if(act==="edit"){
+    const p=$("#prop"); const on=p.getAttribute("contenteditable")==="true";
+    if(on){ i.action=p.innerText; p.setAttribute("contenteditable","false"); b.textContent="Edit"; }
+    else { p.setAttribute("contenteditable","true"); p.focus(); b.textContent="Save"; }
+    return;
+  }
+  const p=$("#prop"); if(p && p.getAttribute("contenteditable")==="true") i.action=p.innerText;
+  if(act==="pick"){ state.choice=b.dataset.opt; state.status[i.id]="resolved"; setRun(`Travel plan resolved: option ${state.choice} (€${chosen().cost}/person). 3 dependent issues unlocked.`); }
+  if(act==="ok"){ state.status[i.id]="resolved"; setRun(`Resolved: ${i.title}`); }
+  if(act==="rej"){ state.status[i.id]="rejected"; setRun(`Dismissed: ${i.title}`); }
+  if(act==="undo"){
+    state.status[i.id]=i.status;
+    if(i.plan){ state.choice=null; cur().issues.forEach(x => { if(x.dependsOn===i.id) state.status[x.id]=x.status; }); }
+  }
+  render();
+});
+$("#approveSafe").addEventListener("click", () => {
+  let n=0; cur().issues.forEach(i => { if(i.safe && state.status[i.id]==="proposed" && !waiting(i)){ state.status[i.id]="resolved"; n++; } });
+  setRun(n ? `${n} replies fully covered by the rules were approved and sent.` : "No safe replies ready right now."); render();
+});
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+$("#replay").addEventListener("click", () => {
+  const btn=$("#replay"); btn.disabled=true; const run=$("#run"); run.classList.add("busy");
+  resetStatus(state.ev); render();
+  const log=cur().log; let k=0;
+  const step=()=>{ setRun(log[k]); k++; if(k<log.length) setTimeout(step, reduce?0:650); else { run.classList.remove("busy"); btn.disabled=false; } };
+  step();
+});
+
+setRun(cur().sources);
+render();
+</script>
