@@ -15,6 +15,7 @@ python -m unittest tests.test_core.LoaderTests -v          # one class
 | `test_planner.py` | Constraint gate, ranking, diagnosis, unverifiable constraints, clarifications |
 | `test_agent.py` | Agent loop mechanics with a scripted fake LLM |
 | `test_pending.py` | Expected behaviour of unfinished modules (store, executor), skipped until their task is done |
+| `test_executor_hardening.py` | Executor rejection, payment ownership, optional replies, and unchanged state on failure |
 | `fake_llm.py` | Fake OpenAI client for tests (no key, no cost) |
 | `helpers.py` | Shared fixtures (e.g. `wei_request()`) |
 

@@ -121,10 +121,10 @@ Mọi `datetime` có múi giờ (dữ liệu mẫu dùng `+02:00`, giờ Paris �
 | `action_type` | `payload` tối thiểu | Tác động khi thực thi |
 |---|---|---|
 | `SEND_MESSAGE` | `to[]`, `text` | Ghi vào hộp thư đã gửi (giả lập) |
-| `LINK_PAYMENT` | `payment_id`, `participant_id`, `message?` | Gắn thanh toán với người tham gia |
+| `LINK_PAYMENT` | `payment_id`, `participant_id`, `to?`, `message?` | Kiểm người tồn tại; từ chối đổi chủ khoản đã gắn bằng ID hoặc khớp email khi chưa có ID. Gắn thanh toán; nếu có `message` thì bắt buộc có `to`, ghi một tin vào outbox (`edited_description` thay nội dung nếu có) |
 | `MOVE_MEMBER` | `participant_id`, `from_group`, `to_group?`, `message?` | Sửa thành viên nhóm |
 | `UPDATE_GROUPS` | `groups[]` | Thay danh sách nhóm/phòng |
-| `SELECT_TRAVEL_PLAN` | `option_id` (do người chọn), `options[]` | Ghi `logistics`; mở khóa vấn đề phụ thuộc |
+| `SELECT_TRAVEL_PLAN` | `option_id` (do người chọn), `options[]` | Chỉ chấp nhận phương án có `valid = true`; ghi `logistics`, mở khóa vấn đề phụ thuộc |
 | `ESCALATE` | `note?` | Đánh dấu đã chuyển người; vấn đề đóng khi người đánh dấu đã xử lý |
 
 ---
@@ -181,9 +181,10 @@ Mọi `datetime` có múi giờ (dữ liệu mẫu dùng `+02:00`, giờ Paris �
 - Lệnh `reset` xóa `runtime/<event>/` để demo lại từ đầu.
 - `runtime/` nằm trong `.gitignore`.
 
-### 5.5. Thực thi (`executor.py`) [cần làm]
-- `apply(state, action, edited=None) -> EventState`: áp tác động theo bảng ở mục 3, ghi nhật ký, trả trạng thái mới.
-- **Kiểm tra lại quy tắc bất biến sau khi áp.** Nếu một hành động làm sai quy tắc (ví dụ đội thành 5 người), từ chối và báo lỗi thay vì ghi.
+### 5.5. Thực thi (`executor.py`) [đã có]
+- `apply(state, action, edited_description=None, option_id=None) -> EventState`: áp tác động theo bảng ở mục 3 trên bản sao, ghi nhật ký, trả trạng thái mới.
+- Kiểm người nhận thanh toán tồn tại (`ValueError` nếu không); chặn đổi chủ thanh toán và chọn phương án không hợp lệ (`InvariantViolation`). ID chủ khoản có ưu tiên; khi chưa có ID, đối chiếu email không phân biệt hoa thường.
+- **Kiểm tra lại quy tắc nhóm trong phạm vi bị tác động.** Nếu một hành động làm sai quy tắc (ví dụ đội thành 5 người), từ chối, giữ nguyên trạng thái đầu vào và không ghi outbox/nhật ký.
 
 ---
 
