@@ -1,0 +1,20 @@
+[
+  {
+    "id": "hackathon",
+    "name": "X-IA Hackathon #1 (sample data)",
+    "counts": {
+      "blocking": 4,
+      "non_blocking": 7,
+      "resolved": 0
+    }
+  },
+  {
+    "id": "wei",
+    "name": "WEI 2026 (sample data)",
+    "counts": {
+      "blocking": 4,
+      "non_blocking": 2,
+      "resolved": 0
+    }
+  }
+]

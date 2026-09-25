@@ -29,14 +29,21 @@ def _action_from_args(state: EventState, issue: Issue, args: dict) -> ProposedAc
     )
 
 
-def resolve_issue(state: EventState, issue: Issue, max_steps: int = MAX_STEPS,
-                  verbose: bool = True) -> ProposedAction:
-    """Run the tool-calling loop for one issue and return the proposed action."""
+def _default_client():
     if not config.OPENAI_API_KEY:
         raise RuntimeError("OPENAI_API_KEY is not set (add it to .env).")
     from openai import OpenAI  # imported lazily so the rest of the package works without it
+    return OpenAI(api_key=config.OPENAI_API_KEY)
 
-    client = OpenAI(api_key=config.OPENAI_API_KEY)
+
+def resolve_issue(state: EventState, issue: Issue, max_steps: int = MAX_STEPS,
+                  verbose: bool = True, client=None) -> ProposedAction:
+    """Run the tool-calling loop for one issue and return the proposed action.
+
+    `client` defaults to a real OpenAI client. Tests pass a fake object with the same
+    `chat.completions.create(...)` interface to check the loop without an API key.
+    """
+    client = client or _default_client()
     handlers = build_handlers(state)
     messages: list[dict] = [
         {"role": "system", "content": SYSTEM_PROMPT},

@@ -1,17 +1,20 @@
 ## Task
-T__ ·
+T__ · Closes #
 
 ## What changed
 -
+
+## "Done when" checklist
+Copy the checklist of the task from TASKS.md and tick each item.
+- [ ]
 
 ## How to check
 ```bash
 python -m unittest discover -s tests -t .
 ```
 
-## Checklist
-- [ ] Tests pass locally
-- [ ] TASKS.md status updated
+## General checklist
+- [ ] Tests pass locally and on CI
 - [ ] README of the touched folder updated if needed
 - [ ] No secrets, no real personal data
-- [ ] Shared contracts (`core/models.py`, `planner/interface.py`) unchanged, or the team was told
+- [ ] Shared contracts (`core/models.py`, `planner/interface.py`) unchanged, or the team was told and `docs/api-examples/` regenerated

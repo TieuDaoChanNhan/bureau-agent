@@ -1,0 +1,353 @@
+{
+  "id": "wei:select_travel_plan",
+  "event_id": "wei",
+  "issue_id": "no_logistics_plan",
+  "action_type": "SELECT_TRAVEL_PLAN",
+  "title": "2 of 5 options pass every verified hard constraint",
+  "description": "Option A ranks first under the current priorities (fewer_changes, near_station, early_return). Best: €112/person. Organizers choose; nothing is booked automatically.",
+  "evidence": [
+    {
+      "source_type": "travel_option",
+      "source_id": "A",
+      "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+    },
+    {
+      "source_type": "travel_option",
+      "source_id": "B",
+      "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+    },
+    {
+      "source_type": "travel_option",
+      "source_id": "C",
+      "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+    },
+    {
+      "source_type": "travel_option",
+      "source_id": "D",
+      "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+    },
+    {
+      "source_type": "travel_option",
+      "source_id": "E",
+      "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+    }
+  ],
+  "checks": [
+    {
+      "name": "cost ≤ €120/person",
+      "passed": true,
+      "detail": "€112",
+      "verified": true
+    },
+    {
+      "name": "arrive before 21:00",
+      "passed": true,
+      "detail": "20:15",
+      "verified": true
+    },
+    {
+      "name": "no overnight travel",
+      "passed": true,
+      "detail": "",
+      "verified": true
+    },
+    {
+      "name": "lodging for 40",
+      "passed": true,
+      "detail": "40",
+      "verified": true
+    },
+    {
+      "name": "≥ 2 step-free rooms",
+      "passed": true,
+      "detail": "listed in facilities; confirm with the venue",
+      "verified": false
+    }
+  ],
+  "confidence": null,
+  "requires_approval": true,
+  "payload": {
+    "ranked_valid": [
+      "A",
+      "B"
+    ],
+    "options": [
+      {
+        "option": {
+          "id": "A",
+          "transport": {
+            "mode": "train",
+            "depart": "18:10",
+            "arrive": "20:15",
+            "changes": 0,
+            "overnight": false,
+            "return_arrive": "19:05"
+          },
+          "lodging": {
+            "name": "Group hostel",
+            "rooms": 10,
+            "capacity": 40,
+            "walk_minutes": 6,
+            "step_free_hint": true
+          },
+          "cost_per_person_cents": 11200,
+          "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+        },
+        "checks": [
+          {
+            "name": "cost ≤ €120/person",
+            "passed": true,
+            "detail": "€112",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": true,
+            "detail": "20:15",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": true,
+            "detail": "",
+            "verified": true
+          },
+          {
+            "name": "lodging for 40",
+            "passed": true,
+            "detail": "40",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": true,
+            "detail": "listed in facilities; confirm with the venue",
+            "verified": false
+          }
+        ],
+        "valid": true
+      },
+      {
+        "option": {
+          "id": "B",
+          "transport": {
+            "mode": "train",
+            "depart": "17:52",
+            "arrive": "20:40",
+            "changes": 1,
+            "overnight": false,
+            "return_arrive": "19:40"
+          },
+          "lodging": {
+            "name": "Hotel",
+            "rooms": 20,
+            "capacity": 40,
+            "walk_minutes": 12,
+            "step_free_hint": true
+          },
+          "cost_per_person_cents": 11800,
+          "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+        },
+        "checks": [
+          {
+            "name": "cost ≤ €120/person",
+            "passed": true,
+            "detail": "€118",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": true,
+            "detail": "20:40",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": true,
+            "detail": "",
+            "verified": true
+          },
+          {
+            "name": "lodging for 40",
+            "passed": true,
+            "detail": "40",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": true,
+            "detail": "listed in facilities; confirm with the venue",
+            "verified": false
+          }
+        ],
+        "valid": true
+      },
+      {
+        "option": {
+          "id": "C",
+          "transport": {
+            "mode": "coach",
+            "depart": "18:30",
+            "arrive": "22:10",
+            "changes": 0,
+            "overnight": false,
+            "return_arrive": "20:30"
+          },
+          "lodging": {
+            "name": "Hotel",
+            "rooms": 20,
+            "capacity": 40,
+            "walk_minutes": 5,
+            "step_free_hint": true
+          },
+          "cost_per_person_cents": 9600,
+          "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+        },
+        "checks": [
+          {
+            "name": "cost ≤ €120/person",
+            "passed": true,
+            "detail": "€96",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": false,
+            "detail": "22:10",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": true,
+            "detail": "",
+            "verified": true
+          },
+          {
+            "name": "lodging for 40",
+            "passed": true,
+            "detail": "40",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": true,
+            "detail": "listed in facilities; confirm with the venue",
+            "verified": false
+          }
+        ],
+        "valid": false
+      },
+      {
+        "option": {
+          "id": "D",
+          "transport": {
+            "mode": "train",
+            "depart": "18:10",
+            "arrive": "20:15",
+            "changes": 0,
+            "overnight": false,
+            "return_arrive": "19:05"
+          },
+          "lodging": {
+            "name": "Seafront hotel",
+            "rooms": 20,
+            "capacity": 40,
+            "walk_minutes": 15,
+            "step_free_hint": true
+          },
+          "cost_per_person_cents": 14100,
+          "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+        },
+        "checks": [
+          {
+            "name": "cost ≤ €120/person",
+            "passed": false,
+            "detail": "€141 (+€21)",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": true,
+            "detail": "20:15",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": true,
+            "detail": "",
+            "verified": true
+          },
+          {
+            "name": "lodging for 40",
+            "passed": true,
+            "detail": "40",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": true,
+            "detail": "listed in facilities; confirm with the venue",
+            "verified": false
+          }
+        ],
+        "valid": false
+      },
+      {
+        "option": {
+          "id": "E",
+          "transport": {
+            "mode": "night coach",
+            "depart": "23:00",
+            "arrive": "02:30",
+            "arrives_next_day": true,
+            "changes": 0,
+            "overnight": true,
+            "return_arrive": "21:00"
+          },
+          "lodging": {
+            "name": "Group hostel",
+            "rooms": 10,
+            "capacity": 40,
+            "walk_minutes": 6,
+            "step_free_hint": true
+          },
+          "cost_per_person_cents": 7800,
+          "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+        },
+        "checks": [
+          {
+            "name": "cost ≤ €120/person",
+            "passed": true,
+            "detail": "€78",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": false,
+            "detail": "02:30",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": false,
+            "detail": "overnight",
+            "verified": true
+          },
+          {
+            "name": "lodging for 40",
+            "passed": true,
+            "detail": "40",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": true,
+            "detail": "listed in facilities; confirm with the venue",
+            "verified": false
+          }
+        ],
+        "valid": false
+      }
+    ]
+  }
+}

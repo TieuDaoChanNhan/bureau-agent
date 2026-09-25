@@ -1,137 +1,188 @@
 # Tasks
 
-Danh sách công việc của dự án. Trưởng nhóm phân công bằng cách điền cột **Người làm**. Người được giao tạo nhánh riêng theo tên gợi ý, làm xong thì mở pull request (xem [CONTRIBUTING.md](CONTRIBUTING.md)) và cập nhật cột **Trạng thái** trong cùng pull request.
+Đặc tả các công việc của dự án. **Trạng thái và người làm được theo dõi trên GitHub Issues** (mỗi task một issue, cột "Issue" bên dưới). Tệp này chỉ do trưởng nhóm sửa, để tránh xung đột khi nhiều pull request cùng cập nhật một bảng.
 
-**Mức ưu tiên:** **P0** = bắt buộc để có demo hackathon · **P1** = kịch bản chuyến đi (điểm nhấn demo) · **P2** = nộp bài và hoàn thiện.
-**Trạng thái:** ⬜ chưa làm · 🟡 đang làm · 🔍 chờ review · ✅ xong.
-**Mốc cắt:** nếu 12:00 thứ Bảy 26/09 các task P0 chưa chạy trọn luồng, tạm dừng P1.
+**Cách làm một task:** trưởng nhóm gán issue cho bạn → tạo nhánh theo tên gợi ý → làm → mở pull request có dòng `Closes #<số issue>` → CI xanh và có người review → gộp. Chi tiết trong [CONTRIBUTING.md](CONTRIBUTING.md).
+
+**Ưu tiên:** **P0** bắt buộc cho demo · **P1** kịch bản chuyến đi · **P2** nộp bài.
+**Mốc cắt:** 12:00 thứ Bảy 26/09 nếu P0 chưa chạy trọn luồng thì tạm dừng P1.
+
+**Quy ước "Xong khi":** mọi mục phải kiểm được bằng **lệnh**, **test** hoặc **checklist có/không**. Ngoài ra, mọi task đều cần: CI xanh, README của thư mục liên quan được cập nhật, không commit bí mật.
 
 ## Bảng tổng
-| ID | Ưu tiên | Task | Phụ thuộc | Người làm | Trạng thái |
+| ID | Ưu tiên | Task | Phụ thuộc | Nhánh | Issue |
 |---|---|---|---|---|---|
-| T01 | P0 | Khung repo, CI, tài liệu | — | | ✅ |
-| T02 | P0 | Lưu trữ runtime (`store.py`) | — | | ⬜ |
-| T03 | P0 | Thực thi hành động đã duyệt (`executor.py`) | — | | ⬜ |
-| T04 | P0 | Chạy agent với OpenAI thật, chỉnh prompt | khóa API | | ⬜ |
-| T05 | P0 | Các route API còn lại | T02, T03, T04 | | ⬜ |
-| T06 | P0 | Giao diện web: sự kiện, vấn đề, chi tiết, duyệt | định dạng JSON (có sẵn) | | ⬜ |
-| T07 | P0 | Làm giàu dữ liệu mẫu hackathon | — | | ⬜ |
-| T08 | P0 | Bộ đánh giá offline | T04, T07 | | ⬜ |
-| T09 | P0 | Chạy agent hàng loạt và lưu đề xuất | T02, T04 | | ⬜ |
-| T10 | P1 | Tách ràng buộc bằng LLM (thử Pipelex) | — | | ⬜ |
-| T11 | P1 | Client Jinko (live / replay) | khóa Jinko sandbox | | ⬜ |
-| T12 | P1 | Ghép phương án trọn gói bằng code | T11 (định dạng) | | ⬜ |
-| T13 | P1 | Viết giải thích đánh đổi bằng LLM | — | | ⬜ |
-| T14 | P1 | Nối planner với Jinko + ghép phương án, route `/plan` | T11, T12, T05 | | ⬜ |
-| T15 | P1 | Giao diện chuyến đi: bảng so sánh, thử ngân sách | T06, T14 | | ⬜ |
-| T16 | P1 | Dữ liệu một chuyến đi thật của hội sinh viên | — | | ⬜ |
-| T17 | P2 | README cuối, sơ đồ kiến trúc, kịch bản và video demo | P0 xong | | ⬜ |
-| T18 | P2 | Buổi thử với người tổ chức thật | P0 xong | | ⬜ |
-| T19 | P2 | Kiểm tra trước khi nộp: quét bí mật, công khai repo, nộp form | T17 | | ⬜ |
-| T20 | P2 | Triển khai demo miễn phí (Hugging Face Spaces, Docker) | T05, T06 | | ⬜ |
+| T01 | P0 | Khung repo, CI, tài liệu | — | — | ✅ xong |
+| T02 | P0 | Lưu trữ runtime | — | `t02-store` | |
+| T03 | P0 | Thực thi hành động đã duyệt | — | `t03-executor` | |
+| T04 | P0 | Chạy agent với OpenAI thật, chỉnh prompt | khóa OpenAI | `t04-agent-live` | |
+| T05 | P0 | Các route API còn lại | T02, T03 | `t05-api` | |
+| T06 | P0 | Giao diện web: sự kiện, vấn đề, chi tiết, duyệt | — (dùng JSON mẫu) | `t06-web` | |
+| T07 | P0 | Làm giàu dữ liệu mẫu hackathon | — | `t07-sample-data` | |
+| T08 | P0 | Bộ đánh giá offline | T04, T07 | `t08-eval` | |
+| T09 | P0 | Chạy agent hàng loạt và lưu đề xuất | T02 | `t09-batch-run` | |
+| T10 | P1 | Tách ràng buộc bằng LLM (thử Pipelex) | — | `t10-extract` | |
+| T11 | P1 | Client Jinko (live / replay) | khóa Jinko sandbox | `t11-jinko` | |
+| T12 | P1 | Ghép phương án trọn gói bằng code | — | `t12-compose` | |
+| T13 | P1 | Giải thích đánh đổi bằng LLM | — | `t13-explain` | |
+| T14 | P1 | Nối planner với Jinko + ghép phương án, route `/plan` | T05, T11, T12 | `t14-planner-wiring` | |
+| T15 | P1 | Giao diện chuyến đi | T06 | `t15-web-trip` | |
+| T16 | P1 | Dữ liệu một chuyến đi thật | — | `t16-real-trip` | |
+| T17 | P2 | README cuối, sơ đồ, kịch bản và video demo | P0 xong | `t17-docs-demo` | |
+| T18 | P2 | Buổi thử với người tổ chức thật | P0 xong | — | |
+| T19 | P2 | Kiểm tra trước khi nộp, công khai repo, nộp form | T17 | `t19-release` | |
+| T20 | P2 | Triển khai demo miễn phí | T05, T06 | `t20-deploy` | |
 
 ---
 
 ## Chi tiết
 
 ### T02 · Lưu trữ runtime · P0
-- **Nhánh:** `t02-store` · **Tệp:** `bureau/core/store.py`, `tests/test_pending.py`
-- **Kỹ năng:** Python, JSON
-- **Việc:** cài đặt các hàm trong `store.py` theo docstring: đọc/ghi `runtime/<event>/` (state, issues, actions, outbox, log), `merge_issue_status` giữ trạng thái vấn đề sau khi phát hiện lại, `reset`.
-- **Xong khi:** bỏ `@skip` của `StoreTests` và test qua; thêm test cho `reset` và cho vấn đề không còn được phát hiện.
+- **Tệp:** `bureau/core/store.py`, `tests/test_pending.py`
+- **Việc:** cài đặt các hàm theo docstring: đọc/ghi `runtime/<event>/` (state, issues, actions, outbox, log), `merge_issue_status`, `reset`.
+- **Xong khi:**
+  - [ ] Bỏ `@unittest.skip` của `StoreTests`; test qua.
+  - [ ] Thêm test: vấn đề không còn được phát hiện thì biến mất sau khi merge.
+  - [ ] Thêm test: `save_state` rồi `load_state` cho lại cùng dữ liệu (số người, số thanh toán, thành viên nhóm).
+  - [ ] Thêm test: `reset` xong thì `load_state` trả về dữ liệu mẫu.
 
 ### T03 · Thực thi hành động · P0
-- **Nhánh:** `t03-executor` · **Tệp:** `bureau/core/executor.py`, `tests/test_pending.py`
-- **Kỹ năng:** Python
-- **Việc:** `apply()` theo bảng tác động trong docstring; không sửa trạng thái gốc nếu vi phạm quy tắc bất biến (dùng `check_groups`, ...); ghi `resolved_by_action_id`.
-- **Xong khi:** bỏ `@skip` của `ExecutorTests`, test qua; mỗi `action_type` có ít nhất một test.
+- **Tệp:** `bureau/core/executor.py`, `tests/test_pending.py`
+- **Việc:** `apply()` theo bảng tác động trong docstring; không đổi trạng thái nếu vi phạm quy tắc bất biến; ghi `resolved_by_action_id`.
+- **Xong khi:**
+  - [ ] Bỏ `@unittest.skip` của `ExecutorTests`; test qua.
+  - [ ] Mỗi `action_type` (6 loại) có ít nhất một test.
+  - [ ] Có test chứng minh hành động làm đội vượt 4 người bị từ chối và trạng thái gốc không đổi.
 
-### T04 · Chạy agent thật · P0
-- **Nhánh:** `t04-agent-live` · **Tệp:** `bureau/agent/*`
-- **Kỹ năng:** LLM, prompt, gọi công cụ
-- **Việc:** chạy `python -m bureau run hackathon` với khóa thật; sửa lỗi vòng lặp; chỉnh prompt để agent **tự chọn** công cụ (không thêm luật cứng). Luồng trọng tâm: tin nhắn `m01` → tìm người gửi → xem thanh toán chưa khớp → `match_person` → đề xuất `LINK_PAYMENT` kèm câu hỏi cho người tổ chức.
-- **Xong khi:** cả 5 tin nhắn mẫu và 3 vấn đề cấu trúc cho ra đề xuất hợp lý; ghi lại kết quả mẫu vào `eval/results/` (hoặc mô tả trong pull request).
+### T04 · Chạy agent với OpenAI thật · P0
+- **Tệp:** `bureau/agent/*`
+- **Việc:** chạy agent với khóa thật, sửa lỗi, chỉnh prompt. **Không thêm luật cứng** kiểu "nếu tin nhắn có chữ X thì gọi công cụ Y": agent phải tự chọn công cụ.
+- **Xong khi:**
+  - [ ] `python -m bureau run hackathon` chạy hết không lỗi.
+  - [ ] Với 3 ca trong `eval/cases/messages.jsonl`: `action_type` đúng với `expected_action`; ca có `must_ask_human: true` thì đề xuất có câu hỏi cho người tổ chức hoặc là `ESCALATE`.
+  - [ ] Ca `c001` (tin `m01`): agent có gọi `match_person` (xem dòng `->` in ra màn hình).
+  - [ ] Dán kết quả chạy (các dòng `->` và JSON đề xuất) vào mô tả pull request.
+  - [ ] `tests/test_agent.py` vẫn qua.
 
 ### T05 · Route API · P0
-- **Nhánh:** `t05-api` · **Tệp:** `api/main.py`
-- **Kỹ năng:** FastAPI
-- **Việc:** cài đặt các route đang trả 501 (xem `api/README.md`), dùng `store` và `executor`; `approve` nhận `edited_description` và `option_id`.
-- **Xong khi:** duyệt một đề xuất qua API làm vấn đề biến mất ở lần `GET` sau; có test gọi API (FastAPI `TestClient`).
+- **Tệp:** `api/main.py`, thêm `tests/test_api.py`
+- **Việc:** cài đặt các route đang trả 501 (xem `api/README.md`), dùng `store` và `executor`. Định dạng phản hồi khớp `docs/api-examples/`.
+- **Xong khi:**
+  - [ ] Không còn route nào trả 501.
+  - [ ] `tests/test_api.py` (dùng `fastapi.testclient.TestClient`) kiểm: `approve` một hành động làm vấn đề tương ứng biến mất ở lần `GET /api/events/{id}` sau; `reset` đưa về dữ liệu mẫu; `dismiss` không đổi dữ liệu.
+  - [ ] Phản hồi của `GET /api/actions/{id}` có đủ các khóa như `docs/api-examples/action_LINK_PAYMENT.json`.
 
 ### T06 · Giao diện web · P0
-- **Nhánh:** `t06-web` · **Tệp:** `web/*`
-- **Kỹ năng:** HTML, CSS, JavaScript
-- **Việc:** dựng lại bố cục của `web/reference/mockup.html` trên dữ liệu thật từ API: thẻ sự kiện, danh sách vấn đề (chặn trước), chi tiết (decision trace, phép kiểm tra, hành động có thể sửa), nút duyệt/sửa/bỏ qua. Khi route còn 501, giả lập phản hồi đúng định dạng.
-- **Xong khi:** duyệt được một đề xuất từ giao diện; dùng được trên màn hình điện thoại.
+- **Tệp:** `web/*`
+- **Việc:** dựng bố cục của `web/reference/mockup.html` trên API thật. Route còn 501 thì dùng JSON trong `docs/api-examples/`.
+- **Xong khi (checklist kiểm bằng tay, ghi kết quả trong pull request):**
+  - [ ] Thẻ sự kiện hiện số vấn đề chặn / không chặn / đã giải quyết.
+  - [ ] Danh sách vấn đề: chặn đứng trước, có nhãn trạng thái.
+  - [ ] Chi tiết vấn đề: đầu vào, decision trace (checked / found / applied / proposed), danh sách phép kiểm tra ✓/✗, hành động đề xuất sửa được.
+  - [ ] Nút duyệt / sửa / bỏ qua gọi đúng route; sau khi duyệt, vấn đề biến mất khỏi danh sách.
+  - [ ] Ở bề rộng 400 px không có thanh cuộn ngang (Chrome DevTools, chế độ thiết bị).
+  - [ ] Có ảnh chụp màn hình trong pull request.
 
 ### T07 · Dữ liệu mẫu hackathon · P0
-- **Nhánh:** `t07-sample-data` · **Tệp:** `data/hackathon/*`, `data/README.md`
-- **Kỹ năng:** hiểu cách một hội vận hành sự kiện
-- **Việc:** tăng lên khoảng 40–60 người tham gia và 20–30 tin nhắn thực tế (tiếng Pháp và tiếng Anh), giữ các tình huống cài sẵn và thêm vài tình huống mới (hỏi quy chế, hỏi không có trong quy chế, thanh toán mơ hồ). Dữ liệu hoàn toàn hư cấu.
-- **Xong khi:** mọi test vẫn qua (cập nhật số liệu kỳ vọng nếu cần); `data/README.md` liệt kê tình huống cài sẵn.
+- **Tệp:** `data/hackathon/*`, `data/README.md`
+- **Việc:** 40–60 người tham gia, 20–30 tin nhắn (tiếng Pháp và tiếng Anh), giữ các tình huống cài sẵn, thêm tình huống mới. Dữ liệu hư cấu hoàn toàn.
+- **Xong khi:**
+  - [ ] Số người trong `participants.json` từ 40 đến 60; số tin nhắn trong `messages.json` từ 20 đến 30.
+  - [ ] Mọi ngày giờ có múi giờ, mọi số tiền là `amount_cents` (loader không báo lỗi).
+  - [ ] `data/README.md` liệt kê từng tình huống cài sẵn và kết quả mong đợi.
+  - [ ] Test vẫn qua (cập nhật số kỳ vọng trong test nếu cần, ghi rõ trong pull request).
 
 ### T08 · Đánh giá offline · P0
-- **Nhánh:** `t08-eval` · **Tệp:** `eval/*`
-- **Kỹ năng:** Python, gán nhãn dữ liệu
-- **Việc:** gán nhãn khoảng 50 tin nhắn trong `cases/messages.jsonl`; cài đặt `run_eval.py` tính các chỉ số trong `eval/README.md`; in bảng và lưu `eval/results/`.
-- **Xong khi:** `python -m eval.run_eval` in bảng chỉ số; số "vi phạm quy tắc bất biến" được đo.
+- **Tệp:** `eval/*`
+- **Việc:** gán nhãn khoảng 50 tin nhắn; cài đặt `run_eval.py`.
+- **Xong khi:**
+  - [ ] `eval/cases/messages.jsonl` có ít nhất 40 dòng, mỗi dòng đủ các khóa như dòng mẫu.
+  - [ ] `python -m eval.run_eval` in bảng gồm: độ chính xác loại hành động, chọn đúng công cụ, trích đúng điều khoản, hỏi người đúng lúc, số vi phạm quy tắc bất biến.
+  - [ ] Kết quả được lưu vào `eval/results/<thời gian>.json`.
 
 ### T09 · Chạy agent hàng loạt · P0
-- **Nhánh:** `t09-batch-run` · **Tệp:** `bureau/cli.py`, `bureau/agent/loop.py`
-- **Việc:** chạy agent cho mọi vấn đề mở chưa có đề xuất và không bị chặn bởi phụ thuộc; lưu đề xuất qua `store`; bỏ qua vấn đề đã có đề xuất.
-- **Xong khi:** chạy hai lần liên tiếp không tạo đề xuất trùng.
+- **Tệp:** `bureau/cli.py`, `bureau/agent/loop.py`
+- **Việc:** chạy agent cho mọi vấn đề mở, chưa có đề xuất, không bị chặn bởi phụ thuộc; lưu đề xuất qua `store`.
+- **Xong khi:**
+  - [ ] Test (dùng `tests/fake_llm.py`) chứng minh: chạy hai lần liên tiếp không tạo đề xuất trùng.
+  - [ ] Test chứng minh vấn đề có `depends_on` chưa xong thì không được gửi cho agent.
 
 ### T10 · Tách ràng buộc bằng LLM · P1
-- **Nhánh:** `t10-extract` · **Tệp:** `bureau/planner/extract.py`
-- **Kỹ năng:** LLM, đầu ra có cấu trúc; Pipelex (tùy chọn)
-- **Việc:** thử Pipelex trước, **giới hạn khoảng 1,5 giờ**; nếu không kịp, dùng OpenAI structured output. Tuân thủ quy tắc trong docstring (không bịa, mơ hồ thì hỏi lại, tiền bằng cent, ràng buộc khả năng tiếp cận vào `organizer_verified`).
-- **Xong khi:** đúng với `eval/cases/planning.jsonl`; thêm ít nhất 5 yêu cầu có nhãn.
+- **Tệp:** `bureau/planner/extract.py`, `eval/cases/planning.jsonl`
+- **Việc:** thử Pipelex trước, **tối đa khoảng 1,5 giờ**; không kịp thì dùng OpenAI structured output. Tuân thủ quy tắc trong docstring.
+- **Xong khi:**
+  - [ ] `eval/cases/planning.jsonl` có ít nhất 6 yêu cầu có nhãn (thêm 5).
+  - [ ] Với mỗi yêu cầu: các khóa trong `hard` khớp nhãn; yêu cầu mơ hồ có ít nhất một `clarification`.
+  - [ ] Pull request ghi rõ đã dùng Pipelex hay OpenAI, và lý do.
 
 ### T11 · Client Jinko · P1
-- **Nhánh:** `t11-jinko` · **Tệp:** `bureau/planner/jinko.py`, `data/wei/jinko_cache/`
-- **Kỹ năng:** HTTP API
-- **Việc:** gọi `POST /v1/ground_search` và `POST /v1/hotel_search` trên sandbox; chuẩn hóa kết quả theo docstring; chế độ `live` lưu phản hồi, `replay` chỉ đọc bộ nhớ đệm. Kiểm tra lại các chi tiết đánh dấu "verify" trong docstring.
-- **Xong khi:** chạy `replay` không cần mạng; có ít nhất một bộ phản hồi thật được lưu cho kịch bản WEI.
+- **Tệp:** `bureau/planner/jinko.py`, `data/wei/jinko_cache/`
+- **Việc:** gọi `POST /v1/ground_search` và `POST /v1/hotel_search` trên sandbox; chuẩn hóa kết quả theo docstring; `live` lưu phản hồi, `replay` chỉ đọc bộ nhớ đệm.
+- **Xong khi:**
+  - [ ] Có ít nhất một phản hồi thật cho mỗi endpoint được lưu trong `data/wei/jinko_cache/`.
+  - [ ] Test ở chế độ `replay` chạy không cần mạng và trả về danh sách đã chuẩn hóa (giá bằng cent).
+  - [ ] Các chi tiết đánh dấu "verify" trong docstring đã được xác nhận hoặc sửa.
 
 ### T12 · Ghép phương án · P1
-- **Nhánh:** `t12-compose` · **Tệp:** `bureau/planner/compose.py`, `tests/test_planner.py`
-- **Việc:** theo docstring; mọi phép tính giá bằng số nguyên; luôn giữ phương án rẻ nhất.
-- **Xong khi:** có test cho cách tính giá mỗi người và việc giữ phương án rẻ nhất.
+- **Tệp:** `bureau/planner/compose.py`, `tests/test_planner.py`
+- **Xong khi:**
+  - [ ] Test: giá mỗi người = giá đi lại/người + giá chỗ ở/đêm × số đêm ÷ số người, tính bằng số nguyên.
+  - [ ] Test: phương án rẻ nhất luôn có trong kết quả, kể cả khi vượt `limit`.
+  - [ ] Test: chỗ ở không đủ sức chứa bị bỏ.
 
 ### T13 · Giải thích đánh đổi · P1
-- **Nhánh:** `t13-explain` · **Tệp:** `bureau/planner/explain.py`
-- **Việc:** 2–4 câu dễ hiểu; không được đổi thứ hạng hay kết quả kiểm tra; có thể dùng Pipelex như T10.
-- **Xong khi:** giải thích nhắc đúng phương án đứng đầu và lý do phương án bị loại.
+- **Tệp:** `bureau/planner/explain.py`
+- **Xong khi:**
+  - [ ] Giải thích nhắc tên phương án đứng đầu và, với mỗi phương án bị loại, tên ràng buộc bị vi phạm (kiểm bằng test: chuỗi có chứa các tên này).
+  - [ ] Test: thứ hạng và kết quả kiểm tra trước và sau khi gọi `explain` giống hệt nhau.
 
 ### T14 · Nối planner · P1
-- **Nhánh:** `t14-planner-wiring` · **Tệp:** `bureau/planner/planner.py`, `api/main.py`
-- **Việc:** `search_options` dùng `jinko` + `compose`; route `POST /api/events/{id}/plan` với `overrides` (ví dụ đổi ngân sách).
-- **Xong khi:** ngân sách 120€ cho 2 phương án hợp lệ, 90€ cho ESCALATE kèm chẩn đoán, trên dữ liệu Jinko đã lưu.
+- **Tệp:** `bureau/planner/planner.py`, `api/main.py`
+- **Xong khi:**
+  - [ ] `search_options` dùng `jinko` + `compose` (chế độ `replay`).
+  - [ ] Test: ngân sách 120€ → `SELECT_TRAVEL_PLAN` có ít nhất một phương án hợp lệ; 90€ → `ESCALATE` có `suggestions`.
+  - [ ] `POST /api/events/wei/plan` với `{"overrides": {"max_cost_per_person_cents": 9000}}` trả `ESCALATE`.
 
 ### T15 · Giao diện chuyến đi · P1
-- **Nhánh:** `t15-web-trip` · **Tệp:** `web/*`
-- **Việc:** hiển thị ràng buộc cứng/mềm, bảng so sánh phương án (lý do bị loại tô đỏ), ràng buộc cần người tổ chức xác nhận, nút chọn phương án, thử đổi ngân sách.
-- **Xong khi:** chọn một phương án làm các vấn đề phụ thuộc được mở khóa.
+- **Tệp:** `web/*`
+- **Xong khi (checklist):**
+  - [ ] Hiện ràng buộc cứng / mềm và ràng buộc cần người tổ chức xác nhận.
+  - [ ] Bảng so sánh: phương án bị loại có lý do tô đỏ.
+  - [ ] Nút chọn phương án; sau khi chọn, các vấn đề phụ thuộc chuyển khỏi trạng thái "chờ".
+  - [ ] Thử ngân sách 90€ hiện chẩn đoán "không có phương án hợp lệ".
+  - [ ] Có ảnh chụp màn hình trong pull request.
 
 ### T16 · Dữ liệu chuyến đi thật · P1
-- **Nhánh:** `t16-real-trip` · **Tệp:** `data/wei/*`
-- **Việc:** thay kịch bản WEI bằng thông số một chuyến đi thật của một hội sinh viên (điểm đến, số người, ngân sách, yêu cầu), không dùng dữ liệu cá nhân thật.
-- **Xong khi:** planner chạy trên kịch bản mới; ghi nguồn trong `data/README.md`.
+- **Tệp:** `data/wei/*`, `data/README.md`
+- **Xong khi:**
+  - [ ] `event.json` dùng điểm đến, số người, ngân sách, yêu cầu của một chuyến đi có thật (không có dữ liệu cá nhân).
+  - [ ] `python -m bureau plan wei` chạy được.
+  - [ ] `data/README.md` ghi nguồn (hội nào, chuyến nào).
 
 ### T17 · Tài liệu và video · P2
-- **Nhánh:** `t17-docs-demo`
-- **Việc:** cập nhật README (trạng thái, kết quả đánh giá, giới hạn), sơ đồ kiến trúc, kịch bản video 2 phút (xem `docs/product-proposal.md`), quay và dựng video.
-- **Xong khi:** video ≤ 2 phút, xong trước **20:00 Chủ Nhật 27/09**.
+- **Xong khi:**
+  - [ ] README gốc: trạng thái cập nhật, kết quả đánh giá, mục giới hạn, link video.
+  - [ ] Có sơ đồ kiến trúc trong README.
+  - [ ] Video ≤ 2 phút, theo kịch bản trong `docs/product-proposal.md`, xong trước **20:00 Chủ Nhật 27/09**.
 
 ### T18 · Thử với người tổ chức thật · P2
-- **Việc:** một thành viên ban điều hành của một hội thật dùng thử khoảng 30 phút; ghi lại số đề xuất được duyệt nguyên văn, số lần sửa, thời gian, một câu nhận xét.
-- **Xong khi:** kết quả có trong README, tách riêng với chỉ số offline.
+- **Xong khi:**
+  - [ ] Một thành viên ban điều hành của một hội thật đã dùng thử (ghi tên hội nếu họ đồng ý).
+  - [ ] Ghi lại: số đề xuất đã xem, số duyệt nguyên văn, số lần sửa, thời gian, một câu nhận xét nguyên văn.
+  - [ ] Kết quả có trong README, tách riêng với chỉ số offline.
 
 ### T19 · Trước khi nộp · P2
-- **Việc:** quét lịch sử commit tìm khóa API; kiểm tra README chạy được trên một máy khác; chuyển repo sang công khai; nộp form trước **22:00 Chủ Nhật 27/09**.
-- **Xong khi:** form đã nộp.
+- **Xong khi:**
+  - [ ] `git log -p | grep -i -E "sk-|jnk_|api_key="` không ra khóa thật.
+  - [ ] Làm theo README trên một máy khác (clone mới) chạy được.
+  - [ ] Repo đã chuyển sang công khai.
+  - [ ] Form nộp bài đã gửi trước **22:00 Chủ Nhật 27/09**.
 
 ### T20 · Triển khai demo miễn phí · P2
-- **Nhánh:** `t20-deploy` · **Tệp:** `Dockerfile`, `README.md`
-- **Việc:** đóng gói API + web trong một container (FastAPI phục vụ cả hai); triển khai lên Hugging Face Spaces (Docker, gói CPU miễn phí). Khóa API đặt trong mục Secrets của Space, không nằm trong repo. Bản công khai chạy ở **chế độ demo**: dùng đề xuất đã lưu sẵn, chỉ gọi OpenAI khi có mật khẩu demo, để người lạ không tiêu hết credit.
-- **Xong khi:** link công khai mở được giao diện, duyệt được một đề xuất; README có link.
+- **Tệp:** `Dockerfile`, `README.md`
+- **Việc:** một container chạy FastAPI (phục vụ cả API và web); triển khai lên Hugging Face Spaces (Docker, gói CPU miễn phí; kiểm tra điều khoản hiện tại trước). Khóa API đặt trong Secrets của Space. Bản công khai chạy **chế độ demo**: dùng đề xuất đã lưu, chỉ gọi OpenAI khi có mật khẩu demo.
+- **Xong khi:**
+  - [ ] Link công khai mở được giao diện và duyệt được một đề xuất.
+  - [ ] Không có khóa API trong image hay repo.
+  - [ ] Không có mật khẩu demo thì không có lệnh gọi OpenAI nào (kiểm bằng log).
+  - [ ] README có link.

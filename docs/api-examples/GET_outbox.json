@@ -1,0 +1,10 @@
+[
+  {
+    "action_id": "hackathon:message:m01",
+    "to": [
+      "a.nguyen@polytechnique.edu"
+    ],
+    "text": "Bonjour Antoine, ...",
+    "sent_at": "2026-09-25T21:08:00+02:00"
+  }
+]

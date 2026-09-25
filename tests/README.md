@@ -10,6 +10,8 @@ python -m unittest discover -s tests -t .
 | `test_tools.py` | Identity bands, eligibility, group checks, rules search |
 | `test_planner.py` | Constraint gate, ranking, diagnosis, unverifiable constraints, clarifications |
 | `test_pending.py` | Expected behaviour of unfinished modules, skipped until their task is done |
+| `test_agent.py` | Agent loop mechanics with a scripted fake LLM |
+| `fake_llm.py` | Fake OpenAI client for tests (no key, no cost) |
 | `helpers.py` | Shared fixtures |
 
 Every new invariant gets a test. CI runs the suite on every pull request.

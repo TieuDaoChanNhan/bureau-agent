@@ -1,0 +1,222 @@
+{
+  "id": "hackathon",
+  "name": "X-IA Hackathon #1 (sample data)",
+  "counts": {
+    "blocking": 4,
+    "non_blocking": 7,
+    "resolved": 0
+  },
+  "issues": [
+    {
+      "id": "unmatched_payment:f90",
+      "kind": "unmatched_payment",
+      "blocking": true,
+      "title": "Payment from \"A. Nguyen\" may belong to Antoine Nguyen",
+      "subject_ids": [
+        "f90",
+        "p01"
+      ],
+      "details": {
+        "payment_id": "f90",
+        "candidate": "p01",
+        "score": 0.91,
+        "band": "ask_human",
+        "signals": [
+          [
+            "Surname matches",
+            true,
+            "nguyen"
+          ],
+          [
+            "First name compatible (initial)",
+            true,
+            "antoine"
+          ],
+          [
+            "Email local part has the same parts",
+            true,
+            "nguyen.a@gmail.com"
+          ],
+          [
+            "Paid after registering",
+            true,
+            ""
+          ]
+        ]
+      },
+      "status": "needs_human",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "unmatched_payment:f91",
+      "kind": "unmatched_payment",
+      "blocking": false,
+      "title": "Payment from \"Jean Dupuis\" matches no registrant",
+      "subject_ids": [
+        "f91"
+      ],
+      "details": {
+        "payment_id": "f91",
+        "best_score": 0.1
+      },
+      "status": "needs_human",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "unpaid_membership",
+      "kind": "unpaid_membership",
+      "blocking": true,
+      "title": "4 participants haven't paid",
+      "subject_ids": [
+        "p07",
+        "p12",
+        "p15",
+        "p18"
+      ],
+      "details": {
+        "excluded_pending_match": [
+          "p01"
+        ]
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "multiple_group_membership:p02",
+      "kind": "multiple_group_membership",
+      "blocking": true,
+      "title": "Léa Martin is in 2 teams",
+      "subject_ids": [
+        "p02",
+        "t-orbit",
+        "t-nomads"
+      ],
+      "details": {
+        "type": "multiple_group_membership",
+        "participant_id": "p02",
+        "group_ids": [
+          "t-orbit",
+          "t-nomads"
+        ]
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "group_over_capacity:t-dragons",
+      "kind": "group_over_capacity",
+      "blocking": true,
+      "title": "DataDragons has 5 members (max 4)",
+      "subject_ids": [
+        "t-dragons"
+      ],
+      "details": {
+        "type": "group_over_capacity",
+        "group_id": "t-dragons",
+        "size": 5,
+        "max": 4
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "solo_participants",
+      "kind": "solo_participants",
+      "blocking": false,
+      "title": "6 participants are looking for a team",
+      "subject_ids": [
+        "p13",
+        "p14",
+        "p15",
+        "p16",
+        "p17",
+        "p18"
+      ],
+      "details": {},
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m01",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from a.nguyen@polytechnique.edu",
+      "subject_ids": [
+        "m01"
+      ],
+      "details": {
+        "text": "Bonjour, j'ai déjà payé ma cotisation mais je reçois encore des relances. J'ai utilisé mon adresse perso pour payer."
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m02",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from julien.morel@gmail.com",
+      "subject_ids": [
+        "m02"
+      ],
+      "details": {
+        "text": "Hi, my team already started a RAG agent project. Can we keep working on it during the hackathon?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m03",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New discord message from orbit_hugo",
+      "subject_ids": [
+        "m03"
+      ],
+      "details": {
+        "text": "La page Luma dit 15 octobre pour la finale mais j'ai vu novembre quelque part, c'est quoi la bonne date ?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m04",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from mei.tanaka@gmail.com",
+      "subject_ids": [
+        "m04"
+      ],
+      "details": {
+        "text": "Hello, our team is mostly international. Can the 2-minute demo video be in English?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m05",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from partnerships@sponsor.example",
+      "subject_ids": [
+        "m05"
+      ],
+      "details": {
+        "text": "Hi team, could you send us the full list of participants with emails and schools so we can reach out to them after the event?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    }
+  ],
+  "actions": []
+}

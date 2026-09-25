@@ -15,7 +15,7 @@ Built during the X-IA Hackathon #1 "Rise of Agents X" (25–27 Sep 2026). All co
 |---|---|
 | Understand the product | [docs/product-proposal.md](docs/product-proposal.md) (Vietnamese) · [interactive mockup](https://claude.ai/artifact/JCKLf1tuJLtPUPsfXK1ox4) |
 | Understand the architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (Vietnamese) |
-| Pick a task | [TASKS.md](TASKS.md) |
+| Pick a task | [TASKS.md](TASKS.md) (specs) · [GitHub Issues](https://github.com/TieuDaoChanNhan/bureau-agent/issues) (status, assignees) |
 | Know how we work (branches, PRs, tests) | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Run it | [Quick start](#quick-start) below |
 
@@ -42,11 +42,11 @@ Answering a question, reconciling a payment, fixing a team or planning a trip ar
 | `data/` | Sample events (read-only input) and their file formats | [→](data/README.md) |
 | `eval/` | Offline evaluation cases and runner | [→](eval/README.md) |
 | `tests/` | Unit tests for every invariant | [→](tests/README.md) |
-| `docs/` | Product proposal and architecture | [→](docs/README.md) |
+| `docs/` | Product proposal, architecture, example API payloads | [→](docs/README.md) |
 
 ## Quick start
 
-Requires Python 3.11+.
+Requires Python 3.11+. Full setup (venv, pre-commit hook, Windows notes) in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ```bash
 pip install -r requirements.txt
@@ -69,7 +69,7 @@ On Windows, set `PYTHONIOENCODING=utf-8` if accented names print incorrectly.
 | Data model, sample data (2 events), issue detection | ✅ done, tested |
 | Deterministic tools (rules, eligibility, identity, groups) | ✅ done, tested |
 | Planner: hard-constraint gate, ranking, diagnosis | ✅ done, tested |
-| Agent loop (OpenAI tool calling) | 🟡 written, not yet run against the API |
+| Agent loop (OpenAI tool calling) | 🟡 loop tested with a fake LLM; not yet run against the API |
 | Store, executor, API routes, web UI, evaluation | ⬜ skeletons, see [TASKS.md](TASKS.md) |
 | Constraint extraction (LLM), Jinko client, package composition | ⬜ skeletons, see [TASKS.md](TASKS.md) |
 

@@ -1,0 +1,62 @@
+{
+  "id": "hackathon:message:m01",
+  "event_id": "hackathon",
+  "issue_id": "message:m01",
+  "action_type": "LINK_PAYMENT",
+  "title": "Link payment f90 to Antoine Nguyen?",
+  "description": "Antoine says he paid from his personal address. Payment f90 (\"A. Nguyen\", nguyen.a@gmail.com, €10) scores 0.91: please confirm before I link it.\n\nReply to send after confirmation:\nBonjour Antoine, votre cotisation 2026 est bien associée à votre inscription. Vous êtes éligible pour le hackathon.\n— Drafted with AI assistance, approved by the organizers.",
+  "evidence": [
+    {
+      "source_type": "message",
+      "source_id": "m01",
+      "description": "Claims payment from a personal address"
+    },
+    {
+      "source_type": "participant",
+      "source_id": "p01",
+      "description": "Antoine Nguyen, registered, no linked fee"
+    },
+    {
+      "source_type": "payment",
+      "source_id": "f90",
+      "description": "A. Nguyen · nguyen.a@gmail.com · €10 · 19 Sep"
+    },
+    {
+      "source_type": "rule",
+      "source_id": "§3",
+      "description": "Membership fee required to take part"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Surname matches",
+      "passed": true,
+      "detail": "nguyen",
+      "verified": true
+    },
+    {
+      "name": "First name compatible (initial)",
+      "passed": true,
+      "detail": "antoine",
+      "verified": true
+    },
+    {
+      "name": "Email local part has the same parts",
+      "passed": true,
+      "detail": "nguyen.a@gmail.com",
+      "verified": true
+    },
+    {
+      "name": "Identity score ≥ 0.98",
+      "passed": false,
+      "detail": "0.91: ask a human",
+      "verified": true
+    }
+  ],
+  "confidence": 0.91,
+  "requires_approval": true,
+  "payload": {
+    "payment_id": "f90",
+    "participant_id": "p01"
+  }
+}
