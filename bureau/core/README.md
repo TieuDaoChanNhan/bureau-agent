@@ -7,7 +7,7 @@ The event state and everything that reads or changes it.
 | `models.py` | Dataclasses: `EventState` (incl. optional `travel` request and chosen `logistics`), `Participant`, `Payment`, `Group`, `Message`, `Rule`, `Issue`, `Check`, `Evidence`, `ProposedAction` | done |
 | `loader.py` | Loads `data/<event>/` into an `EventState`; rejects datetimes without timezone | done |
 | `detect.py` | Finds issues with fixed code; issue ids are deterministic fingerprints | done |
-| `store.py` | Runtime persistence under `runtime/<event>/`, status merge after re-detection | skeleton (T02) |
+| `store.py` | Runtime persistence under `runtime/<event>/`, status merge after re-detection | done |
 | `executor.py` | Applies an **approved** action; re-checks invariants | skeleton (T03) |
 
 ## Rules of this layer
