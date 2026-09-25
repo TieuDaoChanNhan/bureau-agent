@@ -1,5 +1,13 @@
 [
   {"id": "t-orbit", "kind": "team", "name": "Orbit", "members": ["p02", "p03", "p04"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-22T14:03:00+02:00"},
   {"id": "t-nomads", "kind": "team", "name": "NeuralNomads", "members": ["p02", "p05", "p06", "p07"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-23T19:40:00+02:00"},
-  {"id": "t-dragons", "kind": "team", "name": "DataDragons", "members": ["p08", "p09", "p10", "p11", "p12"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-24T10:00:00+02:00"}
+  {"id": "t-dragons", "kind": "team", "name": "DataDragons", "members": ["p08", "p09", "p10", "p11", "p12"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-24T10:00:00+02:00"},
+  {"id": "t-lantern", "kind": "team", "name": "Lantern", "members": ["p19", "p20", "p21", "p22"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-24T11:00:00+02:00"},
+  {"id": "t-mosaic", "kind": "team", "name": "Mosaic", "members": ["p23", "p24", "p25"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-24T12:00:00+02:00"},
+  {"id": "t-cobalt", "kind": "team", "name": "Cobalt", "members": ["p26", "p27", "p28", "p29"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-24T13:00:00+02:00"},
+  {"id": "t-harbor", "kind": "team", "name": "Harbor", "members": ["p30", "p31", "p32"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-24T14:00:00+02:00"},
+  {"id": "t-cedar", "kind": "team", "name": "Cedar", "members": ["p33", "p34", "p35", "p36"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-24T15:00:00+02:00"},
+  {"id": "t-pixel", "kind": "team", "name": "Pixel", "members": ["p37", "p38", "p39", "p40"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-24T16:00:00+02:00"},
+  {"id": "t-aurora", "kind": "team", "name": "Aurora", "members": ["p41", "p42", "p43"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-24T17:00:00+02:00"},
+  {"id": "t-river", "kind": "team", "name": "River", "members": ["p44", "p45", "p46", "p47"], "capacity_min": 2, "capacity_max": 4, "declared_at": "2026-09-24T18:00:00+02:00"}
 ]
