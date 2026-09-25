@@ -65,7 +65,7 @@ def main() -> None:
     dump("action_LINK_PAYMENT.json", asdict(link))
 
     wei = load_event("wei")
-    t = json.loads((ROOT / "data" / "wei" / "event.json").read_text(encoding="utf-8"))["travel"]
+    t = wei.travel
     from datetime import datetime
     req = TravelRequest(event_id="wei", text=t["request"], participants=t["participants"], origin=t["origin"],
                         destination=t["destination"], depart_after=datetime.fromisoformat(t["depart_after"]))

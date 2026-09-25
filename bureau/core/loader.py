@@ -77,5 +77,6 @@ def load_event(event_id: str, data_dir: Path = DATA_DIR) -> EventState:
         payments=payments,
         groups=groups,
         messages=messages,
+        travel=meta.get("travel"),
         logistics=meta.get("logistics"),
     )

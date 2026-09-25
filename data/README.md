@@ -13,7 +13,7 @@ Datetimes are ISO 8601 **with timezone** (`2026-09-25T09:00:00+02:00`). Money is
 
 | File | Content |
 |---|---|
-| `event.json` | `name`, `deadlines`, `settings` (e.g. `unpaid_kind`, `group_kind`, `needs_logistics`), `travel` (WEI only: request, origin, destination, constraints) |
+| `event.json` | `name`, `deadlines`, `settings` (e.g. `unpaid_kind`, `group_kind`, `needs_logistics`), `travel` (WEI only: request, participants, origin, destination, depart_after, constraints; loaded into `EventState.travel`) |
 | `participants.json` | `id, name, emails[], registered_at, skills[]?, needs[]?, looking_for_group?` |
 | `payments.json` | `id, payer_name, amount_cents, currency, paid_at, payer_email?, reference?, participant_id?` |
 | `groups.json` | `id, kind (team/room), name, members[], capacity_min, capacity_max, declared_at?` |

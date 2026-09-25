@@ -43,7 +43,7 @@
 - **Xong khi:**
   - [ ] Bỏ `@unittest.skip` của `StoreTests`; test qua.
   - [ ] Thêm test: vấn đề không còn được phát hiện thì biến mất sau khi merge.
-  - [ ] Thêm test: `save_state` rồi `load_state` cho lại cùng dữ liệu (số người, số thanh toán, thành viên nhóm).
+  - [ ] Thêm test: `save_state` rồi `load_state` cho lại cùng dữ liệu (số người, số thanh toán, thành viên nhóm), **và giữ nguyên `travel`, `logistics` với sự kiện `wei`**.
   - [ ] Thêm test: `reset` xong thì `load_state` trả về dữ liệu mẫu.
 
 ### T03 · Thực thi hành động · P0
@@ -139,7 +139,7 @@
 ### T14 · Nối planner · P1
 - **Tệp:** `bureau/planner/planner.py`, `api/main.py`
 - **Xong khi:**
-  - [ ] `search_options` dùng `jinko` + `compose` (chế độ `replay`).
+  - [ ] `search_options` dùng `jinko` + `compose` (chế độ `replay`); `TravelRequest` được tạo từ `state.travel`, không đọc thẳng `event.json`.
   - [ ] Test: ngân sách 120€ → `SELECT_TRAVEL_PLAN` có ít nhất một phương án hợp lệ; 90€ → `ESCALATE` có `suggestions`.
   - [ ] `POST /api/events/wei/plan` với `{"overrides": {"max_cost_per_person_cents": 9000}}` trả `ESCALATE`.
 
