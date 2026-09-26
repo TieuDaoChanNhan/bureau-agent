@@ -535,7 +535,8 @@ function planDetail(issue, action, st) {
   const c = (action.payload && action.payload.constraints) || { hard: {}, soft: [], organizer_verified: [] };
   const budget = c.hard.max_cost_per_person_cents;
   const requested = requestedBudget(s);
-  const whatIf = requested && requested > 9000 ? 9000 : null;
+  // What-if: 20% below the requested budget, rounded to €10 (€150 -> €120).
+  const whatIf = requested ? Math.round(requested * 0.8 / 1000) * 1000 : null;
   const hard = Object.entries(c.hard).map(([k, v]) =>
     `<li>${esc(HARD_LABEL[k] ? HARD_LABEL[k](v) : `${k}: ${v}`)}${(c.organizer_verified || []).includes(k) ? ' <span class="confirm">organizers confirm</span>' : ""}</li>`).join("");
   const soft = (c.soft || []).map(k => `<li>${esc(SOFT_LABEL[k] || k)}</li>`).join("");
