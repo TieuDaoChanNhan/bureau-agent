@@ -10,7 +10,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Any, Literal, Optional
 
-IssueStatus = Literal["open", "proposed", "needs_human", "resolved", "dismissed"]
+IssueStatus = Literal["open", "proposed", "needs_human", "agent_failed", "resolved", "dismissed"]
 Channel = Literal["email", "discord", "form"]
 GroupKind = Literal["team", "room"]
 

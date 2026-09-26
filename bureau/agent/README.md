@@ -6,7 +6,7 @@ The single event agent investigates an issue with model-selected tools and retur
 |---|---|
 | `prompts.py` | Investigation instructions, uncertainty handling, executor payload contracts and AI signature |
 | `tool_specs.py` | Tool schemas and read-only handlers, including payment/group records, willing group candidates and the complete rule text |
-| `loop.py` | `resolve_issue(state, issue)`: bounded tool loop with error feedback; `run_pending(state)`: persist proposals for runnable issues |
+| `loop.py` | `resolve_issue(state, issue)`: bounded tool loop with error feedback; `run_pending(state, limit=...)`: bounded, resilient batch of runnable issues |
 
 ## How one issue is resolved
 
@@ -20,7 +20,8 @@ Issue + source messages -> model -> tool call -> result -> ... -> propose_action
 - The last turn is reserved for `propose_action`; the model still chooses the action type and must escalate when evidence is insufficient.
 - Malformed JSON, failed tools and incomplete proposal payloads return an error to the model so it can retry.
 - Only an accepted proposal changes the issue status and appends to `state.actions`. No payment is linked, group moved or message sent by the agent.
-- `run_pending` skips existing proposals and issues blocked by unresolved `depends_on` entries, then saves newly created proposals through the runtime store.
+- `run_pending` skips existing proposals and issues blocked by unresolved `depends_on` entries. It saves after each successful proposal, logs a failed issue, marks it `agent_failed` and continues the batch, and returns actions, errors, and the remaining runnable count. An `agent_failed` issue is not retried by later batches (so `remaining` reaches 0 and a failing call is not re-billed on every run); pass `issue_id` to retry it.
+- Terminal decisions no longer detected are retained before each batch save, preventing old proposals from becoming executable again.
 - Payload shape checks prevent missing executor inputs. Group replacements must retain already assigned participants and run the existing capacity/membership checks on a temporary preview before acceptance; the executor checks again after approval.
 - `get_payment` and `list_groups` expose actual records rather than requiring guessed ids or memberships. `list_group_candidates` returns ungrouped participants who want a group, including their names, skills and needs; payment eligibility is checked separately.
 - Rules are in English. `search_rules` uses English keywords; `list_rules` lets the model read all sections before declaring a policy absent.

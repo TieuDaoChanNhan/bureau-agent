@@ -28,14 +28,14 @@ class ApiTests(unittest.TestCase):
         key = mock.patch("bureau.config.OPENAI_API_KEY", "")
         key.start()
         self.addCleanup(key.stop)
-        agent = mock.patch("api.main.resolve_issue", side_effect=self.fake_resolve)
+        agent = mock.patch("bureau.agent.loop.resolve_issue", side_effect=self.fake_resolve)
         self.agent = agent.start()
         self.addCleanup(agent.stop)
         self.client = TestClient(app)
         self.addCleanup(self.client.close)
 
     @staticmethod
-    def fake_resolve(state, issue, verbose=False):
+    def fake_resolve(state, issue, verbose=False, client=None):
         action = ProposedAction(
             id=f"{state.id}:{issue.id}", event_id=state.id, issue_id=issue.id,
             action_type="ESCALATE", title="Organizer review", description="Needs review",
@@ -144,12 +144,49 @@ class ApiTests(unittest.TestCase):
 
     def test_run_skips_existing_proposals_and_needs_no_key_when_nothing_remains(self):
         with mock.patch("bureau.config.OPENAI_API_KEY", "fake-test-key"):
-            first = self.client.post("/api/events/hackathon/run")
+            first = self.client.post("/api/events/hackathon/run?limit=100")
         self.agent.reset_mock()
-        second = self.client.post("/api/events/hackathon/run")
+        second = self.client.post("/api/events/hackathon/run?limit=100")
         self.assertEqual(second.status_code, 200)
         self.assertEqual(second.json(), first.json())
         self.agent.assert_not_called()
+
+    def test_run_limit_reports_remaining_and_continues_without_duplicates(self):
+        """Each limited API batch handles only its slice of the shared runner queue."""
+        with mock.patch("bureau.config.OPENAI_API_KEY", "fake-test-key"):
+            first = self.client.post("/api/events/hackathon/run?limit=2")
+            second = self.client.post("/api/events/hackathon/run?limit=2")
+
+        self.assertEqual(200, first.status_code, first.text)
+        self.assertEqual(200, second.status_code, second.text)
+        self.assertEqual(2, len(first.json()["actions"]))
+        self.assertEqual(4, len(second.json()["actions"]))
+        self.assertEqual(first.json()["remaining"] - 2, second.json()["remaining"])
+        action_ids = [action["id"] for action in second.json()["actions"]]
+        self.assertEqual(len(action_ids), len(set(action_ids)))
+
+    def test_run_persists_neighbors_when_the_third_agent_call_fails(self):
+        """A transient agent error is logged and does not discard other proposals."""
+        calls = 0
+
+        def fail_third(state, issue, verbose=False, client=None):
+            nonlocal calls
+            calls += 1
+            if calls == 3:
+                raise RuntimeError("rate limit")
+            return self.fake_resolve(state, issue, verbose=verbose, client=client)
+
+        self.agent.side_effect = fail_third
+        with mock.patch("bureau.config.OPENAI_API_KEY", "fake-test-key"):
+            response = self.client.post("/api/events/hackathon/run?limit=4")
+
+        self.assertEqual(200, response.status_code, response.text)
+        self.assertEqual(3, len(response.json()["actions"]))
+        self.assertEqual(1, len(response.json()["errors"]))
+        self.assertEqual(3, len(store.load_state("hackathon").actions))
+        log = [json.loads(line) for line in (self.runtime / "hackathon" / "log.jsonl").read_text().splitlines()]
+        self.assertEqual("agent_error", log[0]["type"])
+        self.assertEqual("rate limit", log[0]["error"])
 
     def test_run_skips_dismissed_and_resolved_issues(self):
         dismissed = self.seed_action(issue_id="message:m01", action_type="ESCALATE", payload={})

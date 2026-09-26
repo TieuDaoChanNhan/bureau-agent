@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, replace
+from dataclasses import asdict, dataclass, replace
 
 from .. import config
 from ..core.detect import detect_issues
 from ..core.models import Check, EventState, Evidence, Group, Issue, ProposedAction
-from ..core.store import merge_issue_status, save_state
+from ..core.store import append_log, merge_issue_status, save_state
 from ..tools.groups import check_groups
 from .prompts import SYSTEM_PROMPT
 from .tool_specs import ACTION_TYPES, TOOLS, build_handlers
@@ -201,31 +201,75 @@ def _is_blocked(issue: Issue, issues_by_id: dict[str, Issue]) -> bool:
     return False
 
 
-def run_pending(state: EventState, issue_id: str | None = None, *, client=None,
-                verbose: bool = True) -> list[ProposedAction]:
-    """Propose and persist actions for each currently runnable issue.
+@dataclass
+class BatchRunResult:
+    """Actions, recoverable errors, and remaining runnable issues from one batch."""
 
-    An issue is runnable when it is open or needs human input, has no existing
-    proposal, and is not waiting for an unresolved dependency. The travel-plan
-    issue itself is left to the planner rather than the agent.
+    actions: list[ProposedAction]
+    errors: list[dict[str, str]]
+    remaining: int
+
+
+def _refresh_issues(state: EventState) -> None:
+    """Re-detect issues while retaining terminal decisions missing from detection."""
+    refreshed = merge_issue_status(detect_issues(state), state.issues)
+    current_ids = {issue.id for issue in refreshed}
+    terminal = [
+        issue for issue in state.issues
+        if issue.id not in current_ids and issue.status in ("resolved", "dismissed")
+    ]
+    state.issues = refreshed + terminal
+
+
+def runnable_issues(state: EventState, issue_id: str | None = None) -> list[Issue]:
+    """Return issues eligible for agent proposals from the current state.
+
+    An issue whose last agent run failed is retried only when requested by id,
+    so a permanent failure cannot be re-sent (and re-billed) on every batch.
     """
-    state.issues = merge_issue_status(detect_issues(state), state.issues)
     issues_by_id = {issue.id: issue for issue in state.issues}
     proposed_issue_ids = {action.issue_id for action in state.actions}
-    targets = [
+    statuses = ("open", "needs_human", "agent_failed") if issue_id else ("open", "needs_human")
+    return [
         issue for issue in state.issues
         if (issue_id is None or issue.id == issue_id)
-        and issue.status in ("open", "needs_human")
+        and issue.status in statuses
         and issue.id not in proposed_issue_ids
         and issue.kind != "no_logistics_plan"
         and not _is_blocked(issue, issues_by_id)
     ]
 
-    actions = []
-    for issue in targets:
-        action = resolve_issue(state, issue, client=client, verbose=verbose)
-        actions.append(action)
 
-    if actions:
+def run_pending(state: EventState, issue_id: str | None = None, *, limit: int | None = None,
+                client=None, verbose: bool = True) -> BatchRunResult:
+    """Propose runnable issues, persisting each success and logging each failure.
+
+    An issue is runnable when it is open or needs human input, has no existing
+    proposal, and is not waiting for an unresolved dependency. The travel-plan
+    issue itself is left to the planner rather than the agent. ``limit`` bounds
+    how many issues one caller attempts; ``None`` means no bound. A failed issue
+    is marked ``agent_failed`` and is only retried when requested by ``issue_id``.
+    """
+    _refresh_issues(state)
+    targets = runnable_issues(state, issue_id)
+    if limit is not None:
+        targets = targets[:limit]
+
+    actions: list[ProposedAction] = []
+    errors: list[dict[str, str]] = []
+    for issue in targets:
+        try:
+            action = resolve_issue(state, issue, client=client, verbose=verbose)
+        except Exception as exc:
+            error = {"issue_id": issue.id, "error": str(exc)}
+            append_log(state.id, {"type": "agent_error", **error})
+            errors.append(error)
+            issue.status = "agent_failed"
+            save_state(state)
+            continue
+        actions.append(action)
+        # Do not lose earlier paid API calls if a later issue fails.
         save_state(state)
-    return actions
+
+    return BatchRunResult(actions=actions, errors=errors,
+                          remaining=len(runnable_issues(state, issue_id)))
