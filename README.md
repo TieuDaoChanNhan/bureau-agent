@@ -69,7 +69,7 @@ On Windows, set `PYTHONIOENCODING=utf-8` if accented names print incorrectly.
 | Data model, sample data (2 events), issue detection | ✅ done, tested |
 | Deterministic tools (rules, eligibility, identity, groups) | ✅ done, tested |
 | Planner: hard-constraint gate, ranking, diagnosis | ✅ done, tested |
-| Agent loop (OpenAI tool calling) | 🟡 loop tested with a fake LLM; not yet run against the API |
+| Agent loop (OpenAI tool calling) | ✅ live acceptance verified with `gpt-4.1`; 3 labeled cases and full hackathon batch (see [agent checks](bureau/agent/README.md#live-acceptance-checks-t04)) |
 | Store, executor, API routes except `/plan` | ✅ done, tested; messages use a simulated outbox |
 | Web UI, evaluation | ⬜ skeletons, see [TASKS.md](TASKS.md) |
 | Constraint extraction (LLM), Jinko client, package composition | ⬜ skeletons, see [TASKS.md](TASKS.md) |
