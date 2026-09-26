@@ -59,8 +59,11 @@ function isWaiting(issue, s) {
   });
 }
 
+// Everything needs approval; "needs you" marks a decision the agent could not make:
+// an escalation, or an identity link in the ask-a-human band (score < 0.98).
 function needsHuman(action) {
-  return action.action_type === "ESCALATE" || (action.confidence != null && action.confidence < 0.98);
+  return action.action_type === "ESCALATE" ||
+    (action.action_type === "LINK_PAYMENT" && action.confidence != null && action.confidence < 0.98);
 }
 
 function viewStatus(issue, s, byIssue) {
@@ -380,12 +383,13 @@ async function runAgent(issueId = null) {
       const added = data.actions.length - before;
       proposed += added; failed += data.errors.length; remaining = data.remaining;
       renderEvents(); renderIssues();
-      setRun(`Agent: ${proposed} proposals, ${failed} failed, ${remaining} issues left…`, "busy");
+      setRun(`Agent: ${proposed} proposed, ${failed} failed, ${remaining} left…`, "busy");
       if (issueId || remaining === 0 || (added === 0 && data.errors.length === 0)) break;
     }
     keepSelection();
+    const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
     setRun(proposed || failed
-      ? `Agent finished: ${proposed} proposals ready for review${failed ? `, ${failed} failed (see the audit log)` : ""}${remaining ? `, ${remaining} left` : ""}.`
+      ? `Agent finished: ${plural(proposed, "proposal")} ready for review${failed ? `, ${failed} failed (see the audit log)` : ""}${remaining ? `, ${plural(remaining, "issue")} left` : ""}.`
       : "Nothing for the agent to do: every runnable issue already has a proposal.", failed && !proposed ? "error" : "");
   });
 }
