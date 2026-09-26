@@ -5,6 +5,22 @@ Use them to build and mock the web UI while a route still returns 501.
 The generator uses explicit recorded travel constraints so it works without an
 API key. Live constraint extraction is evaluated separately in `eval/`.
 
+WEI examples use the unconfirmed 100-person kès demo. Option prices include
+coaches, lodging, groceries and food transport; kès buys the groceries and
+transports them to the venue. Each `cost_breakdown_per_person_cents` itemizes the
+total, including the fictional EUR 20/person for groceries and EUR 2/person for
+food transport, with no surcharge. The EUR 120 ceiling applies to the full
+package. Search combines cached Jinko hotel rates, scaled from one double room
+to 50 rooms, with illustrative two-coach transport and the catering budgets.
+Generated options may differ from the A–E fallback packages. The room block,
+charter coaches, venue facilities and meal arrangements require organizer
+verification; a passing option only satisfies the
+currently supported checks. See [data provenance](../../data/README.md#wei-source-assumptions-and-scenarios-t16--issue-15).
+
+The default EUR 120 budget now yields `ESCALATE`: the cheapest composed package
+meeting the travel-time checks is EUR 135.59/person. A selection example using an
+explicit EUR 140 override is a what-if scenario, not a confirmed budget or fee.
+
 | File | Route |
 |---|---|
 | `GET_events.json` | `GET /api/events` |

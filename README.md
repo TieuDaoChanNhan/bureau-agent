@@ -53,8 +53,8 @@ pip install -r requirements.txt
 cp .env.example .env                      # add OPENAI_API_KEY (default model: gpt-4.1)
 
 python -m bureau detect hackathon         # issues found by fixed code (no LLM)
-python -m bureau plan wei                 # LLM extraction, then recorded options (needs a key)
-python -m bureau plan wei --recorded-constraints  # offline demo, recorded constraints and options
+python -m bureau plan wei                 # LLM extraction, cached hotels + recorded transport (needs an OpenAI key)
+python -m bureau plan wei --recorded-constraints  # offline demo, recorded constraints + Jinko replay
 python -m bureau plan wei --recorded-constraints --budget 90  # diagnosis, no relaxation
 python -m bureau run hackathon --issue message:m01   # the agent (needs a key)
 python -m eval.run_eval                  # labeled corpus evaluation (needs a key)
@@ -70,6 +70,12 @@ requests produce clarification questions before any travel-option search. Use
 without an API key. `--budget` overrides the per-person budget; other unresolved
 questions still require an organizer's answer.
 
+The WEI demo has 100 fictional registrations and includes groceries and their
+transport in the student fee. Its dates, costs and logistics remain unconfirmed
+by kès. Current composed options exceed the EUR 120 ceiling (the cheapest
+time-compliant package is EUR 135.59), so the default returns `ESCALATE`.
+`--budget 140` is an explicit what-if scenario for showing selection.
+
 ## Status
 
 | Part | Status |
@@ -82,7 +88,7 @@ questions still require an organizer's answer.
 | Evaluation | ✅ 50 labeled message cases and 8 planning requests, live LLM metrics and saved reports; [definitions and limits](eval/README.md) |
 | Web UI | ✅ organizer console wired to the runtime API; [usage](web/README.md) |
 | Constraint extraction (LLM) | ✅ structured constraints from organizer text, with clarification and accessibility verification flags; [planner details](bureau/planner/README.md) |
-| Jinko client, package composition | ⬜ skeletons, see [TASKS.md](TASKS.md) |
+| Jinko client, package composition | ✅ hotels verified live with replay cache; recorded transport because ground search returns 404; group availability requires confirmation |
 
 ## What is real and what is simulated
 
@@ -92,7 +98,7 @@ questions still require an organizer's answer.
 | Agent investigation and proposals | Real (OpenAI) |
 | Travel constraint extraction | Real (configured LLM); `--recorded-constraints` selects the offline fixture explicitly |
 | Registrations, payments, messages | Simulated sample data with planted inconsistencies; no real personal data |
-| Travel options | Recorded illustrative data until the Jinko client lands |
+| Travel options | Cached Jinko hotel rates scaled to the group + illustrative charter transport + demo catering budgets; illustrative full-package fallback if hotel search is unavailable |
 | Sending messages, booking, payments | Not performed; actions are proposals for organizers |
 
 Messages drafted by the agent end with "Drafted with AI assistance, approved by the organizers." (EU AI Act, Art. 50).

@@ -2,12 +2,12 @@
 
 Sample events. **Read-only input**: runtime changes go to `runtime/<event>/` (git-ignored).
 All people, emails and payments are fictional. Never commit real personal data.
-New hackathon contacts use reserved `.example` domains; the original fictional records are retained unchanged.
+New hackathon contacts and all WEI contacts use reserved `.example` domains.
 
 | Event | Folder | Planted scenarios |
 |---|---|---|
 | X-IA hackathon | `hackathon/` | 50 participants, 47 payments, 11 teams, 25 messages (12 French / 13 English); ambiguous and unrelated payments, unpaid members, conflicting teams, team moves, rule questions and organizer escalations |
-| Integration weekend | `wei/` | no travel plan yet, transfer with compound surname and nickname (b90 → w01), refund request, recorded travel packages |
+| kès integration weekend (WEI) | `wei/` | 100 fictional registrations, 97 payments, 7 messages; unconfirmed demo of student registration, payment checks, charter coaches and a group venue with lodging, cooking and activity spaces |
 
 ## File formats
 
@@ -16,13 +16,141 @@ Payment values use `amount_cents`; `event.json` stores the configured membership
 
 | File | Content |
 |---|---|
-| `event.json` | `name`, `deadlines`, `settings` (e.g. `unpaid_kind`, `group_kind`, `needs_logistics`), `travel` (WEI only: request, participants, origin, destination, depart_after, constraints; loaded into `EventState.travel`) |
+| `event.json` | `name`, `deadlines`, `settings` (e.g. `unpaid_kind`, `group_kind`, `needs_logistics`), `travel` (WEI only: request, participants, origin, destination, depart_after, return_by, nights, constraints, catering, provenance and organizer_checks; loaded into `EventState.travel`) |
 | `participants.json` | `id, name, emails[], registered_at, skills[]?, needs[]?, looking_for_group?` |
 | `payments.json` | `id, payer_name, amount_cents, currency, paid_at, payer_email?, reference?, participant_id?` |
 | `groups.json` | `id, kind (team/room), name, members[], capacity_min, capacity_max, declared_at?` |
 | `messages.json` | `id, channel (email/discord/form), sender, text, received_at` |
 | `rules.md` | One `## §N Title` section per rule; parsed into `Rule` objects |
-| `travel_options.json` | WEI only: recorded packages until the Jinko client (T11/T12) replaces them |
+| `travel_options.json` | WEI only: illustrative full packages used as a fallback when Jinko hotel search is unavailable |
+
+## WEI source, assumptions and scenarios (T16 / issue #15)
+
+**Source:** the project owner's description during implementation of
+[issue #15](https://github.com/TieuDaoChanNhan/bureau-agent/issues/15), on
+26 September 2026. WEI means *weekend d'intégration*, organized by **kès**, the
+École polytechnique student association. The supplied workflow is to collect
+student registrations, check payments, hire buses, and find a resort-like venue
+with accommodation, cooking facilities and space for group activities. Meals are
+included in the student participation fee: kès buys the groceries and transports
+them to the venue. Jinko is the intended service for transport and lodging searches.
+
+The owner explicitly approved retaining demo dates and prices and then requested
+about 100 registrations. This dataset uses **100**. It represents that real event
+workflow, but **is not a confirmed itinerary or an official kès dataset**. No
+organizer roster, supplier quote or confirmed destination was supplied. The
+source and unconfirmed assumptions are also stored in `travel.provenance` so
+they survive loading and runtime persistence.
+
+| Field | Demo assumption, requiring kès confirmation |
+|---|---|
+| Dates | Friday 9 to Sunday 11 October 2026, two nights |
+| Pickup / search area | École polytechnique campus in Palaiseau / Trouville-Deauville; the exact pickup and venue are undecided |
+| Headcount | 100 synthetic registrations (`w01`–`w100`), including two separate step-free room requests |
+| Transport | Two privately hired 53-seat coaches, 106 passenger seats total, round trip |
+| Venue | Space for 100 overnight guests, shared kitchen with permission to cook, indoor and outdoor activity spaces |
+| Budget ceiling | EUR 120/person (12000 cents), EUR 12000/group for round-trip coaches, two nights, groceries and their transport |
+| Provisional participation fee | EUR 112/person (11200 cents), used by the sample payments; includes meals and grocery transport, remains distinct from the ceiling and subject to reconciliation once a plan is approved |
+| Meals | kès buys groceries and transports them to the venue; demo allocation EUR 20/person for groceries and EUR 2/person for food transport, already included in the package total (EUR 2000 + EUR 200 for 100 people) |
+| Policies | Payment by 1 October and the sample refund rules are demo policies, not confirmed kès rules |
+
+All student names, registration details, payments, accessibility requests and
+messages are fictional. All WEI email addresses use the reserved `wei.example`
+domain. No room allocation, venue reservation or transport booking has been made.
+
+### Registration and payment scenarios
+
+| Records | Expected behavior |
+|---|---|
+| `w02`–`w05`, `w09`–`w100` | 96 students have exact-email payment matches. Added payments use `b009`–`b100`; `b090` is distinct from the original ambiguous `b90`. |
+| `w01`, `b90`, `wm04` | Camille's compound-surname/nickname transfer needs organizer review. Do not auto-link it or send a duplicate payment reminder while the match is pending. |
+| `w06`, `w07`, `w08`, `wm03` | Three students have no matched payment; registration alone does not establish payment. |
+| `wm02` | Tom requests a refund; organizers handle the financial decision under the explicitly provisional policy. |
+| `w03`, `w05`, `wm05` | Two accessibility requests require venue and transport verification; a facility hint is not confirmation. |
+| `wm01`, `wm06`, `wm07` | Pickup, group-cooking/activity permissions and return details depend on an approved logistics plan. Do not invent supplier confirmations. |
+| `no_logistics_plan`, `rooms_unassigned` | No plan or room assignments yet. Payment reminders, room assignments and messages `wm01`, `wm05`, `wm06`, `wm07` wait on `no_logistics_plan`. |
+
+### Illustrative fallback packages and current limits
+
+Every package in `travel_options.json` models two charter coaches and two nights at an **illustrative**
+group venue, with groceries and their transport included. Venue names are
+invented, and all costs, schedules, capacities and facility hints are demo inputs.
+The original per-person totals are retained with a reassigned fictional cost
+breakdown to include meals; they are not recalculated supplier quotes.
+`charter_verified` and `facilities_verified` remain false.
+
+| Option | EUR/person | Numeric constraint result at EUR 120/person |
+|---|---:|---|
+| A | 112 | Pass; first among the recorded options |
+| B | 118 | Pass; later return than A |
+| C | 96 | Rejected: arrives at 22:10, after 21:00 |
+| D | 141 | Rejected: exceeds the budget ceiling |
+| E | 78 | Rejected: overnight travel and arrival the following day |
+
+The per-person breakdown in EUR is A: 35 coaches + 55 lodging + 20 groceries +
+2 food transport; B: 40 + 56 + 20 + 2; C: 30 + 44 + 20 + 2;
+D: 42 + 77 + 20 + 2; E: 22 + 34 + 20 + 2. These are allocations within each
+total, not surcharges. `cost_breakdown_per_person_cents`, when supplied, contains
+nonnegative integer cents and must sum to `cost_per_person_cents`; code checks
+this consistency. `max_cost_per_person_cents` applies to the full requested
+package, including meals when explicitly requested. Ambiguous meal inclusion
+still requires clarification.
+
+The default `python -m bureau plan wei` sends the full briefing to the LLM.
+The request explicitly includes meals and food transport and requests two
+separate accessible rooms. Private coach hire, kitchen access and activity
+permissions are not supported hard fields in the current extraction schema.
+The model may ask clarifications, but a successful extraction can also omit
+these unsupported checks and proceed to search. Search normally composes cached
+Jinko hotel rates with recorded charter transport, including the catering budgets
+once. Composed options have different IDs and may have different prices from the
+fallback packages or the provisional participation fee.
+
+With the current cache, the cheapest package meeting the travel-time checks is
+EUR 135.59/person (EUR 35 charter transport + EUR 78.59 lodging + EUR 20 groceries
++ EUR 2 food transport). Both the unchanged EUR 120 ceiling and EUR 90 return
+`ESCALATE`. An explicit EUR 140 override can demonstrate selection, but is only a
+what-if scenario, not an approved budget or participation fee.
+
+`--recorded-constraints` skips extraction and exercises the supported numeric/time
+checks and ranking on the search results. When using the fallback package fixture,
+A/B pass at EUR 120; no option passes at EUR 90. A `VALID` result in this
+offline demonstration does **not** certify charter service, bus capacity, venue
+facilities, return deadline or availability. The current gate checks cost-breakdown
+consistency, lodging capacity, price, outbound arrival and overnight travel; accessibility is marked
+for organizer verification. Extra transport/lodging fields are descriptive
+metadata, not additional enforced constraints. `travel.catering` records kès's
+purchasing and food-transport responsibilities and the unconfirmed demo budgets.
+It is passed to `TravelRequest.catering` so composition includes groceries and
+their transport in the per-person price; fallback package totals already include them.
+`travel.organizer_checks` and `rules.md` retain the outstanding requirements for
+human review: menu, quantities, dietary needs, food transport capacity, storage
+and handling, as well as venue and coach checks. No particular food-transport
+method is confirmed.
+
+Jinko hotel search supports live and replay modes. Its cached quote prices one
+double room; the demo scales it to 50 rooms for 100 people, without confirming
+a group block. Ground search returned 404 for the current key, so charter
+transport remains illustrative. **Private coach hire**, group kitchens and
+activity permissions still require verification. Preserve raw cached responses
+as provider evidence; the illustrative fallback packages are not Jinko results.
+The current planner takes a supplied destination, so
+Trouville-Deauville is an unconfirmed search area, not a destination it discovered.
+
+```bash
+python -m bureau detect wei
+python -m bureau plan wei                         # configured OpenAI key; supported checks only
+python -m bureau plan wei --recorded-constraints   # offline, cached hotels + recorded transport
+python -m bureau plan wei --recorded-constraints --budget 90  # offline, ESCALATE
+python -m unittest tests.test_wei_data tests.test_planner
+```
+
+Detection prints **100 participants, 97 payments, 0 groups, 7 messages**, with
+**4 blocking** and **7 non-blocking** issues. These are fixture checks, not
+evidence of real registrations or payments. The historical planning evaluation
+cases keep their own explicit 40-person request context and transport/lodging-only
+options in `eval/cases/planning_options.json`, independent of this 100-person demo;
+their gold labels are not rewritten to fit event data.
 
 ## Hackathon scenarios and expected outcomes
 
@@ -96,12 +224,18 @@ On Windows, use `$env:PYTHONIOENCODING="utf-8"` in PowerShell if accented names 
 Create `data/<event_id>/` with at least `event.json` and `participants.json`. It appears automatically in the CLI and the API.
 
 ## `wei/transport_options.json` (T14)
-Illustrative Paris → Trouville-Deauville departures on Friday 9 October (price per person in cents),
-recorded because Jinko ground search is not available for our key. Composed with the Jinko hotels.
-`wei/event.json` → `travel.search` holds the hotel search parameters (city, dates, rooms, station).
+Illustrative round-trip charter options from the École polytechnique campus in Palaiseau
+to the Trouville-Deauville search area, using two 53-seat coaches for 100 students
+(price per person in cents). They remain unverified because Jinko ground search
+returned 404 for our key. Composition combines them with Jinko hotel rates and the
+demo catering budgets. `wei/event.json` → `travel.search` holds the hotel search
+parameters (city, dates, 50 double rooms, station).
 
 ## `wei/jinko_cache/` (T11)
 Raw Jinko responses saved by `JINKO_MODE=live` and read in `replay` mode (tests, demo), keyed by a
 hash of the request body. `hotel_search_*.json` is a real response from 2026-09-26: one double room
-in Deauville, 9–11 October 2026. Hotel names and prices are public offers, not personal data. No API
-key is stored. Ground search is not cached because the endpoint returned 404 for our key.
+in Deauville, 9–11 October 2026. The raw response is preserved; scaling its room
+price to 50 rooms for 100 people does not establish group availability, kitchen
+access or activity permissions. `group_block_confirmed` remains false. Hotel names
+and prices are public offers, not personal data. No API key is stored. Ground search
+is not cached because the endpoint returned 404 for our key.

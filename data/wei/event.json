@@ -1,5 +1,5 @@
 {
-  "name": "WEI 2026 (sample data)",
+  "name": "WEI — kès, École polytechnique (unconfirmed demo)",
   "deadlines": {
     "payment": "2026-10-01T23:59:00+02:00",
     "departure": "2026-10-09T18:00:00+02:00"
@@ -8,24 +8,37 @@
     "needs_logistics": true,
     "unpaid_kind": "unpaid_participation",
     "group_kind": "room",
+    "fee_amount_cents": 11200,
+    "fee_status": "provisional_demo",
     "refund_policy": "No refund after 1 October, except exceptional cases decided by the organizers.",
     "messages_need_plan": [
-      "wm01"
+      "wm01",
+      "wm05",
+      "wm06",
+      "wm07"
+    ],
+    "fee_includes": [
+      "coach",
+      "lodging",
+      "groceries",
+      "food_transport"
     ],
     "display": {
       "type": "Integration weekend",
       "dates": "9–11 Oct 2026",
-      "place": "Paris → Trouville-Deauville"
+      "place": "Palaiseau → Trouville-Deauville (demo)"
     }
   },
   "travel": {
-    "request": "WEI for 40 people. Leave Paris Friday 9 Oct after class, back Sunday afternoon. Max €120 per person for travel and lodging. We must arrive before 21:00. No overnight travel. Two people need step-free rooms.",
-    "participants": 40,
-    "origin": "Paris",
+    "request": "Plan a WEI (weekend d'intégration) for kès, the École polytechnique student association. These are unconfirmed demo assumptions, not an approved kès trip: 100 students, departing the École polytechnique campus in Palaiseau on Friday 9 October 2026 after 17:00 and returning there on Sunday 11 October by 18:00. Use Trouville-Deauville as a provisional search area; no venue is selected. The maximum total is €120 per person including round-trip coaches, two nights of lodging, meals and transporting groceries to the venue. kès buys the groceries and transports them to the venue; students pay for these through the participation fee, with no separate meal surcharge. For this unconfirmed demo, allocate €20 per person for groceries and €2 per person for their transport within the total, not on top of it. The provisional participation fee remains €112 per person including all four components; the menu, purchases and food transport arrangements are not yet confirmed. Arrive before 21:00 and do not travel overnight. Two students each need a separate step-free room (two rooms total), to be verified with the venue. Prefer fewer changes, then an earlier return, then a lower cost. kès needs privately hired coaches with seats for all 100 students (assume two 53-seat buses for this demo), and a resort-like group venue with overnight accommodation, a shared kitchen where group cooking is permitted, and indoor and outdoor spaces where integration activities are allowed. Use Jinko lodging results as unconfirmed group estimates; private coach hire uses illustrative recorded options because ground search is unavailable for the current key. The fallback packages are not Jinko quotes. Ask the organizers to resolve requirements that the current planner cannot verify; do not assume charter availability, venue facilities or permission for activities.",
+    "participants": 100,
+    "origin": "École polytechnique campus, Palaiseau",
     "depart_after": "2026-10-09T17:00:00+02:00",
+    "return_by": "2026-10-11T18:00:00+02:00",
+    "nights": 2,
     "constraints": {
       "hard": {
-        "participants": 40,
+        "participants": 100,
         "arrive_before": "21:00",
         "no_overnight": true,
         "step_free_rooms": 2,
@@ -33,14 +46,48 @@
       },
       "soft": [
         "fewer_changes",
-        "near_station",
-        "early_return"
+        "early_return",
+        "lower_cost"
       ],
       "organizer_verified": [
         "step_free_rooms"
       ]
     },
     "destination": "Trouville-Deauville",
+    "provenance": {
+      "status": "unconfirmed_demo",
+      "association": "kès — École polytechnique",
+      "event": "WEI — weekend d’intégration",
+      "source": "User-provided description in issue #15 implementation conversation (2026-09-26)",
+      "confirmed_context": "kès collects student registrations, checks payments, hires buses and looks for a venue with lodging, cooking and activity spaces; Jinko is the intended transport and lodging search provider. Meals are included in what students pay; kès buys groceries and transports them to the venue.",
+      "unconfirmed_assumptions": [
+        "Trouville-Deauville search area and Palaiseau pickup point",
+        "9–11 October 2026 dates and travel times",
+        "100 students and two separate step-free rooms",
+        "€120 complete-package ceiling and €112 provisional participation fee, both including meals and food transport; demo allocations of €20 groceries and €2 food transport per person",
+        "Payment deadline, refund policy and all sample package prices and facilities"
+      ],
+      "personal_data": "All registrations, payments and messages are fictional.",
+      "travel_options": "Illustrative recorded packages, not Jinko results or confirmed supplier quotes."
+    },
+    "organizer_checks": [
+      "Confirm the destination area, dates, headcount, fee and budget with kès before using this demo for a real trip.",
+      "Confirm a private round-trip coach hire, at least 100 passenger seats across the hired coaches (demo: two 53-seat buses), campus pickup, return time and accessibility with the operator; a scheduled coach ticket is not a charter quote.",
+      "Confirm accommodation for 100 students for two nights, including two separate step-free rooms and accessible shared spaces.",
+      "Confirm shared-kitchen capacity, equipment and permission for student group cooking. kès must plan the menu, quantities and dietary needs, buy groceries and organize their transport to the venue, including vehicle capacity, handling and storage. Verify the food and delivery allocation within the student fee; the demo amounts and transport method are not confirmed.",
+      "Confirm indoor and outdoor activity spaces, permission for integration activities and venue noise rules.",
+      "Verify availability and complete group quotes with providers. Jinko hotel room prices are scaled estimates, not confirmed group blocks; ground search is unavailable for the current key. Verify private coach hire, kitchen access and activity permissions directly with providers."
+    ],
+    "catering": {
+      "included_in_participation_fee": true,
+      "purchased_by": "kès",
+      "transported_by": "kès",
+      "groceries_per_person_cents": 2000,
+      "food_transport_per_person_cents": 200,
+      "budget_status": "unconfirmed_demo",
+      "transport_method": null,
+      "logistics_status": "to_confirm"
+    },
     "search": {
       "city": "Deauville",
       "country_code": "fr",
@@ -50,7 +97,7 @@
       ],
       "checkin": "2026-10-09",
       "checkout": "2026-10-11",
-      "rooms": 20
+      "rooms": 50
     }
   }
 }

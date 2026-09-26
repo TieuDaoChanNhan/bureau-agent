@@ -1,6 +1,51 @@
 [
-  {"id": "wm01", "channel": "discord", "sender": "nathan_m", "received_at": "2026-09-23T18:00:00+02:00",
-   "text": "On se retrouve à quelle heure et où vendredi ?"},
-  {"id": "wm02", "channel": "email", "sender": "tom.girard@etu.example.fr", "received_at": "2026-09-22T09:12:00+02:00",
-   "text": "Salut, j'ai payé le WEI mais j'ai un rattrapage ce week-end-là. Est-ce que je peux être remboursé ?"}
+  {
+    "id": "wm01",
+    "channel": "discord",
+    "sender": "nathan_m",
+    "received_at": "2026-09-23T18:00:00+02:00",
+    "text": "On se retrouve à quelle heure et où vendredi ?"
+  },
+  {
+    "id": "wm02",
+    "channel": "email",
+    "sender": "tom.girard@wei.example",
+    "received_at": "2026-09-22T09:12:00+02:00",
+    "text": "Salut, j'ai payé le WEI mais j'ai un rattrapage ce week-end-là. Est-ce que je peux être remboursé ?"
+  },
+  {
+    "id": "wm03",
+    "channel": "email",
+    "sender": "sarah.lefebvre@wei.example",
+    "received_at": "2026-09-23T18:15:00+02:00",
+    "text": "Bonjour la kès, j'ai envoyé le formulaire d'inscription au WEI mais pas encore le virement. Est-ce que l'inscription suffit à valider ma place ? Je vois 112 € à payer et un plafond de 120 € : quelle est la différence, et les repas sont-ils compris ?"
+  },
+  {
+    "id": "wm04",
+    "channel": "email",
+    "sender": "camille.dupont@wei.example",
+    "received_at": "2026-09-23T18:30:00+02:00",
+    "text": "Bonjour, le virement de 112 € du 22 septembre pourrait apparaître sous C. DUPONT-LAMBERT avec la référence WEI Cami. Il devrait correspondre à mon inscription Camille Dupont. Pouvez-vous vérifier avec la trésorerie avant de confirmer mon paiement ? Je peux fournir un justificatif si nécessaire."
+  },
+  {
+    "id": "wm05",
+    "channel": "email",
+    "sender": "ines.roux@wei.example",
+    "received_at": "2026-09-24T09:00:00+02:00",
+    "text": "Hi kès, Emma and I requested step-free rooms. Before you assign rooms, can you confirm access from the coaches to the bedrooms, bathroom, shared kitchen and activity space? Please check the coach boarding arrangements with the operator too; a room label alone does not answer those questions."
+  },
+  {
+    "id": "wm06",
+    "channel": "discord",
+    "sender": "lucas_b",
+    "received_at": "2026-09-24T10:15:00+02:00",
+    "text": "Pour les repas du WEI, est-ce qu'on pourra cuisiner ensemble sur place ? Il faudrait une cuisine autorisée pour notre groupe de 100 et un espace pour les jeux, avec les horaires et règles du lieu. Est-ce qu'un lieu a été retenu ? Les courses achetées par la kès et leur transport jusqu'au lieu sont-ils bien inclus dans notre participation de 112 € ?"
+  },
+  {
+    "id": "wm07",
+    "channel": "email",
+    "sender": "student09@wei.example",
+    "received_at": "2026-09-24T11:00:00+02:00",
+    "text": "Hello, will the two rented coaches collect us on the École polytechnique campus in Palaiseau on Friday and bring us back there on Sunday? Please send the meeting point and return time once the venue and both coach journeys are confirmed. Is the Trouville-Deauville area only a search assumption for now?"
+  }
 ]

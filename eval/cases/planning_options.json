@@ -1,0 +1,103 @@
+[
+  {
+    "id": "A",
+    "source": "recorded (illustrative, to be replaced by Jinko sandbox results)",
+    "transport": {
+      "mode": "train",
+      "depart": "18:10",
+      "arrive": "20:15",
+      "changes": 0,
+      "overnight": false,
+      "return_arrive": "19:05"
+    },
+    "lodging": {
+      "name": "Group hostel",
+      "rooms": 10,
+      "capacity": 40,
+      "walk_minutes": 6,
+      "step_free_hint": true
+    },
+    "cost_per_person_cents": 11200
+  },
+  {
+    "id": "B",
+    "source": "recorded (illustrative, to be replaced by Jinko sandbox results)",
+    "transport": {
+      "mode": "train",
+      "depart": "17:52",
+      "arrive": "20:40",
+      "changes": 1,
+      "overnight": false,
+      "return_arrive": "19:40"
+    },
+    "lodging": {
+      "name": "Hotel",
+      "rooms": 20,
+      "capacity": 40,
+      "walk_minutes": 12,
+      "step_free_hint": true
+    },
+    "cost_per_person_cents": 11800
+  },
+  {
+    "id": "C",
+    "source": "recorded (illustrative, to be replaced by Jinko sandbox results)",
+    "transport": {
+      "mode": "coach",
+      "depart": "18:30",
+      "arrive": "22:10",
+      "changes": 0,
+      "overnight": false,
+      "return_arrive": "20:30"
+    },
+    "lodging": {
+      "name": "Hotel",
+      "rooms": 20,
+      "capacity": 40,
+      "walk_minutes": 5,
+      "step_free_hint": true
+    },
+    "cost_per_person_cents": 9600
+  },
+  {
+    "id": "D",
+    "source": "recorded (illustrative, to be replaced by Jinko sandbox results)",
+    "transport": {
+      "mode": "train",
+      "depart": "18:10",
+      "arrive": "20:15",
+      "changes": 0,
+      "overnight": false,
+      "return_arrive": "19:05"
+    },
+    "lodging": {
+      "name": "Seafront hotel",
+      "rooms": 20,
+      "capacity": 40,
+      "walk_minutes": 15,
+      "step_free_hint": true
+    },
+    "cost_per_person_cents": 14100
+  },
+  {
+    "id": "E",
+    "source": "recorded (illustrative, to be replaced by Jinko sandbox results)",
+    "transport": {
+      "mode": "night coach",
+      "depart": "23:00",
+      "arrive": "02:30",
+      "arrives_next_day": true,
+      "changes": 0,
+      "overnight": true,
+      "return_arrive": "21:00"
+    },
+    "lodging": {
+      "name": "Group hostel",
+      "rooms": 10,
+      "capacity": 40,
+      "walk_minutes": 6,
+      "step_free_hint": true
+    },
+    "cost_per_person_cents": 7800
+  }
+]

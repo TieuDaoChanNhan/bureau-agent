@@ -21,6 +21,8 @@ class TravelRequest:
     destination: str
     depart_after: datetime          # timezone-aware
     return_by: Optional[datetime] = None
+    # Organizer-provided meal inclusion and per-person allocations, never inferred prices.
+    catering: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -40,9 +42,11 @@ class Constraints:
 
 @dataclass
 class TravelOption:
-    """One package = one transport result + one lodging result, built in code."""
+    """Transport, lodging and any included meal/logistics costs for one person."""
     id: str
     transport: dict[str, Any]       # mode, depart, arrive, changes, overnight, return_arrive
     lodging: dict[str, Any]         # name, rooms, capacity, walk_minutes, step_free_hint
     cost_per_person_cents: int
     source: str                     # "jinko:sandbox", "jinko:replay", "recorded"
+    # Optional itemization of the complete price, not charges to add to it.
+    cost_breakdown_per_person_cents: dict[str, int] = field(default_factory=dict)

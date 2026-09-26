@@ -1,103 +1,178 @@
 [
   {
     "id": "A",
-    "source": "recorded (illustrative, to be replaced by Jinko sandbox results)",
+    "source": "recorded illustration for the kès WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified",
     "transport": {
-      "mode": "train",
+      "mode": "coach",
+      "charter": true,
+      "capacity": 106,
+      "round_trip": true,
+      "charter_verified": false,
       "depart": "18:10",
       "arrive": "20:15",
       "changes": 0,
       "overnight": false,
-      "return_arrive": "19:05"
+      "return_arrive": "17:30",
+      "vehicles": 2,
+      "seats_per_vehicle": 53
     },
     "lodging": {
-      "name": "Group hostel",
-      "rooms": 10,
-      "capacity": 40,
-      "walk_minutes": 6,
-      "step_free_hint": true
+      "name": "Illustrative Normandy group holiday park A",
+      "rooms": 25,
+      "capacity": 100,
+      "step_free_hint": true,
+      "nights": 2,
+      "kitchen_hint": true,
+      "activity_space_hint": true,
+      "facilities_verified": false
     },
-    "cost_per_person_cents": 11200
+    "cost_per_person_cents": 11200,
+    "cost_breakdown_per_person_cents": {
+      "coach": 3500,
+      "lodging": 5500,
+      "groceries": 2000,
+      "food_transport": 200
+    }
   },
   {
     "id": "B",
-    "source": "recorded (illustrative, to be replaced by Jinko sandbox results)",
+    "source": "recorded illustration for the kès WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified",
     "transport": {
-      "mode": "train",
-      "depart": "17:52",
+      "mode": "coach",
+      "charter": true,
+      "capacity": 106,
+      "round_trip": true,
+      "charter_verified": false,
+      "depart": "18:05",
       "arrive": "20:40",
-      "changes": 1,
+      "changes": 0,
       "overnight": false,
-      "return_arrive": "19:40"
+      "return_arrive": "18:00",
+      "vehicles": 2,
+      "seats_per_vehicle": 53
     },
     "lodging": {
-      "name": "Hotel",
-      "rooms": 20,
-      "capacity": 40,
-      "walk_minutes": 12,
-      "step_free_hint": true
+      "name": "Illustrative Normandy residential activity centre B",
+      "rooms": 50,
+      "capacity": 100,
+      "step_free_hint": true,
+      "nights": 2,
+      "kitchen_hint": true,
+      "activity_space_hint": true,
+      "facilities_verified": false
     },
-    "cost_per_person_cents": 11800
+    "cost_per_person_cents": 11800,
+    "cost_breakdown_per_person_cents": {
+      "coach": 4000,
+      "lodging": 5600,
+      "groceries": 2000,
+      "food_transport": 200
+    }
   },
   {
     "id": "C",
-    "source": "recorded (illustrative, to be replaced by Jinko sandbox results)",
+    "source": "recorded illustration for the kès WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified",
     "transport": {
       "mode": "coach",
+      "charter": true,
+      "capacity": 106,
+      "round_trip": true,
+      "charter_verified": false,
       "depart": "18:30",
       "arrive": "22:10",
       "changes": 0,
       "overnight": false,
-      "return_arrive": "20:30"
+      "return_arrive": "20:30",
+      "vehicles": 2,
+      "seats_per_vehicle": 53
     },
     "lodging": {
-      "name": "Hotel",
-      "rooms": 20,
-      "capacity": 40,
-      "walk_minutes": 5,
-      "step_free_hint": true
+      "name": "Illustrative Normandy holiday village C",
+      "rooms": 50,
+      "capacity": 100,
+      "step_free_hint": true,
+      "nights": 2,
+      "kitchen_hint": true,
+      "activity_space_hint": true,
+      "facilities_verified": false
     },
-    "cost_per_person_cents": 9600
+    "cost_per_person_cents": 9600,
+    "cost_breakdown_per_person_cents": {
+      "coach": 3000,
+      "lodging": 4400,
+      "groceries": 2000,
+      "food_transport": 200
+    }
   },
   {
     "id": "D",
-    "source": "recorded (illustrative, to be replaced by Jinko sandbox results)",
+    "source": "recorded illustration for the kès WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified",
     "transport": {
-      "mode": "train",
+      "mode": "coach",
+      "charter": true,
+      "capacity": 106,
+      "round_trip": true,
+      "charter_verified": false,
       "depart": "18:10",
       "arrive": "20:15",
       "changes": 0,
       "overnight": false,
-      "return_arrive": "19:05"
+      "return_arrive": "17:00",
+      "vehicles": 2,
+      "seats_per_vehicle": 53
     },
     "lodging": {
-      "name": "Seafront hotel",
-      "rooms": 20,
-      "capacity": 40,
-      "walk_minutes": 15,
-      "step_free_hint": true
+      "name": "Illustrative Normandy group resort D",
+      "rooms": 50,
+      "capacity": 100,
+      "step_free_hint": true,
+      "nights": 2,
+      "kitchen_hint": true,
+      "activity_space_hint": true,
+      "facilities_verified": false
     },
-    "cost_per_person_cents": 14100
+    "cost_per_person_cents": 14100,
+    "cost_breakdown_per_person_cents": {
+      "coach": 4200,
+      "lodging": 7700,
+      "groceries": 2000,
+      "food_transport": 200
+    }
   },
   {
     "id": "E",
-    "source": "recorded (illustrative, to be replaced by Jinko sandbox results)",
+    "source": "recorded illustration for the kès WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified",
     "transport": {
-      "mode": "night coach",
+      "mode": "coach",
+      "charter": true,
+      "capacity": 106,
+      "round_trip": true,
+      "charter_verified": false,
       "depart": "23:00",
       "arrive": "02:30",
       "arrives_next_day": true,
       "changes": 0,
       "overnight": true,
-      "return_arrive": "21:00"
+      "return_arrive": "21:00",
+      "vehicles": 2,
+      "seats_per_vehicle": 53
     },
     "lodging": {
-      "name": "Group hostel",
-      "rooms": 10,
-      "capacity": 40,
-      "walk_minutes": 6,
-      "step_free_hint": true
+      "name": "Illustrative Normandy group holiday park E",
+      "rooms": 25,
+      "capacity": 100,
+      "step_free_hint": true,
+      "nights": 2,
+      "kitchen_hint": true,
+      "activity_space_hint": true,
+      "facilities_verified": false
     },
-    "cost_per_person_cents": 7800
+    "cost_per_person_cents": 7800,
+    "cost_breakdown_per_person_cents": {
+      "coach": 2200,
+      "lodging": 3400,
+      "groceries": 2000,
+      "food_transport": 200
+    }
   }
 ]

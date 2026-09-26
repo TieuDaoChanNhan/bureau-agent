@@ -46,8 +46,12 @@ the participant count from text when explicit, otherwise from participants. If
 the counts conflict, ask which count is correct and leave participants null.
 
 Hard constraints: participants is a headcount; max_cost_per_person_cents is the
-maximum EUR budget per person for transport and lodging in INTEGER CENTS (including
-decimal amounts); arrive_before is the latest local arrival in zero-padded HH:MM;
+maximum EUR budget per person for the complete requested package in INTEGER CENTS
+(including decimal amounts). When meals and food delivery are explicitly included,
+keep the full ceiling covering transport, lodging, groceries and food transport;
+do not subtract their allocations or add them again. When meals are excluded,
+the ceiling covers transport and lodging only.
+arrive_before is the latest local arrival in zero-padded HH:MM;
 no_overnight is true when overnight travel is forbidden, false when explicitly
 allowed, and null when unstated. step_free_rooms counts requested accessible rooms.
 Do not confuse accessible people with rooms: if people need step-free rooms but
@@ -67,8 +71,9 @@ text needs English questions, French text needs French questions; do not infer
 language from a city or event name) for ambiguity,
 conflicting numbers, vague limits, or unsupported hard requirements. In particular,
 if a budget does not explicitly say whether meals are included or excluded, ask
-whether meals are included, even when travel and lodging are mentioned. If meals
-are included, ask for the transport/lodging allocation before setting that ceiling.
+whether meals are included, even when travel and lodging are mentioned. An explicit
+meal-inclusive ceiling does not need a transport/lodging-only allocation. Do not
+invent prices or claim that grocery purchases or food deliveries are confirmed.
 Never assume a budget is per-person or total when its scope is unclear. An explicit
 group total may be divided by a known headcount, rounding down to whole cents.
 Ask for a maximum budget when the organizer requests one or only says 'cheap'.

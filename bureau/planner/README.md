@@ -24,7 +24,7 @@ LLM interprets and explains. Code composes, prices and validates. The planner ne
 ## Hard constraints
 | Key | Checked by | Can reject an option |
 |---|---|---|
-| `max_cost_per_person_cents` | code | yes |
+| `max_cost_per_person_cents` (full requested package, including meals when explicit) | code | yes |
 | `arrive_before` ("HH:MM") | code | yes |
 | `no_overnight` | code | yes |
 | `participants` (lodging capacity) | code | yes |
@@ -43,10 +43,40 @@ The default extracts the organizer's text using `OPENAI_API_KEY` and
 for extraction. Null hard fields are omitted, cents remain integers, arrival
 times use `HH:MM`, and preference order is preserved. Accessibility always
 requires organizer verification. Questions stop the planner before searching.
-The original WEI text leaves meals unclear, so a clarification is expected.
+The WEI briefing now describes kès's 100-person demo, charter coaches and a group
+venue with cooking and activity spaces. Meals and grocery transport are included
+in the student fee: kès buys the groceries and transports them to the venue.
+Two separate step-free rooms are requested. Charter hire, kitchens and activity
+permissions are outside the current schema. The model may ask clarifications or
+proceed with only the supported checks. See [fixture provenance and limits](../../data/README.md#wei-source-assumptions-and-scenarios-t16--issue-15).
 
-`--recorded-constraints` explicitly replays the sample constraints for an offline
-demo. It does not evaluate extraction. Unit tests and API example generation also
+The budget is the ceiling for the full requested package. Explicit meal inclusion
+is supported; ambiguity about inclusion still requires clarification. The optional
+`TravelRequest.catering` carries the organizer's group budgets. For the WEI demo,
+composition adds EUR 2000 for groceries and EUR 200 for food transport across
+100 people (EUR 22/person) once, alongside transport and lodging. The fallback
+packages already include these allocations in their unchanged totals; option A
+matches the EUR 112 provisional participation fee. Composed prices may differ
+from that fee. These fictional budgets await kès confirmation. An optional
+`cost_breakdown_per_person_cents` itemizes a `TravelOption`; code requires
+nonnegative integer values whose sum equals `cost_per_person_cents` and never
+adds the breakdown a second time. Menus, quantities, dietary needs, purchasing
+and food transport arrangements remain organizer checks.
+
+`--recorded-constraints` explicitly replays the supported sample constraints for an offline
+demo. Search normally combines cached Jinko hotel rates with illustrative charter
+transport. A cached quote for one double room is scaled to 50 rooms for 100 people;
+group availability remains unconfirmed. Ground search returned 404 for the current
+key, so transport is recorded. If hotel search is unavailable, the planner uses
+`travel_options.json`: A/B pass at EUR 120 and none passes at EUR 90 in that
+fallback fixture. Composed options have their own IDs and prices. Neither path
+confirms coach hire, group availability or venue facilities; those requirements
+remain in `travel.organizer_checks`. This mode does not evaluate extraction.
+The current composed results return `ESCALATE` at the unchanged EUR 120 ceiling
+and at EUR 90: the cheapest package meeting the travel-time checks costs EUR
+135.59/person including meals. `--budget 140` is a what-if selection demo only;
+it does not change the configured ceiling or the provisional participation fee.
+Unit tests and API example generation also
 use explicit fixtures. Missing credentials, API errors, refusals, truncated output,
 and invalid values raise errors; they never fall back to the sample's answers.
 The optional `client=` argument supports scripted tests without network access.
@@ -87,4 +117,6 @@ validates shape and types, not the truth of an interpretation. The original p001
 gold maps two people needing accessible rooms to two provisional rooms; the
 organizer must confirm allocation and accessibility before proceeding. Currency
 conversion and arbitrary new hard fields are unsupported and need clarification.
-Option availability is still recorded until T11/T12.
+Hotel search supports live and replay modes. Cached individual-room quotes,
+scaled group prices and illustrative transport do not establish current group
+availability, private coach hire or venue permissions.

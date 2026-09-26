@@ -21,7 +21,7 @@ def response(**hard):
 
 class ExtractionTests(unittest.TestCase):
     def setUp(self):
-        self.request = replace(wei_request(), event_id="not-a-recorded-event",
+        self.request = replace(wei_request(), event_id="not-a-recorded-event", participants=40,
                                text="For 40 people: EUR 99.50 per person, meals excluded. Arrive by 22:30.")
 
     def test_request_is_source_of_truth_and_schema_is_strict(self):
