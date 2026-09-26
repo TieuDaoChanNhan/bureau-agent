@@ -15,6 +15,7 @@ python -m unittest tests.test_core.LoaderTests -v          # one class
 | `test_tools.py` | Identity bands, eligibility, group checks, rules search |
 | `test_planner.py` | Constraint gate, ranking, diagnosis, unverifiable constraints, clarifications |
 | `test_agent.py` | Agent tool context, argument/proposal recovery, approval-only behavior and loop mechanics with a scripted fake LLM |
+| `test_eval.py` | Labeled corpus integrity, actual tool tracing with fake clients, scoring errors, isolated invariant checks and JSON reports |
 | `test_pending.py` | Store persistence and all six executor actions |
 | `test_executor_hardening.py` | Executor rejection, payment ownership, optional replies, and unchanged state on failure |
 | `test_api.py` | Runtime API, proposal persistence, approval/dismiss/reset, error responses, and outbox; fake agent and temporary storage |
