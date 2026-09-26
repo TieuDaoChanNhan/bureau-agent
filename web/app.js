@@ -820,6 +820,13 @@ setInterval(() => {
   $("#thinkPhase").textContent = THINKING[Math.min(THINKING.length - 1, Math.floor(n / 3))];
 }, 500);
 
+// Demo video (T17): the hero button and footer link stay hidden until a URL is set here.
+const DEMO_VIDEO_URL = "";
+for (const id of ["#videoBtn", "#videoLink"]) {
+  const a = $(id);
+  if (DEMO_VIDEO_URL) { a.href = DEMO_VIDEO_URL; a.hidden = false; }
+}
+
 // Theme: light by default; the choice is remembered per browser when storage is available.
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
