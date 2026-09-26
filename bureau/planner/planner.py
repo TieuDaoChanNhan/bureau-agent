@@ -9,15 +9,41 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict
+from datetime import datetime
 
 from ..config import DATA_DIR
-from ..core.models import Evidence, ProposedAction
+from ..core.models import EventState, Evidence, ProposedAction
 from .constraints import diagnose, eur, evaluate
 from .explain import explain, rejection_line
 from .extract import extract_constraints
 from .interface import Constraints, TravelOption, TravelRequest
 
-__all__ = ["plan_trip", "extract_constraints", "search_options", "TravelRequest"]
+__all__ = ["plan_trip", "extract_constraints", "search_options", "request_from_state", "TravelRequest",
+           "HARD_KEYS", "recorded_constraints"]
+
+# Hard constraints checked in code (see interface.Constraints); the only keys an override may set.
+HARD_KEYS = {"participants": int, "max_cost_per_person_cents": int, "arrive_before": str,
+             "no_overnight": bool, "step_free_rooms": int}
+
+
+def recorded_constraints(state: EventState) -> Constraints:
+    """Constraints recorded with the sample event, for offline demos and tests (no LLM)."""
+    recorded = (state.travel or {}).get("constraints")
+    if not recorded:
+        raise ValueError(f"Event '{state.id}' has no recorded constraints")
+    return Constraints(hard=dict(recorded["hard"]), soft=list(recorded["soft"]),
+                       organizer_verified=list(recorded.get("organizer_verified", [])),
+                       clarifications=list(recorded.get("clarifications", [])))
+
+
+def request_from_state(state: EventState, text: str | None = None) -> TravelRequest:
+    """Build the planner input from `state.travel` (runtime state, not event.json)."""
+    t = state.travel
+    if not t:
+        raise ValueError(f"Event '{state.id}' has no travel request")
+    return TravelRequest(event_id=state.id, text=text or t["request"], participants=t["participants"],
+                         origin=t["origin"], destination=t["destination"],
+                         depart_after=datetime.fromisoformat(t["depart_after"]))
 
 
 def search_options(req: TravelRequest) -> list[TravelOption]:

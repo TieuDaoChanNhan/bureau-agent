@@ -15,8 +15,7 @@ from .agent.loop import run_pending
 from .core.detect import detect_issues
 from .core.loader import load_event
 from .core.store import load_state
-from .planner.interface import Constraints, TravelRequest
-from .planner.planner import extract_constraints, plan_trip
+from .planner.planner import extract_constraints, plan_trip, recorded_constraints, request_from_state
 
 
 def _print_issues(issues) -> None:
@@ -56,18 +55,12 @@ def cmd_run(args) -> None:
 
 def cmd_plan(args) -> None:
     state = load_event(args.event)
-    t = state.travel
-    if not t:
-        sys.exit(f"Event '{args.event}' has no travel request.")
-    from datetime import datetime
-    req = TravelRequest(event_id=state.id, text=t["request"], participants=t["participants"],
-                        origin=t["origin"], destination=t["destination"],
-                        depart_after=datetime.fromisoformat(t["depart_after"]))
+    try:
+        req = request_from_state(state)
+    except ValueError as exc:
+        sys.exit(str(exc))
     if args.recorded_constraints:
-        recorded = t["constraints"]
-        c = Constraints(hard=dict(recorded["hard"]), soft=list(recorded["soft"]),
-                        organizer_verified=list(recorded.get("organizer_verified", [])),
-                        clarifications=list(recorded.get("clarifications", [])))
+        c = recorded_constraints(state)
         source = "recorded fixture (offline demo)"
     else:
         c = extract_constraints(req)

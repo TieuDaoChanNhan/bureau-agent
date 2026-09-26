@@ -21,6 +21,8 @@ from bureau.core.detect import detect_issues
 from bureau.core.executor import InvariantViolation, apply
 from bureau.core.models import EventState, Issue, Message, ProposedAction
 from bureau.config import DATA_DIR, ROOT
+from bureau.planner.planner import (HARD_KEYS, extract_constraints, plan_trip, recorded_constraints,
+                                    request_from_state)
 
 app = FastAPI(title="Bureau Agent API")
 
@@ -30,6 +32,12 @@ class NewMessage(BaseModel):
     sender: str = Field(min_length=1, max_length=200)
     channel: Literal["email", "discord", "form"] = "email"
     text: str = Field(min_length=1, max_length=4000)
+
+
+class PlanRequest(BaseModel):
+    text: StrictStr | None = None          # the request, possibly with the organizer's answers appended
+    overrides: dict[str, int | bool | str] | None = None
+    recorded: bool = False                 # use the constraints recorded with the event (offline demo)
 
 
 class ApprovalRequest(BaseModel):
@@ -69,7 +77,8 @@ def _refresh(state: EventState) -> None:
 def _event_summary(state: EventState) -> dict:
     issues = store.merge_issue_status(detect_issues(state), state.issues)
     return {"id": state.id, "name": state.name, "counts": _counts(issues),
-            "issues": [asdict(i) for i in issues], "actions": [asdict(a) for a in state.actions]}
+            "issues": [asdict(i) for i in issues], "actions": [asdict(a) for a in state.actions],
+            "travel": state.travel, "logistics": state.logistics}
 
 
 def _event_id_of_action(action_id: str) -> str:
@@ -114,10 +123,6 @@ def get_event(event_id: str):
     return _event_summary(_load_and_refresh(event_id))
 
 
-def _todo(task: str):
-    raise HTTPException(501, f"Not implemented yet: see TASKS.md {task}")
-
-
 @app.post("/api/events/{event_id}/run")
 def run_agent(event_id: str, limit: int = Query(5, ge=1), issue_id: str | None = None):
     """Propose up to ``limit`` runnable issues and report the remaining backlog.
@@ -136,10 +141,60 @@ def run_agent(event_id: str, limit: int = Query(5, ge=1), issue_id: str | None =
     return summary
 
 
+def _planner_client():
+    """OpenAI client for constraint extraction and explanations; None without a key.
+
+    Tests patch this with a scripted fake client, so they never call the API.
+    """
+    if not config.OPENAI_API_KEY:
+        return None
+    from openai import OpenAI
+    return OpenAI(api_key=config.OPENAI_API_KEY, timeout=45, max_retries=2)
+
+
 @app.post("/api/events/{event_id}/plan")
-def run_planner(event_id: str, body: dict | None = None):
-    """Run the travel planner. Body: {"text"?: str, "overrides"?: {"max_cost_per_person_cents": int}}."""
-    _todo("T14")
+def run_planner(event_id: str, body: PlanRequest | None = None):
+    """Run the travel planner and store its proposal for the `no_logistics_plan` issue.
+
+    Body: {"text"?: str, "overrides"?: {hard constraint: value}}, e.g. a what-if budget
+    {"max_cost_per_person_cents": 9000}. Replaces any earlier planner proposal; never books.
+    """
+    body = body or PlanRequest()
+    if event_id not in _events():
+        raise HTTPException(404, "unknown event")
+    state = _load_and_refresh(event_id)
+    issue = state.issue("no_logistics_plan")
+    if not state.travel or issue is None:
+        raise HTTPException(409, "this event has no open travel-planning issue")
+    if issue.status in ("resolved", "dismissed"):
+        raise HTTPException(409, f"issue {issue.id} is already {issue.status}")
+    for key, value in (body.overrides or {}).items():
+        if key not in HARD_KEYS or type(value) is not HARD_KEYS[key]:
+            raise HTTPException(422, f"unsupported override: {key}={value!r}")
+    req = request_from_state(state, text=body.text)
+    client = None if body.recorded else _planner_client()
+    if body.recorded:
+        constraints = recorded_constraints(state)
+    elif client is None:
+        raise HTTPException(503, 'OPENAI_API_KEY is not set (or send {"recorded": true} for the offline demo)')
+    else:
+        try:
+            constraints = extract_constraints(req, client=client)
+        except ValueError as exc:  # blank request or unusable model output
+            raise HTTPException(422, str(exc)) from exc
+        except Exception as exc:   # provider failure: never fall back to a sample plan
+            raise HTTPException(502, f"constraint extraction failed: {exc}") from exc
+    constraints.hard.update(body.overrides or {})
+    action = plan_trip(req, constraints, client=client)
+    action.payload["constraints"] = asdict(constraints)
+    action.payload["request_text"] = req.text
+    action.payload["constraints_source"] = "recorded" if body.recorded else "llm"
+    state.actions = [a for a in state.actions if a.issue_id != issue.id] + [action]
+    issue.status = "proposed" if action.action_type == "SELECT_TRAVEL_PLAN" else "needs_human"
+    store.save_state(state)
+    summary = _event_summary(state)
+    summary["action_id"] = action.id
+    return summary
 
 
 @app.post("/api/events/{event_id}/messages", status_code=201)
