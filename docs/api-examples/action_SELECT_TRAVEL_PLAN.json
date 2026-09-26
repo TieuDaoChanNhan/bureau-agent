@@ -4,7 +4,7 @@
   "issue_id": "no_logistics_plan",
   "action_type": "SELECT_TRAVEL_PLAN",
   "title": "2 of 5 options pass every verified hard constraint",
-  "description": "Option A ranks first under the current priorities (fewer_changes, near_station, early_return). Best: €112/person. Organizers choose; nothing is booked automatically.",
+  "description": "Option A ranks first under the current priorities (fewer_changes, near_station, early_return) at €112/person. Other valid options: Option B (€118). Rejected: Option C (arrive before 21:00); Option D (cost ≤ €120/person); Option E (arrive before 21:00, no overnight travel). Organizers choose; nothing is booked automatically.",
   "evidence": [
     {
       "source_type": "travel_option",

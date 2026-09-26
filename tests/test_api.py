@@ -117,6 +117,89 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code, response.text)
         self.assertEqual([issue_id], [a["issue_id"] for a in response.json()["actions"]])
 
+    WEI_EXTRACTED = {"hard": {"participants": 40, "max_cost_per_person_cents": 12000, "arrive_before": "21:00",
+                              "no_overnight": True, "step_free_rooms": 2},
+                     "soft": ["fewer_changes", "near_station", "early_return"],
+                     "organizer_verified": ["step_free_rooms"], "clarifications": []}
+
+    def plan(self, body=None, clarifications=(), explanation="Option F is the direct train; Option D is cheaper but has one change."):
+        """POST /plan with a scripted planner client: extraction JSON, then the explanation."""
+        from tests.fake_llm import FakeClient
+        extracted = {**self.WEI_EXTRACTED, "clarifications": list(clarifications)}
+        self.planner_client = FakeClient([json.dumps(extracted), explanation])
+        with mock.patch("api.main._planner_client", return_value=self.planner_client):
+            return self.client.post("/api/events/wei/plan", json=body or {})
+
+    def plan_action(self, response):
+        return next(a for a in response.json()["actions"] if a["id"] == response.json()["action_id"])
+
+    def test_plan_with_requested_budget_proposes_valid_options(self):
+        response = self.plan()
+        self.assertEqual(200, response.status_code, response.text)
+        action = self.plan_action(response)
+        self.assertEqual("SELECT_TRAVEL_PLAN", action["action_type"])
+        self.assertGreaterEqual(len(action["payload"]["ranked_valid"]), 1)
+        self.assertEqual(12000, action["payload"]["constraints"]["hard"]["max_cost_per_person_cents"])
+        self.assertEqual("llm", action["payload"]["constraints_source"])
+        self.assertEqual("F", action["payload"]["ranked_valid"][0])   # Jinko hotels (replay) x recorded transport
+        self.assertTrue(action["description"].startswith("Option F is the direct train"))
+        self.assertIn("jinko:replay", action["payload"]["options"][0]["option"]["source"])
+        self.assertEqual("proposed", next(i for i in response.json()["issues"]
+                                          if i["id"] == "no_logistics_plan")["status"])
+
+    def test_plan_what_if_budget_escalates_with_suggestions_and_replaces_the_proposal(self):
+        self.plan()
+        response = self.plan({"overrides": {"max_cost_per_person_cents": 9000}})
+        self.assertEqual(200, response.status_code, response.text)
+        plans = [a for a in response.json()["actions"] if a["issue_id"] == "no_logistics_plan"]
+        self.assertEqual(["ESCALATE"], [a["action_type"] for a in plans])
+        self.assertTrue(plans[0]["payload"]["suggestions"])
+
+    def test_plan_asks_clarifications_before_searching_and_accepts_answers(self):
+        question = "Does the €120 budget include meals?"
+        response = self.plan(clarifications=[question])
+        action = self.plan_action(response)
+        self.assertEqual("ESCALATE", action["action_type"])
+        self.assertEqual([question], action["payload"]["clarifications"])
+        self.assertNotIn("options", action["payload"])           # nothing searched yet
+        answered = action["payload"]["request_text"] + "\n\nOrganizer answers: No, travel and lodging only."
+        response = self.plan({"text": answered})
+        self.assertEqual("SELECT_TRAVEL_PLAN", self.plan_action(response)["action_type"])
+        sent = json.loads(self.planner_client.requests[0]["messages"][1]["content"])
+        self.assertTrue(sent["text"].endswith("travel and lodging only."))
+
+    def test_plan_without_a_key_is_503_unless_recorded_constraints_are_requested(self):
+        with mock.patch("api.main._planner_client", return_value=None):
+            self.assertEqual(503, self.client.post("/api/events/wei/plan").status_code)
+            response = self.client.post("/api/events/wei/plan", json={"recorded": True})
+        self.assertEqual(200, response.status_code, response.text)
+        self.assertEqual("recorded", self.plan_action(response)["payload"]["constraints_source"])
+
+    def test_unusable_extraction_is_422_and_changes_nothing(self):
+        from tests.fake_llm import FakeClient
+        with mock.patch("api.main._planner_client", return_value=FakeClient(['{"hard": {}}'])):
+            response = self.client.post("/api/events/wei/plan")
+        self.assertEqual(422, response.status_code, response.text)
+        self.assertEqual([], [a for a in self.client.get("/api/events/wei").json()["actions"]])
+
+    def test_choosing_a_valid_option_unlocks_dependent_issues(self):
+        plan = self.plan().json()
+        before = {i["id"]: i for i in plan["issues"]}
+        self.assertEqual(["no_logistics_plan"], before["unpaid_participation"]["depends_on"])
+        best = next(a for a in plan["actions"] if a["id"] == plan["action_id"])["payload"]["ranked_valid"][0]
+        response = self.client.post(f"/api/actions/{plan['action_id']}/approve", json={"option_id": best})
+        self.assertEqual(200, response.status_code, response.text)
+        self.assertEqual(best, response.json()["logistics"]["id"])
+        self.assertNotIn("no_logistics_plan", [i["id"] for i in response.json()["issues"]])
+        self.assertEqual(409, self.plan().status_code)
+
+    def test_plan_rejects_bad_overrides_and_events_without_travel(self):
+        for overrides in ({"budget": 9000}, {"max_cost_per_person_cents": "90"}, {"no_overnight": 1}):
+            with self.subTest(overrides=overrides):
+                self.assertEqual(422, self.plan({"overrides": overrides}).status_code)
+        self.assertEqual(409, self.client.post("/api/events/hackathon/plan").status_code)
+        self.assertEqual(404, self.client.post("/api/events/nope/plan").status_code)
+
     def test_reset_restores_sample_data_and_clears_actions_outbox_and_log(self):
         baseline = self.client.get("/api/events/hackathon").json()
         action = self.seed_action(payload={"payment_id": "f90", "participant_id": "p01",

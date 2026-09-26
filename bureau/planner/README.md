@@ -14,7 +14,7 @@ LLM interprets and explains. Code composes, prices and validates. The planner ne
 | File | Role | Status |
 |---|---|---|
 | `interface.py` | Contract with the core: `TravelRequest`, `Constraints`, `TravelOption` | done |
-| `planner.py` | `plan_trip(req, constraints) -> ProposedAction` | done (uses recorded packages) |
+| `planner.py` | `plan_trip(req, constraints, client, search) -> ProposedAction`; `search_options` composes Jinko hotels (replay) × recorded transport, falling back to `travel_options.json` | done (T14) |
 | `constraints.py` | Hard-constraint checks, ranking by soft priorities, diagnosis | done |
 | `extract.py` | Words → `Constraints` with OpenAI strict structured output | done (T10) |
 | `jinko.py` | `ground_search`, `hotel_search`, live/replay cache under `data/<event>/jinko_cache/` | done (T11): hotels verified live; ground search returns 404 for our key |

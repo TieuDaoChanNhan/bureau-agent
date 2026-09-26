@@ -4,7 +4,7 @@
   "issue_id": "no_logistics_plan",
   "action_type": "ESCALATE",
   "title": "No option satisfies every hard constraint",
-  "description": "I did not relax any constraint. Option A (€112/person) only fails \"cost ≤ €90/person\" (€112 (+€22)). Option B (€118/person) only fails \"cost ≤ €90/person\" (€118 (+€28)). Option D (€141/person) only fails \"cost ≤ €90/person\" (€141 (+€51)).",
+  "description": "I did not relax any constraint. Option A (€112/person) only fails \"cost ≤ €90/person\" (€112 (+€22)). Option B (€118/person) only fails \"cost ≤ €90/person\" (€118 (+€28)). Option D (€141/person) only fails \"cost ≤ €90/person\" (€141 (+€51)). Rejected: Option A (cost ≤ €90/person); Option B (cost ≤ €90/person); Option C (cost ≤ €90/person, arrive before 21:00); Option D (cost ≤ €90/person); Option E (arrive before 21:00, no overnight travel).",
   "evidence": [
     {
       "source_type": "travel_option",

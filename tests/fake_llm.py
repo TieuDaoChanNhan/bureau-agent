@@ -28,13 +28,14 @@ class FakeClient:
         self.requests.append(copy.deepcopy(kwargs))  # snapshot: the loop keeps mutating messages
         step = self.script.pop(0)
         if isinstance(step, str):
-            message = SimpleNamespace(content=step, tool_calls=None)
+            message = SimpleNamespace(content=step, tool_calls=None, refusal=None)
         else:
             calls = [SimpleNamespace(id=f"call_{len(self.requests)}_{i}", type="function",
                                      function=SimpleNamespace(name=name, arguments=json.dumps(args)))
                      for i, (name, args) in enumerate(step)]
-            message = SimpleNamespace(content=None, tool_calls=calls)
-        return SimpleNamespace(choices=[SimpleNamespace(message=message)])
+            message = SimpleNamespace(content=None, tool_calls=calls, refusal=None)
+        # finish_reason/refusal match the real SDK; structured extraction (T10) checks them.
+        return SimpleNamespace(choices=[SimpleNamespace(message=message, finish_reason="stop")])
 
 
 class FakeStructuredClient:

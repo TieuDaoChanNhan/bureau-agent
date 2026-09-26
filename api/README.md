@@ -12,7 +12,7 @@ uvicorn api.main:app --reload     # http://127.0.0.1:8000  (docs at /docs)
 | GET | `/api/events/{event_id}` | done (re-detected issues, stored statuses and actions) |
 | POST | `/api/events/{event_id}/run?limit=5` | done (bounded proposals only) |
 | POST | `/api/events/{event_id}/messages` | done (T32: add an incoming message; returns the summary and the new `issue_id`) |
-| POST | `/api/events/{event_id}/plan` | 501 (T14 / issue #13, outside T05) |
+| POST | `/api/events/{event_id}/plan` | done (T14: planner proposal for `no_logistics_plan`; optional `overrides` for what-if) |
 | GET | `/api/actions/{action_id}` | done |
 | POST | `/api/actions/{action_id}/approve` | done (executor validation, optional edits/selection) |
 | POST | `/api/actions/{action_id}/dismiss` | done (issue status only) |
@@ -22,7 +22,7 @@ uvicorn api.main:app --reload     # http://127.0.0.1:8000  (docs at /docs)
 JSON bodies are the dataclasses of `bureau/core/models.py` (`dataclasses.asdict`). Keep it that way so the web UI has one source of truth.
 
 `approve`, `dismiss`, and `reset` return the same summary as the event GET:
-`{id, name, counts, issues, actions}`. `run` adds `remaining` and `errors` to
+`{id, name, counts, issues, actions, travel, logistics}`. `run` adds `remaining` and `errors` to
 that summary. GET routes do not write runtime files.
 Issues are re-detected for each summary; repaired issues disappear, and dependent
 issues are unlocked immediately after a travel plan is approved. Completed
@@ -66,3 +66,21 @@ python -m unittest tests.test_api -v
 `liveNN`, a timezone-aware `received_at`, and is saved in runtime `state.json`; detection turns it into
 `message:liveNN`, returned as `issue_id`. Run the agent on it with `run?issue_id=`. Reset removes it.
 The text is data for the agent, never instructions.
+
+## Planning a trip (T14)
+`POST /api/events/{event_id}/plan` with an optional body `{"text"?: str, "overrides"?: {key: value}, "recorded"?: bool}`.
+Constraints are extracted from the request text by the LLM (T10); `recorded: true` uses the constraints
+recorded with the event instead (offline demo). Without an OpenAI key and without `recorded`, the route
+returns 503; unusable model output returns 422 and a provider failure 502, and nothing is stored.
+When the planner has questions it returns `ESCALATE` with `payload.clarifications` and does not search;
+send the request again with the organizer's answer appended to `text` (`payload.request_text` holds
+the text last used). Packages are Jinko hotels (replay cache) composed with recorded transport,
+and the LLM phrases the explanation.
+The request is built from the runtime `state.travel`. `overrides` may only set the hard constraints
+checked in code (`participants`, `max_cost_per_person_cents`, `arrive_before`, `no_overnight`,
+`step_free_rooms`) with the right JSON type, otherwise 422; this powers the budget what-if.
+The planner proposal (`SELECT_TRAVEL_PLAN`, or `ESCALATE` with `suggestions` when nothing is valid)
+replaces any earlier planner proposal and carries the constraints used in `payload.constraints`.
+The response is the event summary plus `action_id`. Approving `SELECT_TRAVEL_PLAN` needs
+`{"option_id": ...}` and only accepts a valid option; it sets `logistics` and unlocks dependent
+issues. 409 when the event has no open travel issue. Nothing is booked.

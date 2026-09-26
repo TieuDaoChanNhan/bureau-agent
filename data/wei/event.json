@@ -35,6 +35,17 @@
         "step_free_rooms"
       ]
     },
-    "destination": "Trouville-Deauville"
+    "destination": "Trouville-Deauville",
+    "search": {
+      "city": "Deauville",
+      "country_code": "fr",
+      "station": [
+        49.3583,
+        0.0858
+      ],
+      "checkin": "2026-10-09",
+      "checkout": "2026-10-11",
+      "rooms": 20
+    }
   }
 }

@@ -70,7 +70,7 @@ def compose_packages(req: TravelRequest, transports: list[dict[str, Any]],
     for k, (cost, _, t, l) in enumerate(chosen):
         transport = {key: value for key, value in t.items() if key not in ("price_cents", "source")}
         lodging = {key: value for key, value in l.items() if key not in ("price_per_night_cents", "source")}
-        source = t.get("source") or l.get("source") or "jinko"
+        source = " + ".join(x for x in (t.get("source"), l.get("source")) if x) or "jinko"
         packages.append(TravelOption(id=_label(k), transport=transport, lodging=lodging,
                                      cost_per_person_cents=cost, source=source))
     return packages
