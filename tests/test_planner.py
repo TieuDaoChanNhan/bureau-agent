@@ -276,6 +276,18 @@ class ExplainTests(unittest.TestCase):
         self.assertEqual(ranked_before, self.valid)
         self.assertEqual(checks_before, self.checks)
 
+    def test_priorities_are_plain_words_for_the_model_and_the_template(self):
+        from bureau.planner.explain import explain
+        from bureau.planner.extract import SOFT_KEYS
+        from tests.fake_llm import FakeClient
+        client = FakeClient(["The hotel is nice."])  # rejected prose: the template is used
+        text = explain(self.valid, self.checks, self.c, client=client)
+        facts = client.requests[0]["messages"][1]["content"]
+        for key in SOFT_KEYS:
+            self.assertNotIn(key, text)
+            self.assertNotIn(key, facts)
+        self.assertIn("fewer changes", facts)
+
     def test_plan_trip_passes_the_client_to_explain(self):
         from tests.fake_llm import FakeClient
         action = plan_trip(self.req, self.c, client=FakeClient(["Option D returns earliest by coach."]))

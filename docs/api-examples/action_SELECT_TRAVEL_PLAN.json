@@ -4,7 +4,7 @@
   "issue_id": "no_logistics_plan",
   "action_type": "SELECT_TRAVEL_PLAN",
   "title": "3 of 8 options pass every verified hard constraint",
-  "description": "Option F ranks first under the current priorities (fewer_changes, early_return, lower_cost) at €142.59/person. Other valid options: Option C (€135.59), Option E (€140.59). Rejected: Option A (arrive before 21:00, no overnight travel); Option B (arrive before 21:00); Option D (arrive before 21:00, no overnight travel); Option G (arrive before 21:00); Option H (cost ≤ €150/person). Organizers choose; nothing is booked automatically.",
+  "description": "Option F ranks first under the current priorities (fewer changes, an earlier return, lower cost) at €142.59/person. Other valid options: Option C (€135.59), Option E (€140.59). Rejected: Option A (arrive before 21:00, no overnight travel); Option B (arrive before 21:00); Option D (arrive before 21:00, no overnight travel); Option G (arrive before 21:00); Option H (cost ≤ €150/person). Organizers choose; nothing is booked automatically.",
   "evidence": [
     {
       "source_type": "travel_option",

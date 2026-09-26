@@ -26,15 +26,7 @@ The work is not hard. It is **fragmented, repetitive, and easy to get wrong**, a
 
 One loop handles every kind of event:
 
-```mermaid
-flowchart LR
-  S[Event state<br/>registrations · payments · teams · inbox · trip] --> D[Detect<br/>fixed checks in code]
-  D --> A[Investigate<br/>AI agent chooses tools]
-  A --> P[Proposed action<br/>with evidence and checks]
-  P --> H{Organizer<br/>approves · edits · dismisses}
-  H -->|approved| X[Executor re-checks rules<br/>and applies]
-  X --> S
-```
+![The loop: event state → detect (code) → investigate (AI agent) → proposed action → organizer approves, edits or dismisses → executor re-checks rules and applies → event state](docs/screenshots/loop-diagram.png)
 
 1. **Detect.** Deterministic checks read the event and list what needs attention, blocking first: unmatched payments, unpaid fees, a person in two teams, a team over capacity, unanswered messages, a trip without a plan. 31 issues are found in the sample hackathon.
 2. **Investigate.** An AI agent (OpenAI `gpt-4.1`, tool calling) picks its own tools: look up a participant, read payments, score an identity match, search the rules, check teams. It proposes **one** action: link a payment, send a reply, move a member, or ask the organizers. Every tool call is recorded and shown.

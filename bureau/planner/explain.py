@@ -24,8 +24,21 @@ SYSTEM = (
     "Write 2 to 4 short plain sentences: why the first option ranks first under the stated "
     "priorities, and the main trade-off against the other valid options. Mention options by "
     "their letter (\"Option A\"). Do not recommend relaxing a constraint, do not invent prices, "
-    "times or facilities, and do not say anything is booked."
+    "times or facilities, and do not say anything is booked. Name priorities in plain words as "
+    "given; never quote field names."
 )
+
+# Plain words for the soft-preference keys (see extract.SOFT_KEYS), for organizers and the model.
+PRIORITY_LABEL = {
+    "fewer_changes": "fewer changes",
+    "near_station": "lodging near the station",
+    "early_return": "an earlier return",
+    "lower_cost": "lower cost",
+}
+
+
+def priority_labels(soft: list[str]) -> list[str]:
+    return [PRIORITY_LABEL.get(k, k.replace("_", " ")) for k in soft]
 
 
 def _rejections(checks: dict[str, list[Check]], ranked_ids: set[str]) -> list[tuple[str, list[str]]]:
@@ -50,7 +63,7 @@ def rejection_line(checks: dict[str, list[Check]], ranked: list[TravelOption]) -
 def _template(ranked: list[TravelOption], c: Constraints) -> str:
     best = ranked[0]
     text = (f"Option {best.id} ranks first under the current priorities "
-            f"({', '.join(c.soft) or 'lower cost'}) at {eur(best.cost_per_person_cents)}/person.")
+            f"({', '.join(priority_labels(c.soft)) or 'lower cost'}) at {eur(best.cost_per_person_cents)}/person.")
     if len(ranked) > 1:
         text += " Other valid options: " + ", ".join(
             f"Option {o.id} ({eur(o.cost_per_person_cents)})" for o in ranked[1:]) + "."
@@ -59,7 +72,7 @@ def _template(ranked: list[TravelOption], c: Constraints) -> str:
 
 def _facts(ranked: list[TravelOption], checks: dict[str, list[Check]], c: Constraints) -> dict:
     return {
-        "priorities_in_order": c.soft,
+        "priorities_in_order": priority_labels(c.soft),
         "hard_constraints": c.hard,
         "valid_options_ranked": [
             {"option": o.id, "cost_per_person": eur(o.cost_per_person_cents), "transport": o.transport,
