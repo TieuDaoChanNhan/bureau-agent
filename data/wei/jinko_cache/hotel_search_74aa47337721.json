@@ -1,0 +1,2975 @@
+{
+ "endpoint": "hotel_search",
+ "request": {
+  "city_name": "Deauville",
+  "country_code": "fr",
+  "checkin": "2026-10-09",
+  "checkout": "2026-10-11",
+  "occupancies": [
+   {
+    "adults": 2
+   }
+  ],
+  "currency": "EUR",
+  "max_results": 10
+ },
+ "response": {
+  "hotels": [
+   {
+    "hotel_id": "lp6554d64f",
+    "name": "You Hotel Deauville - Handwritten Collection",
+    "address": "1 Rue Désiré le Hoc, Deauville, Calvados, 14800",
+    "city": "Deauville",
+    "country": "FR",
+    "star_rating": 4,
+    "rating": 8.800000190734863,
+    "review_count": 66,
+    "main_photo": "https://static.cupid.travel/hotels/ex_174b1e16_z.jpg",
+    "thumbnail": "https://static.cupid.travel/hotels/thumbnail/ex_174b1e16_z.jpg",
+    "latitude": 49.359718322753906,
+    "longitude": 0.07991000264883041,
+    "rooms": [
+     {
+      "room_id": "1459092123",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 4,
+      "rates": [
+       {
+        "offer_id": "htl_443dae15cc08b6ba",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 551.66,
+        "currency": "EUR",
+        "total_amount_display": "EUR 551.66",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 22.9,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 22.90"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_beea90f5e4233602",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 641.16,
+        "currency": "EUR",
+        "total_amount_display": "EUR 641.16",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 11.44,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 11.44"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_847fecce435c8fdc",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 641.94,
+        "currency": "EUR",
+        "total_amount_display": "EUR 641.94",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 291.79,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 291.79"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 53.05,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 53.05"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_bb18eafa967f6e10",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 735.68,
+        "currency": "EUR",
+        "total_amount_display": "EUR 735.68",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 334.4,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 334.40"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 60.8,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 60.80"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "5885367",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_2d658e75ed75365a",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 347.56,
+        "currency": "EUR",
+        "total_amount_display": "EUR 347.56",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 11.44,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 11.44"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_77ab7cfbeb6969cd",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 413.72,
+        "currency": "EUR",
+        "total_amount_display": "EUR 413.72",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T10:00:00Z",
+          "amount": 179.1,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 179.10"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 11.44,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 11.44"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_db9941214ff0dd7b",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 428.12,
+        "currency": "EUR",
+        "total_amount_display": "EUR 428.12",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 11.44,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 11.44"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_162dcf1d3fa6b104",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 494.86,
+        "currency": "EUR",
+        "total_amount_display": "EUR 494.86",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T10:00:00Z",
+          "amount": 215.99,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 215.99"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 11.44,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 11.44"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "1459092127",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 3,
+      "rates": [
+       {
+        "offer_id": "htl_84ff6383d11aade1",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 459.75,
+        "currency": "EUR",
+        "total_amount_display": "EUR 459.75",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 17.17,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 17.17"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_2fc12b2a1d53ed25",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 534.95,
+        "currency": "EUR",
+        "total_amount_display": "EUR 534.95",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 243.16,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 243.16"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 44.21,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 44.21"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_e33d06fa4bcb71a7",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 549.24,
+        "currency": "EUR",
+        "total_amount_display": "EUR 549.24",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 11.44,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 11.44"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_3ef457f29af31c4b",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 628.69,
+        "currency": "EUR",
+        "total_amount_display": "EUR 628.69",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 285.77,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 285.77"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 51.96,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 51.96"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "1459092121",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 4,
+      "rates": [
+       {
+        "offer_id": "htl_bae390220f954fa1",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 478.1,
+        "currency": "EUR",
+        "total_amount_display": "EUR 478.10",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 22.9,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 22.90"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_1acb1c3338c15077",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 556.35,
+        "currency": "EUR",
+        "total_amount_display": "EUR 556.35",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 252.88,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 252.88"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 45.98,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 45.98"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_ad0124133a7524e1",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 567.61,
+        "currency": "EUR",
+        "total_amount_display": "EUR 567.61",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 11.44,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 11.44"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_5c887234100a4e08",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 650.09,
+        "currency": "EUR",
+        "total_amount_display": "EUR 650.09",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 295.49,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 295.49"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 53.73,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 53.73"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hotel_id": "lp33477",
+    "name": "Best Western Plus Hostellerie Du Vallon",
+    "address": "12 Rue Sylvestre Lasserre",
+    "city": "Trouville-sur-Mer",
+    "country": "FR",
+    "star_rating": 4,
+    "rating": 8.300000190734863,
+    "review_count": 1123,
+    "main_photo": "https://static.cupid.travel/hotels/176234288.jpg",
+    "thumbnail": "https://static.cupid.travel/hotels/thumbnail/176234288.jpg",
+    "latitude": 49.36248779296875,
+    "longitude": 0.08865000307559967,
+    "rooms": [
+     {
+      "room_id": "2176367",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_f09b1b6cbe9d4ca2",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 353.66,
+        "currency": "EUR",
+        "total_amount_display": "EUR 353.66",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 11.56,
+          "currency": "EUR",
+          "description": "City tax",
+          "included": false,
+          "display": "EUR 11.56"
+         },
+         {
+          "amount": 32.15,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": false,
+          "display": "EUR 32.15"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_8ff1480e2564b931",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 394.66,
+        "currency": "EUR",
+        "total_amount_display": "EUR 394.66",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T01:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T01:59:00Z",
+          "amount": 179.39,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 179.39"
+         },
+         {
+          "cancel_time": "2026-10-08T01:59:00Z",
+          "amount": 179.39,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 179.39"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 11.56,
+          "currency": "EUR",
+          "description": "City tax",
+          "included": false,
+          "display": "EUR 11.56"
+         },
+         {
+          "amount": 35.88,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": false,
+          "display": "EUR 35.88"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_b66442333b4b3876",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 461.35,
+        "currency": "EUR",
+        "total_amount_display": "EUR 461.35",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T01:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T01:59:00Z",
+          "amount": 209.71,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 209.71"
+         },
+         {
+          "cancel_time": "2026-10-08T01:59:00Z",
+          "amount": 209.71,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 209.71"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 11.56,
+          "currency": "EUR",
+          "description": "City tax",
+          "included": false,
+          "display": "EUR 11.56"
+         },
+         {
+          "amount": 41.94,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": false,
+          "display": "EUR 41.94"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "2176365",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_3fc66ec78666f04f",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 388.3,
+        "currency": "EUR",
+        "total_amount_display": "EUR 388.30",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 35.87,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 35.87"
+         },
+         {
+          "amount": 11.44,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 11.44"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_5844b41b3ac798f7",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 433.64,
+        "currency": "EUR",
+        "total_amount_display": "EUR 433.64",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T02:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T02:00:00Z",
+          "amount": 177.69,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 177.69"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 41.06,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 41.06"
+         },
+         {
+          "amount": 11.44,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 11.44"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_a482e703e14fcb3a",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 502,
+        "currency": "EUR",
+        "total_amount_display": "EUR 502.00",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T02:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T02:00:00Z",
+          "amount": 208.76,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 208.76"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 47.52,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 47.52"
+         },
+         {
+          "amount": 11.44,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 11.44"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hotel_id": "lp6b568",
+    "name": "ibis Styles Deauville Centre",
+    "address": "10 rue Fossorier",
+    "city": "Deauville",
+    "country": "FR",
+    "star_rating": 3,
+    "rating": 8.5,
+    "review_count": 2170,
+    "main_photo": "https://static.cupid.travel/hotels/97565921.jpg",
+    "thumbnail": "https://static.cupid.travel/hotels/thumbnail/97565921.jpg",
+    "latitude": 49.3603630065918,
+    "longitude": 0.07395000010728836,
+    "rooms": [
+     {
+      "room_id": "4331070",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_12853fb67c87dc54",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 323.39,
+        "currency": "EUR",
+        "total_amount_display": "EUR 323.39",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 28.08,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 28.08"
+         },
+         {
+          "amount": 0.72,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 0.72"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_7418a042d6fb5a67",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 343.15,
+        "currency": "EUR",
+        "total_amount_display": "EUR 343.15",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 163.87,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 163.87"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 163.87,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 163.87"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 163.87,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 163.87"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 29.8,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 29.80"
+         },
+         {
+          "amount": 0.72,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 0.72"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "4331071",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_48b58d9fe9cf88c9",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 323.39,
+        "currency": "EUR",
+        "total_amount_display": "EUR 323.39",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 28.08,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 28.08"
+         },
+         {
+          "amount": 0.72,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 0.72"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_ae714ad833b6b6e1",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 343.15,
+        "currency": "EUR",
+        "total_amount_display": "EUR 343.15",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 163.87,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 163.87"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 163.87,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 163.87"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 163.87,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 163.87"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 29.8,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 29.80"
+         },
+         {
+          "amount": 0.72,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 0.72"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "4331072",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_3e1387cd35844824",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 382.14,
+        "currency": "EUR",
+        "total_amount_display": "EUR 382.14",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 33.18,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 33.18"
+         },
+         {
+          "amount": 0.72,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 0.72"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_43c751bf27fe5b44",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 406.35,
+        "currency": "EUR",
+        "total_amount_display": "EUR 406.35",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 194.05,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 194.05"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 194.05,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 194.05"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 194.05,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 194.05"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 35.28,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 35.28"
+         },
+         {
+          "amount": 0.72,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 0.72"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hotel_id": "lp7a10b",
+    "name": "Mercure Trouville Sur Mer",
+    "address": "Place Foch",
+    "city": "Trouville-sur-Mer",
+    "country": "FR",
+    "star_rating": 4,
+    "rating": 8.300000190734863,
+    "review_count": 1293,
+    "main_photo": "https://static.cupid.travel/hotels/548027618.jpg",
+    "thumbnail": "https://static.cupid.travel/hotels/thumbnail/548027618.jpg",
+    "latitude": 49.366390228271484,
+    "longitude": 0.079865001142025,
+    "rooms": [
+     {
+      "room_id": "3869227",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_2cc82bee06320a64",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 367.49,
+        "currency": "EUR",
+        "total_amount_display": "EUR 367.49",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 30.37,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 30.37"
+         },
+         {
+          "amount": 1.13,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 1.13"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_dc4b90fa4aec0857",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 399.33,
+        "currency": "EUR",
+        "total_amount_display": "EUR 399.33",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 181.52,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 181.52"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 181.52,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 181.52"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 181.52,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 181.52"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 33,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 33.00"
+         },
+         {
+          "amount": 1.13,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 1.13"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_dd5f2ae378e0fb2b",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 447.11,
+        "currency": "EUR",
+        "total_amount_display": "EUR 447.11",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 36.95,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 36.95"
+         },
+         {
+          "amount": 1.13,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 1.13"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_5bc84486f225ba6b",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 478.95,
+        "currency": "EUR",
+        "total_amount_display": "EUR 478.95",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 217.71,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 217.71"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 217.71,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 217.71"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 217.71,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 217.71"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 39.58,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 39.58"
+         },
+         {
+          "amount": 1.13,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 1.13"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "3869226",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_2e752ea57ce2a78a",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 367.49,
+        "currency": "EUR",
+        "total_amount_display": "EUR 367.49",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 30.37,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 30.37"
+         },
+         {
+          "amount": 1.13,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 1.13"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_4d89b7846a9c1a44",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 399.33,
+        "currency": "EUR",
+        "total_amount_display": "EUR 399.33",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 181.52,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 181.52"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 181.52,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 181.52"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 181.52,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 181.52"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 33,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 33.00"
+         },
+         {
+          "amount": 1.13,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 1.13"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_3b118669ee0f6835",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 447.11,
+        "currency": "EUR",
+        "total_amount_display": "EUR 447.11",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 36.95,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 36.95"
+         },
+         {
+          "amount": 1.13,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 1.13"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_a2a701cfb47c6d09",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 478.95,
+        "currency": "EUR",
+        "total_amount_display": "EUR 478.95",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 217.71,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 217.71"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 217.71,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 217.71"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 217.71,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 217.71"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 39.58,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 39.58"
+         },
+         {
+          "amount": 1.13,
+          "currency": "EUR",
+          "description": "15, Country Tax",
+          "included": true,
+          "display": "EUR 1.13"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hotel_id": "lp6556fcca",
+    "name": "B&B HOTEL Deauville-Touques",
+    "address": "Rue des Tonneliers, Touques, Calvados, 14800",
+    "city": "Touques",
+    "country": "FR",
+    "star_rating": 3,
+    "rating": 8.600000381469727,
+    "review_count": 106,
+    "main_photo": "https://static.cupid.travel/hotels/ex_d950245c_z.jpg",
+    "thumbnail": "https://static.cupid.travel/hotels/thumbnail/ex_d950245c_z.jpg",
+    "latitude": 49.348182678222656,
+    "longitude": 0.09481299668550491,
+    "rooms": [
+     {
+      "room_id": "6209613",
+      "room_name": "",
+      "description": "FIT conditions are available for bookings of 5 passengers and under, above 5 passengers the property reserves the right to decline the bookings and special cancellation policy applies.<br/>Pets are allowed in our hotels with a supplement of 6 EUR per pet per night.<br/>",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_f4b1f2bac8a8daaf",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 184.31,
+        "currency": "EUR",
+        "total_amount_display": "EUR 184.31",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 15.23,
+          "currency": "EUR",
+          "description": "VAT of 10% per night (Included in price)",
+          "included": true,
+          "display": "EUR 15.23"
+         },
+         {
+          "amount": 6.6,
+          "currency": "EUR",
+          "description": "City tax of 1.65 EUR per adult per night (Not included in price)",
+          "included": false,
+          "display": "EUR 6.60"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_40ac318c2f398e57",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 196.96,
+        "currency": "EUR",
+        "total_amount_display": "EUR 196.96",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-07T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-07T10:00:00Z",
+          "amount": 93.08,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 93.08"
+         },
+         {
+          "cancel_time": "2026-10-08T10:00:00Z",
+          "amount": 93.08,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 93.08"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 16.92,
+          "currency": "EUR",
+          "description": "VAT of 10% per night (Included in price)",
+          "included": true,
+          "display": "EUR 16.92"
+         },
+         {
+          "amount": 6.6,
+          "currency": "EUR",
+          "description": "City tax of 1.65 EUR per adult per night (Not included in price)",
+          "included": false,
+          "display": "EUR 6.60"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_0260395bef241c09",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 243.22,
+        "currency": "EUR",
+        "total_amount_display": "EUR 243.22",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 20.11,
+          "currency": "EUR",
+          "description": "VAT of 10% per night (Included in price)",
+          "included": true,
+          "display": "EUR 20.11"
+         },
+         {
+          "amount": 6.6,
+          "currency": "EUR",
+          "description": "City tax of 1.65 EUR per adult per night (Not included in price)",
+          "included": false,
+          "display": "EUR 6.60"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_9db2eade4b821468",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 253.88,
+        "currency": "EUR",
+        "total_amount_display": "EUR 253.88",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-07T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-07T10:00:00Z",
+          "amount": 119.98,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 119.98"
+         },
+         {
+          "cancel_time": "2026-10-08T10:00:00Z",
+          "amount": 119.98,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 119.98"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 21.81,
+          "currency": "EUR",
+          "description": "VAT of 10% per night (Included in price)",
+          "included": true,
+          "display": "EUR 21.81"
+         },
+         {
+          "amount": 6.6,
+          "currency": "EUR",
+          "description": "City tax of 1.65 EUR per adult per night (Not included in price)",
+          "included": false,
+          "display": "EUR 6.60"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "6209418",
+      "room_name": "",
+      "description": "FIT conditions are available for bookings of 5 passengers and under, above 5 passengers the property reserves the right to decline the bookings and special cancellation policy applies.<br/>Pets are allowed in our hotels with a supplement of 6 EUR per pet per night.<br/>",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_13916bca9f338e9c",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 184.31,
+        "currency": "EUR",
+        "total_amount_display": "EUR 184.31",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 15.23,
+          "currency": "EUR",
+          "description": "VAT of 10% per night (Included in price)",
+          "included": true,
+          "display": "EUR 15.23"
+         },
+         {
+          "amount": 6.6,
+          "currency": "EUR",
+          "description": "City tax of 1.65 EUR per adult per night (Not included in price)",
+          "included": false,
+          "display": "EUR 6.60"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_37043c90494d63f2",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 196.96,
+        "currency": "EUR",
+        "total_amount_display": "EUR 196.96",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-07T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-07T10:00:00Z",
+          "amount": 93.08,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 93.08"
+         },
+         {
+          "cancel_time": "2026-10-08T10:00:00Z",
+          "amount": 93.08,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 93.08"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 16.92,
+          "currency": "EUR",
+          "description": "VAT of 10% per night (Included in price)",
+          "included": true,
+          "display": "EUR 16.92"
+         },
+         {
+          "amount": 6.6,
+          "currency": "EUR",
+          "description": "City tax of 1.65 EUR per adult per night (Not included in price)",
+          "included": false,
+          "display": "EUR 6.60"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_aa2578c8265eead5",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 243.22,
+        "currency": "EUR",
+        "total_amount_display": "EUR 243.22",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 20.11,
+          "currency": "EUR",
+          "description": "VAT of 10% per night (Included in price)",
+          "included": true,
+          "display": "EUR 20.11"
+         },
+         {
+          "amount": 6.6,
+          "currency": "EUR",
+          "description": "City tax of 1.65 EUR per adult per night (Not included in price)",
+          "included": false,
+          "display": "EUR 6.60"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_f901ac7c2e4aa069",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 253.88,
+        "currency": "EUR",
+        "total_amount_display": "EUR 253.88",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-07T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-07T10:00:00Z",
+          "amount": 119.98,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 119.98"
+         },
+         {
+          "cancel_time": "2026-10-08T10:00:00Z",
+          "amount": 119.98,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 119.98"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 21.81,
+          "currency": "EUR",
+          "description": "VAT of 10% per night (Included in price)",
+          "included": true,
+          "display": "EUR 21.81"
+         },
+         {
+          "amount": 6.6,
+          "currency": "EUR",
+          "description": "City tax of 1.65 EUR per adult per night (Not included in price)",
+          "included": false,
+          "display": "EUR 6.60"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "6209612",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_9ecd041d9c2ca9a3",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 215.33,
+        "currency": "EUR",
+        "total_amount_display": "EUR 215.33",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_f53fd89b16648d59",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 242.3,
+        "currency": "EUR",
+        "total_amount_display": "EUR 242.30",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T10:00:00Z",
+          "amount": 220.27,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 220.27"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_d9a4a8e1b64ba774",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 275.36,
+        "currency": "EUR",
+        "total_amount_display": "EUR 275.36",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_bf3dbc46a30e66c4",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 299.61,
+        "currency": "EUR",
+        "total_amount_display": "EUR 299.61",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T10:00:00Z",
+          "amount": 272.37,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 272.37"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hotel_id": "lp3610f",
+    "name": "SOWELL HOTELS Le Beach",
+    "address": "Quai Albert 1er",
+    "city": "Trouville-sur-Mer",
+    "country": "FR",
+    "star_rating": 4,
+    "rating": 7.699999809265137,
+    "review_count": 2938,
+    "main_photo": "https://static.cupid.travel/hotels/21698844.jpg",
+    "thumbnail": "https://static.cupid.travel/hotels/thumbnail/21698844.jpg",
+    "latitude": 49.36552047729492,
+    "longitude": 0.07726600021123886,
+    "rooms": [
+     {
+      "room_id": "649541",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_30a7bcd93efd26f6",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 299.46,
+        "currency": "EUR",
+        "total_amount_display": "EUR 299.46",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-07T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-07T10:00:00Z",
+          "amount": 272.24,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 272.24"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 9.62,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 9.62"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_83ff57d513afca87",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 322.42,
+        "currency": "EUR",
+        "total_amount_display": "EUR 322.42",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 9.62,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 9.62"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_3c730223ea85a933",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 390.43,
+        "currency": "EUR",
+        "total_amount_display": "EUR 390.43",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-07T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-07T10:00:00Z",
+          "amount": 354.94,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 354.94"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 9.62,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 9.62"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "649542",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_1ad14e7d8469df75",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 359.35,
+        "currency": "EUR",
+        "total_amount_display": "EUR 359.35",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-07T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-07T10:00:00Z",
+          "amount": 326.68,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 326.68"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 9.62,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 9.62"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_3c936694e91cbaf2",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 374.33,
+        "currency": "EUR",
+        "total_amount_display": "EUR 374.33",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 9.62,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 9.62"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_5691ab536109df9c",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 452.08,
+        "currency": "EUR",
+        "total_amount_display": "EUR 452.08",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-07T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-07T10:00:00Z",
+          "amount": 410.98,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 410.98"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 9.62,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 9.62"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "649540",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_40172931c0b131ee",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 259.53,
+        "currency": "EUR",
+        "total_amount_display": "EUR 259.53",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-07T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-07T10:00:00Z",
+          "amount": 235.94,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 235.94"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 9.62,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 9.62"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_e097cccc21a63d80",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 288.49,
+        "currency": "EUR",
+        "total_amount_display": "EUR 288.49",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 9.62,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 9.62"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_975ac1a121e4d0a0",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 349.34,
+        "currency": "EUR",
+        "total_amount_display": "EUR 349.34",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-07T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-07T10:00:00Z",
+          "amount": 317.58,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 317.58"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 9.62,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 9.62"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hotel_id": "lp65745838",
+    "name": "Kyriad Deauville - St Arnoult",
+    "address": "Avenue Michel D'ornano, Saint Arnoult",
+    "city": "Deauville",
+    "country": "FR",
+    "star_rating": 3,
+    "rating": 7.900000095367432,
+    "review_count": 1708,
+    "main_photo": "https://static.cupid.travel/hotels/54839244.jpg",
+    "thumbnail": "https://static.cupid.travel/hotels/thumbnail/54839244.jpg",
+    "latitude": 49.34538269042969,
+    "longitude": 0.08467700332403183,
+    "rooms": [
+     {
+      "room_id": "4323982",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_86964c3e1007bb52",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 287.29,
+        "currency": "EUR",
+        "total_amount_display": "EUR 287.29",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 23.95,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 23.95"
+         },
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_2fe4fb3b80b09a43",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 301.48,
+        "currency": "EUR",
+        "total_amount_display": "EUR 301.48",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-09T04:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-09T04:00:00Z",
+          "amount": 134.35,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 134.35"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 27.6,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 27.60"
+         },
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_f6f4806ec08203b4",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 353.01,
+        "currency": "EUR",
+        "total_amount_display": "EUR 353.01",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 30.11,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 30.11"
+         },
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_35ac6a57ceb197fe",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 367.19,
+        "currency": "EUR",
+        "total_amount_display": "EUR 367.19",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-09T04:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-09T04:00:00Z",
+          "amount": 164.22,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 164.22"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 33.61,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 33.61"
+         },
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "4323981",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_b242cd01d3ac5e46",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 287.29,
+        "currency": "EUR",
+        "total_amount_display": "EUR 287.29",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 23.95,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 23.95"
+         },
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_2e48d7ca314edc50",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 301.48,
+        "currency": "EUR",
+        "total_amount_display": "EUR 301.48",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-09T04:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-09T04:00:00Z",
+          "amount": 134.35,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 134.35"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 27.6,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 27.60"
+         },
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_5bca000325d5ffad",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 353.01,
+        "currency": "EUR",
+        "total_amount_display": "EUR 353.01",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 30.11,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 30.11"
+         },
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_5c6abb4778b63e0f",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 367.19,
+        "currency": "EUR",
+        "total_amount_display": "EUR 367.19",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-09T04:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-09T04:00:00Z",
+          "amount": 164.22,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 164.22"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 33.61,
+          "currency": "EUR",
+          "description": "VAT",
+          "included": true,
+          "display": "EUR 33.61"
+         },
+         {
+          "amount": 6.61,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 6.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hotel_id": "lp1a55a",
+    "name": "Mercure Deauville Centre",
+    "address": "2 Rue Breney",
+    "city": "Deauville",
+    "country": "FR",
+    "star_rating": 4,
+    "rating": 8.300000190734863,
+    "review_count": 294,
+    "main_photo": "https://static.cupid.travel/hotels/251857194.jpg",
+    "thumbnail": "https://static.cupid.travel/hotels/thumbnail/251857194.jpg",
+    "latitude": 49.3609504699707,
+    "longitude": 0.07978200167417526,
+    "rooms": [
+     {
+      "room_id": "2176013",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_fea276f954b87ea0",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 363.78,
+        "currency": "EUR",
+        "total_amount_display": "EUR 363.78",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 30.06,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 30.06"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_9716ac742b6daa65",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 395.86,
+        "currency": "EUR",
+        "total_amount_display": "EUR 395.86",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 179.94,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 179.94"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 179.94,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 179.94"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 179.94,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 179.94"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 32.72,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 32.72"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_e70b75dfc30e81eb",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 447.23,
+        "currency": "EUR",
+        "total_amount_display": "EUR 447.23",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 36.96,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 36.96"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_396e20c3a82cefe8",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 479.33,
+        "currency": "EUR",
+        "total_amount_display": "EUR 479.33",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 217.87,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 217.87"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 217.87,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 217.87"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 217.87,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 217.87"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 39.61,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 39.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "2176012",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_31abb650d105c280",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 449.37,
+        "currency": "EUR",
+        "total_amount_display": "EUR 449.37",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 37.14,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 37.14"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_8250b3b7bd472426",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 481.45,
+        "currency": "EUR",
+        "total_amount_display": "EUR 481.45",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 218.84,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 218.84"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 218.84,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 218.84"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 218.84,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 218.84"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 39.79,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 39.79"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_f3e658ad42e4f864",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 532.82,
+        "currency": "EUR",
+        "total_amount_display": "EUR 532.82",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 44.03,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 44.03"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_e52d2d0fd366324c",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 564.92,
+        "currency": "EUR",
+        "total_amount_display": "EUR 564.92",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T08:59:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 256.77,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 256.77"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 256.77,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 256.77"
+         },
+         {
+          "cancel_time": "2026-10-08T08:59:00Z",
+          "amount": 256.77,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 256.77"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 46.68,
+          "currency": "EUR",
+          "description": "19, VAT National taxes on accommodation",
+          "included": true,
+          "display": "EUR 46.68"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hotel_id": "lp1e5299",
+    "name": "Les Manoirs des Portes de Deauville",
+    "address": "30 Route Départementale 677, Canapville, 14800",
+    "city": "Canapville",
+    "country": "FR",
+    "star_rating": 4,
+    "rating": 9.199999809265137,
+    "review_count": 49,
+    "main_photo": "https://static.cupid.travel/hotels/ex_8f1874a2_z.jpg",
+    "thumbnail": "https://static.cupid.travel/hotels/thumbnail/ex_8f1874a2_z.jpg",
+    "latitude": 49.316898345947266,
+    "longitude": 0.13547000288963318,
+    "rooms": [
+     {
+      "room_id": "1459091036",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 2,
+      "rates": [
+       {
+        "offer_id": "htl_e0e7d5f6fde787fd",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 1024.96,
+        "currency": "EUR",
+        "total_amount_display": "EUR 1024.96",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 17.61,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 17.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_11b715061932f2a0",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 1139,
+        "currency": "EUR",
+        "total_amount_display": "EUR 1139.00",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-04T21:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-04T21:00:00Z",
+          "amount": 1035.45,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 1035.45"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 17.61,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 17.61"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     },
+     {
+      "room_id": "1459091038",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 4,
+      "rates": [
+       {
+        "offer_id": "htl_358fafc121570014",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 1143.78,
+        "currency": "EUR",
+        "total_amount_display": "EUR 1143.78",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 13.22,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 13.22"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_72eec6ef8160a99a",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 1270.68,
+        "currency": "EUR",
+        "total_amount_display": "EUR 1270.68",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-05T02:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-05T02:00:00Z",
+          "amount": 1155.16,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 1155.16"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 13.22,
+          "currency": "EUR",
+          "description": "City Tax",
+          "included": false,
+          "display": "EUR 13.22"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hotel_id": "lp8facd",
+    "name": "ibis budget Deauville",
+    "address": "Avenue M. d'Ornano, Saint-Arnoult, 14800",
+    "city": "Saint-Arnoult",
+    "country": "FR",
+    "star_rating": 2,
+    "rating": 8.399999618530273,
+    "review_count": 59,
+    "main_photo": "https://static.cupid.travel/hotels/ex_6cd17bc0_z.jpg",
+    "thumbnail": "https://static.cupid.travel/hotels/thumbnail/ex_6cd17bc0_z.jpg",
+    "latitude": 49.34587860107422,
+    "longitude": 0.08608099818229675,
+    "rooms": [
+     {
+      "room_id": "6556820",
+      "room_name": "",
+      "requested_occupancy": 2,
+      "max_occupancy": 2,
+      "room_capacity": 3,
+      "rates": [
+       {
+        "offer_id": "htl_21d67f3af2e3c96f",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 151.16,
+        "currency": "EUR",
+        "total_amount_display": "EUR 151.16",
+        "is_refundable": false,
+        "taxes_breakdown": [
+         {
+          "amount": 6.01,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 6.01"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_af68025d8f9f973b",
+        "board_type": "RO",
+        "board_name": "Room Only",
+        "total_amount": 159.12,
+        "currency": "EUR",
+        "total_amount_display": "EUR 159.12",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T10:00:00Z",
+          "amount": 67.16,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 67.16"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 4.01,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 4.01"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       },
+       {
+        "offer_id": "htl_32a2502209c23aa1",
+        "board_type": "BI",
+        "board_name": "Breakfast Included",
+        "total_amount": 199.44,
+        "currency": "EUR",
+        "total_amount_display": "EUR 199.44",
+        "is_refundable": true,
+        "free_cancellation_until": "2026-10-08T10:00:00Z",
+        "cancellation_schedule": [
+         {
+          "cancel_time": "2026-10-08T10:00:00Z",
+          "amount": 85.55,
+          "currency": "EUR",
+          "type": "amount",
+          "display": "EUR 85.55"
+         }
+        ],
+        "taxes_breakdown": [
+         {
+          "amount": 4.01,
+          "currency": "EUR",
+          "description": "City Fee",
+          "included": false,
+          "display": "EUR 4.01"
+         }
+        ],
+        "payment_types": [
+         "NUITEE_PAY"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "total": 10,
+  "pagination": {
+   "total_count": 99,
+   "has_more": false
+  },
+  "destination_resolution": {
+   "shape": "city",
+   "match": "exact",
+   "status": "resolved",
+   "requested_city": "Deauville",
+   "requested_country": "fr",
+   "resolved_city": "Deauville",
+   "resolved_country": "FR",
+   "latitude": 49.35647991973545,
+   "longitude": 0.07478003940427243,
+   "radius_km": 5,
+   "catalog_hotel_count": 204
+  }
+ },
+ "fetched_at": "2026-09-26T12:35:48.074386+02:00"
+}
