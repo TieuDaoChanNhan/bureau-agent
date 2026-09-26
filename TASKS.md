@@ -39,8 +39,11 @@
 | T25 | P2 | Filter and search issues in the web console | T06 | `t25-web-filter` | [#35](https://github.com/TieuDaoChanNhan/bureau-agent/issues/35) |
 | T26 | P2 | Automated tests for the web console | T06 | `t26-web-tests` | [#36](https://github.com/TieuDaoChanNhan/bureau-agent/issues/36) |
 | T27 | P2 | `pyproject.toml` and uv alongside `requirements.txt` | — | `t27-uv` | [#37](https://github.com/TieuDaoChanNhan/bureau-agent/issues/37) |
+| T28 | P1 | Show which issue the agent is working on and overall progress | T06 | `t28-run-progress` | [#40](https://github.com/TieuDaoChanNhan/bureau-agent/issues/40) |
+| T29 | P0 | Enforce the identity threshold in code for `LINK_PAYMENT` | — | `t29-identity-guard` | [#41](https://github.com/TieuDaoChanNhan/bureau-agent/issues/41) |
+| T30 | P0 | Make the validated model (`gpt-4.1`) the default | — | `t30-default-model` | [#43](https://github.com/TieuDaoChanNhan/bureau-agent/issues/43) |
 
-T21–T27 were added after review follow-ups and PM planning; their full specification lives in the linked issue (in English), not in the details below.
+T21–T30 were added after review follow-ups and PM planning; their full specification lives in the linked issue (in English), not in the details below.
 
 ---
 
