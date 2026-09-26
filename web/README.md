@@ -23,6 +23,7 @@ uvicorn api.main:app --reload     # then open http://127.0.0.1:8000
 | Issue detail | Input found by fixed checks, **Agent steps** (the real tool calls of the run, from `ProposedAction.trace`; rejected calls in red), decision trace built from the proposal's evidence (checked / found / applied / proposed), checks ✓ / ✗ / ? (unverified), the agent's note, the proposed action and its draft reply | same |
 | Approve / Edit / Dismiss | Edit makes the draft reply editable; approving sends it as `edited_description`. The issue leaves the open list | `POST /api/actions/{id}/approve`, `/dismiss` |
 | Run agent | Runs the runnable issues one request at a time (`run?issue_id=`), blocking first: the current row shows **Running…** and the status line `Investigating n/total`. The button becomes **Stop** (takes effect after the current issue). One issue can also be run or retried from its detail pane | `POST /api/events/{id}/run` |
+| New message | A form (with three fictional examples) that adds an incoming message and immediately runs the agent on it, with the run progress display | `POST /api/events/{id}/messages`, then `run?issue_id=` |
 | Outbox | Simulated sent replies, newest first | `GET /api/events/{id}/outbox` |
 | Reset demo | Two clicks (no blocking dialog); restores the sample data | `POST /api/events/{id}/reset` |
 

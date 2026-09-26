@@ -6,21 +6,30 @@ dataclasses.asdict. The web UI depends only on these shapes.
 from __future__ import annotations
 
 from dataclasses import asdict
+from datetime import datetime
+from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, StrictStr
+from pydantic import BaseModel, Field, StrictStr
 
 from bureau import config
 from bureau.agent.loop import run_pending, runnable_issues
 from bureau.core import store
 from bureau.core.detect import detect_issues
 from bureau.core.executor import InvariantViolation, apply
-from bureau.core.models import EventState, Issue, ProposedAction
+from bureau.core.models import EventState, Issue, Message, ProposedAction
 from bureau.config import DATA_DIR, ROOT
 
 app = FastAPI(title="Bureau Agent API")
+
+
+class NewMessage(BaseModel):
+    """A message typed or pasted by an organizer (T32). It is data for the agent, never instructions."""
+    sender: str = Field(min_length=1, max_length=200)
+    channel: Literal["email", "discord", "form"] = "email"
+    text: str = Field(min_length=1, max_length=4000)
 
 
 class ApprovalRequest(BaseModel):
@@ -44,14 +53,18 @@ def _counts(issues) -> dict:
 def _load_and_refresh(event_id: str) -> EventState:
     """Re-detect issues while retaining terminal decisions to prevent re-approval."""
     state = store.load_state(event_id)
+    _refresh(state)
+    return state
+
+
+def _refresh(state: EventState) -> None:
     refreshed = store.merge_issue_status(detect_issues(state), state.issues)
     current_ids = {i.id for i in refreshed}
     # A repaired issue disappears from detection, but its decision must survive
     # later writes (run/dismiss/approve) so an old action cannot be executed again.
     state.issues = refreshed + [i for i in state.issues
                                 if i.id not in current_ids and i.status in ("resolved", "dismissed")]
-    return state
-
+    
 
 def _event_summary(state: EventState) -> dict:
     issues = store.merge_issue_status(detect_issues(state), state.issues)
@@ -127,6 +140,31 @@ def run_agent(event_id: str, limit: int = Query(5, ge=1), issue_id: str | None =
 def run_planner(event_id: str, body: dict | None = None):
     """Run the travel planner. Body: {"text"?: str, "overrides"?: {"max_cost_per_person_cents": int}}."""
     _todo("T14")
+
+
+@app.post("/api/events/{event_id}/messages", status_code=201)
+def add_message(event_id: str, body: NewMessage):
+    """Add an incoming message to the runtime state; detection turns it into a `message:<id>` issue.
+
+    Returns the event summary plus the new `issue_id`. Reset removes added messages.
+    """
+    if event_id not in _events():
+        raise HTTPException(404, "unknown event")
+    if not body.text.strip() or not body.sender.strip():
+        raise HTTPException(422, "sender and text must not be blank")
+    state = _load_and_refresh(event_id)
+    existing = {m.id for m in state.messages}
+    n = 1
+    while f"live{n:02d}" in existing:
+        n += 1
+    message = Message(id=f"live{n:02d}", channel=body.channel, sender=body.sender.strip(),
+                      text=body.text.strip(), received_at=datetime.now().astimezone())
+    state.messages.append(message)
+    _refresh(state)
+    store.save_state(state)
+    summary = _event_summary(state)
+    summary["issue_id"] = f"message:{message.id}"
+    return summary
 
 
 @app.get("/api/actions/{action_id}")

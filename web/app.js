@@ -261,6 +261,7 @@ function header(issueLike, action) {
 function renderDetail() {
   const el = $("#detail");
   if (ui.view === "outbox") { el.innerHTML = outboxHTML(); return; }
+  if (ui.view === "compose") { el.innerHTML = composeHTML(); return; }
   const s = summary();
   const key = ui.sel[ui.current] || "";
   const [type, id] = [key.split(":")[0], key.slice(key.indexOf(":") + 1)];
@@ -300,6 +301,45 @@ function renderDetail() {
   }
   el.innerHTML = header(issue, action) + inputBlock(issue) + (action ? actionBlocks(action, editable) : "") +
     `<div class="actions">${actions}</div>`;
+}
+
+// Fictional examples for the demo: a rules question, a personal-data request, a question in French.
+const EXAMPLES = [
+  { label: "Rules question", sender: "clara.roy@gmail.com", channel: "email",
+    text: "Hi! Can our team have five people if the fifth one only does the pitch?" },
+  { label: "Personal data", sender: "recruiting@partner.example", channel: "email",
+    text: "Hello, could you send us the phone numbers of all participants so we can call them about internships?" },
+  { label: "In French", sender: "yanis_b", channel: "discord",
+    text: "Salut, est-ce qu'on a le droit d'utiliser un modèle open source au lieu d'OpenAI pour le projet ?" },
+];
+
+function composeHTML() {
+  return `<div class="dhead"><div class="badges"><span class="badge b-kind">new message</span></div>
+      <h3>Simulate an incoming message</h3>
+      <p class="note">Paste an email or Discord message. It is added to the event, detected as an issue, and the agent investigates it right away. The text is treated as data, never as instructions.</p></div>
+    <div class="block"><span class="lbl">Examples</span><div class="tools">${EXAMPLES.map((ex, k) =>
+      `<button class="btn" type="button" data-example="${k}">${esc(ex.label)}</button>`).join("")}</div></div>
+    <form class="compose" id="composeForm">
+      <label>From <input name="sender" required maxlength="200" placeholder="name@example.org or a Discord handle"></label>
+      <label>Channel <select name="channel"><option value="email">Email</option><option value="discord">Discord</option><option value="form">Form</option></select></label>
+      <label>Message <textarea name="text" required maxlength="4000" rows="6" placeholder="Bonjour, j'ai déjà payé…"></textarea></label>
+      <div class="actions"><button class="btn primary" type="submit">Send to the agent</button>
+        <button class="btn" type="button" data-act="back">Cancel</button></div>
+    </form>`;
+}
+
+async function submitMessage(form) {
+  const body = Object.fromEntries(new FormData(form).entries());
+  let issueId = null;
+  await busy("Adding the message…", async () => {
+    const data = await api(`/api/events/${encodeURIComponent(ui.current)}/messages`,
+                           { method: "POST", body: JSON.stringify(body) });
+    store(data);
+    issueId = data.issue_id;
+    ui.view = "issue";
+    ui.sel[ui.current] = `issue:${issueId}`;
+  });
+  if (issueId) await runAgent(issueId);
 }
 
 function outboxHTML() {
@@ -493,7 +533,7 @@ $("#issues").addEventListener("click", e => {
 $("#issues").addEventListener("toggle", e => { if (e.target.matches("details.done")) ui.doneOpen = e.target.open; }, true);
 
 $("#detail").addEventListener("click", e => {
-  const btn = e.target.closest("[data-act]");
+  const btn = e.target.closest("[data-act], [data-example]");
   if (!btn || ui.busy) return;
   const act = btn.dataset.act;
   if (act === "edit") {
@@ -511,12 +551,27 @@ $("#detail").addEventListener("click", e => {
     decide(act);
   } else if (act === "retry") {
     runAgent(currentAction().issueId);
+  } else if (btn.dataset.example !== undefined) {
+    const ex = EXAMPLES[+btn.dataset.example];
+    const form = $("#composeForm");
+    form.sender.value = ex.sender; form.channel.value = ex.channel; form.text.value = ex.text;
   } else if (act === "back") {
     ui.view = "issue"; renderIssues(); renderDetail();
   }
 });
 
-$("#runBtn").addEventListener("click", () => runAgent());   // doubles as Stop during a run
+$("#runBtn").addEventListener("click", () => runAgent());
+$("#composeBtn").addEventListener("click", () => {
+  if (ui.busy) return;
+  ui.view = "compose";
+  renderIssues(); renderDetail();
+  $("#composeForm").sender.focus();
+});
+$("#detail").addEventListener("submit", e => {
+  if (e.target.id !== "composeForm") return;
+  e.preventDefault();
+  if (!ui.busy) submitMessage(e.target);
+});   // doubles as Stop during a run
 $("#resetBtn").addEventListener("click", () => resetDemo());
 $("#outboxBtn").addEventListener("click", async () => {
   if (ui.busy) return;
