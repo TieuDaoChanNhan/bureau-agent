@@ -35,7 +35,7 @@
           [
             "Email local part has the same parts",
             true,
-            "nguyen.a@gmail.com"
+            "nguyen.a@gmail.example"
           ],
           [
             "Paid after registering",
@@ -148,7 +148,7 @@
       "id": "message:m01",
       "kind": "unprocessed_message",
       "blocking": false,
-      "title": "New email message from a.nguyen@polytechnique.edu",
+      "title": "New email message from a.nguyen@polytechnique.example",
       "subject_ids": [
         "m01"
       ],
@@ -163,7 +163,7 @@
       "id": "message:m02",
       "kind": "unprocessed_message",
       "blocking": false,
-      "title": "New email message from julien.morel@gmail.com",
+      "title": "New email message from julien.morel@gmail.example",
       "subject_ids": [
         "m02"
       ],
@@ -193,7 +193,7 @@
       "id": "message:m04",
       "kind": "unprocessed_message",
       "blocking": false,
-      "title": "New email message from mei.tanaka@gmail.com",
+      "title": "New email message from mei.tanaka@gmail.example",
       "subject_ids": [
         "m04"
       ],
@@ -268,7 +268,7 @@
       "id": "message:m09",
       "kind": "unprocessed_message",
       "blocking": false,
-      "title": "New email message from lea.martin@polytechnique.edu",
+      "title": "New email message from lea.martin@polytechnique.example",
       "subject_ids": [
         "m09"
       ],
@@ -343,7 +343,7 @@
       "id": "message:m14",
       "kind": "unprocessed_message",
       "blocking": false,
-      "title": "New email message from victor.leroy@polytechnique.edu",
+      "title": "New email message from victor.leroy@polytechnique.example",
       "subject_ids": [
         "m14"
       ],

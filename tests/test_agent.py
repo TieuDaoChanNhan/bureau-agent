@@ -18,10 +18,10 @@ PROPOSAL = {
     "action_type": "LINK_PAYMENT",
     "title": "Link payment f90 to Antoine Nguyen?",
     "description": "Score 0.91: please confirm before linking.",
-    "evidence": [{"source_type": "payment", "source_id": "f90", "description": "A. Nguyen, nguyen.a@gmail.com"}],
+    "evidence": [{"source_type": "payment", "source_id": "f90", "description": "A. Nguyen, nguyen.a@gmail.example"}],
     "checks": [{"name": "identity score >= 0.98", "passed": False, "detail": "0.91"}],
     "confidence": 0.91,
-    "payload": {"payment_id": "f90", "participant_id": "p01", "to": "a.nguyen@polytechnique.edu",
+    "payload": {"payment_id": "f90", "participant_id": "p01", "to": "a.nguyen@polytechnique.example",
                 "message": "Bonjour Antoine, votre paiement est bien associé à votre inscription."},
 }
 
@@ -35,7 +35,7 @@ class AgentLoopTests(unittest.TestCase):
         state = load_event("hackathon")
         issue = message_issue(state)
         client = FakeClient([
-            [("get_participant", {"id_or_email": "a.nguyen@polytechnique.edu"})],
+            [("get_participant", {"id_or_email": "a.nguyen@polytechnique.example"})],
             [("match_person", {"payment_id": "f90"})],
             [("propose_action", PROPOSAL)],
         ])
@@ -197,7 +197,7 @@ class AgentLoopTests(unittest.TestCase):
         action = resolve_issue(state, message_issue(state), client=client, verbose=False)
         replies = [m for m in client.requests[-1]["messages"] if m["role"] == "tool"]
         self.assertIn("payload.message", json.loads(replies[-1]["content"])["error"])
-        self.assertEqual("a.nguyen@polytechnique.edu", action.payload["to"])
+        self.assertEqual("a.nguyen@polytechnique.example", action.payload["to"])
         self.assertTrue(action.payload["message"])
 
     def test_link_for_a_payment_issue_needs_no_reply(self):
@@ -227,7 +227,7 @@ class AgentLoopTests(unittest.TestCase):
     def test_proposal_records_the_ordered_tool_calls_including_rejections(self):
         state = load_event("hackathon")
         client = FakeClient([
-            [("get_participant", {"id_or_email": "a.nguyen@polytechnique.edu"})],
+            [("get_participant", {"id_or_email": "a.nguyen@polytechnique.example"})],
             [("match_person", {"payment_id": "f90"})],
             [("propose_action", {**PROPOSAL, "payload": {"payment_id": "f90", "participant_id": "p18"}})],
             [("propose_action", PROPOSAL)],
@@ -356,7 +356,7 @@ class AgentLoopTests(unittest.TestCase):
         context = json.loads(client.requests[0]["messages"][1]["content"].split("\n", 1)[1])
         self.assertEqual(context["issue"]["id"], "message:m01")
         self.assertEqual(len(context["messages"]), 1)
-        self.assertEqual(context["messages"][0]["sender"], "a.nguyen@polytechnique.edu")
+        self.assertEqual(context["messages"][0]["sender"], "a.nguyen@polytechnique.example")
         self.assertEqual(context["messages"][0]["channel"], "email")
         self.assertIn("+02:00", context["messages"][0]["received_at"])
 
@@ -392,7 +392,7 @@ class AgentToolContextTests(unittest.TestCase):
         handlers = build_handlers(state)
         payment = handlers["get_payment"]("f90")
         self.assertEqual(payment["amount_cents"], 1000)
-        self.assertEqual(payment["payer_email"], "nguyen.a@gmail.com")
+        self.assertEqual(payment["payer_email"], "nguyen.a@gmail.example")
         self.assertIsNone(payment["participant_id"])
         self.assertIn("error", handlers["get_payment"]("missing"))
         groups = handlers["list_groups"]()
