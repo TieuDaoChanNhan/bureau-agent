@@ -94,3 +94,9 @@ On Windows, use `$env:PYTHONIOENCODING="utf-8"` in PowerShell if accented names 
 ## Adding an event
 
 Create `data/<event_id>/` with at least `event.json` and `participants.json`. It appears automatically in the CLI and the API.
+
+## `wei/jinko_cache/` (T11)
+Raw Jinko responses saved by `JINKO_MODE=live` and read in `replay` mode (tests, demo), keyed by a
+hash of the request body. `hotel_search_*.json` is a real response from 2026-09-26: one double room
+in Deauville, 9–11 October 2026. Hotel names and prices are public offers, not personal data. No API
+key is stored. Ground search is not cached because the endpoint returned 404 for our key.
