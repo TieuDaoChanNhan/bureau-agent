@@ -43,10 +43,14 @@ def cmd_run(args) -> None:
         sys.exit("OPENAI_API_KEY is not set. Copy .env.example to .env and add the key.")
     state = load_state(args.event)
     client = getattr(args, "_client", None)
-    actions = run_pending(state, issue_id=args.issue, client=client, verbose=True)
-    if not actions:
+    result = run_pending(state, issue_id=args.issue, client=client, verbose=True)
+    for error in result.errors:
+        print(f"Agent failed for {error['issue_id']}: {error['error']}", file=sys.stderr)
+    if not result.actions:
+        if result.errors:
+            sys.exit("No proposals were created; see errors above.")
         sys.exit("No matching issue that can be resolved now.")
-    for action in actions:
+    for action in result.actions:
         print(json.dumps(action.to_dict(), indent=2, ensure_ascii=False, default=str))
 
 
