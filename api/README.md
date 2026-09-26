@@ -22,7 +22,8 @@ uvicorn api.main:app --reload     # http://127.0.0.1:8000  (docs at /docs)
 JSON bodies are the dataclasses of `bureau/core/models.py` (`dataclasses.asdict`). Keep it that way so the web UI has one source of truth.
 
 `approve`, `dismiss`, and `reset` return the same summary as the event GET:
-`{id, name, counts, issues, actions, travel, logistics, records}`. `records` maps ids to display
+`{id, name, counts, issues, actions, travel, logistics, records, meta}`. `meta` carries the event
+card context from `settings.display` (type, dates, place) and the participant count (T33). `records` maps ids to display
 names (`participants`, `groups`, `payments`) so the UI can show names instead of ids (T23). `run` adds `remaining` and `errors` to
 that summary. GET routes do not write runtime files.
 Issues are re-detected for each summary; repaired issues disappear, and dependent

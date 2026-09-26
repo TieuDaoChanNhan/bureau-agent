@@ -11,7 +11,12 @@
     "refund_policy": "No refund after 1 October, except exceptional cases decided by the organizers.",
     "messages_need_plan": [
       "wm01"
-    ]
+    ],
+    "display": {
+      "type": "Integration weekend",
+      "dates": "9–11 Oct 2026",
+      "place": "Paris → Trouville-Deauville"
+    }
   },
   "travel": {
     "request": "WEI for 40 people. Leave Paris Friday 9 Oct after class, back Sunday afternoon. Max €120 per person for travel and lodging. We must arrive before 21:00. No overnight travel. Two people need step-free rooms.",

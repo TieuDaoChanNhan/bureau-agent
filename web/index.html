@@ -18,12 +18,18 @@
           <div><b>Bureau Agent</b><div class="note">Organizers supervise; the agent does the legwork.</div></div>
         </div>
         <div class="tools">
+          <button class="btn" id="tourBtn" type="button">Demo tour</button>
           <button class="btn" id="composeBtn" type="button">New message</button>
           <button class="btn" id="outboxBtn" type="button">Outbox</button>
           <button class="btn" id="resetBtn" type="button">Reset demo</button>
           <button class="btn primary" id="runBtn" type="button">Run agent</button>
         </div>
       </div>
+      <div class="intro">
+        <p><b>An operations agent for volunteer-run associations.</b> It keeps an event consistent: code detects what needs attention, the agent investigates with tools and proposes one action with its evidence, and an organizer approves, edits or dismisses it. Nothing is sent, changed or booked without approval.</p>
+        <ol class="loopsteps"><li><span>1</span>Code detects issues</li><li><span>2</span>The agent investigates and proposes</li><li><span>3</span>You approve, edit or dismiss</li></ol>
+      </div>
+      <div class="tour" id="tour" hidden></div>
       <div class="events" id="events" aria-label="Events"></div>
       <div class="run" id="run" role="status" aria-live="polite"><span class="dot"></span><span id="runText">Loading…</span></div>
       <div class="main">

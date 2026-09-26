@@ -11,6 +11,7 @@ const ui = {
   doneOpen: false,
   busy: false,
   running: null,        // issue id the agent is investigating right now
+  tourStep: null,       // index in TOUR while the demo tour is open
   stopRequested: false,
 };
 
@@ -96,6 +97,7 @@ function renderEvents() {
     const c = cardCounts(s);
     return `<button class="evcard" type="button" data-ev="${esc(s.id)}" aria-pressed="${ui.current === s.id}">
       <div class="evtop"><h3>${esc(s.name)}</h3>${c.blocking === 0 ? '<span class="ready">No blocking issues</span>' : ""}</div>
+      <span class="evmeta">${esc(eventMeta(s))}</span>
       <div class="counts">
         <div class="count block ${c.blocking === 0 ? "zero" : ""}"><span class="v">${c.blocking}</span><span class="k">blocking</span></div>
         <div class="count nonblock ${c.nonBlocking === 0 ? "zero" : ""}"><span class="v">${c.nonBlocking}</span><span class="k">non-blocking</span></div>
@@ -105,13 +107,19 @@ function renderEvents() {
   }).join("");
 }
 
+function eventMeta(s) {
+  const m = s.meta || {};
+  const people = s.travel ? `${s.travel.participants} travelling` : `${m.participants ?? "?"} registered`;
+  return [m.type, m.dates, m.place, people].filter(Boolean).join(" · ");
+}
+
 function issueMeta(issue) {
   if (issue.details && issue.details.text) {
     const t = issue.details.text;
     return t.length > 70 ? `${t.slice(0, 70)}…` : t;
   }
   const r = (summary() && summary().records) || {};
-  const names = (issue.subject_ids || []).map(id => (r.participants || {})[id] || (r.groups || {})[id]).filter(Boolean);
+  const names = (issue.subject_ids || []).map(id => (r.payments || {})[id] || (r.participants || {})[id] || (r.groups || {})[id]).filter(Boolean);
   if (names.length) return names.slice(0, 3).join(", ") + (names.length > 3 ? ` +${names.length - 3}` : "");
   return issue.id;
 }
@@ -132,7 +140,7 @@ function renderIssues() {
   const doneRow = a => `<button class="issue res" type="button" data-key="action:${esc(a.id)}"
         aria-current="${ui.view === "issue" && sel === `action:${a.id}`}">
       <span class="bar-n"></span>
-      <span><span class="t">${esc(a.title)}</span><span class="m">${esc(a.issue_id)}</span></span>
+      <span><span class="t">${esc(a.title)}</span><span class="m">${esc(a.action_type)}</span></span>
       <span class="pill p-res">Resolved</span></button>`;
 
   const open = s.issues.filter(i => !TERMINAL.includes(i.status));
@@ -148,18 +156,29 @@ function renderIssues() {
       ${vanished.map(doneRow).join("")}${doneIssues.map(row).join("")}</details>` : "");
 }
 
-// "Antoine Nguyen (p01)" for a known participant, group or payment id; the id otherwise (T23).
-function nameOf(id) {
-  if (id == null || id === "") return id;
+// Display name of a participant, group or payment id (T23, T33); null when unknown.
+function recordName(id) {
+  if (id == null || id === "") return null;
   const r = (summary() && summary().records) || {};
-  const name = (r.participants || {})[id] || (r.groups || {})[id] || (r.payments || {})[id];
-  return name ? `${name} (${id})` : String(id);
+  return (r.participants || {})[id] || (r.groups || {})[id] || (r.payments || {})[id] || null;
 }
-const namesOf = ids => (ids || []).map(nameOf);
+// A name for people to read, with the id kept in a tooltip for traceability (T33).
+function named(id) {
+  const name = recordName(id);
+  return name ? { text: name, title: id } : id;
+}
+const namesOf = ids => (ids || []).map(named);
+function nameOf(id) { return recordName(id) || id; }
+
+function cell(v) {
+  if (Array.isArray(v)) return v.map(cell).join(", ");
+  if (v && typeof v === "object" && "text" in v) return `<span class="named" title="${esc(v.title)}">${esc(v.text)}</span>`;
+  return esc(v);
+}
 
 function kv(pairs) {
   const rows = pairs.filter(([, v]) => v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && !v.length));
-  return rows.length ? `<dl class="kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(Array.isArray(v) ? v.join(", ") : v)}</dd>`).join("")}</dl>` : "";
+  return rows.length ? `<dl class="kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${cell(v)}</dd>`).join("")}</dl>` : "";
 }
 
 function checksList(checks) {
@@ -177,12 +196,12 @@ function inputBlock(issue) {
     body = `<div class="mail"><span class="from">${esc(issue.title)}</span>${esc(d.text)}</div>`;
   } else if (issue.kind === "unmatched_payment") {
     const signals = (d.signals || []).map(([name, passed, detail]) => ({ name, passed, detail }));
-    body = kv([["Payment", nameOf(d.payment_id)], ["Best candidate", nameOf(d.candidate)], ["Identity score", d.score], ["Band", d.band]]) +
+    body = kv([["Payment", named(d.payment_id)], ["Best candidate", named(d.candidate)], ["Identity score", d.score], ["Band", d.band]]) +
       (signals.length ? checksList(signals) : "");
   } else if (issue.kind === "multiple_group_membership") {
-    body = kv([["Participant", nameOf(d.participant_id)], ["Groups", namesOf(d.group_ids)]]);
+    body = kv([["Participant", named(d.participant_id)], ["Groups", namesOf(d.group_ids)]]);
   } else if (issue.kind === "group_over_capacity") {
-    body = kv([["Group", nameOf(d.group_id)], ["Members", d.size], ["Maximum", d.max]]);
+    body = kv([["Group", named(d.group_id)], ["Members", d.size], ["Maximum", d.max]]);
   } else {
     body = kv([["Subjects", namesOf(issue.subject_ids)], ...Object.entries(d).map(([k, v]) => [k.replace(/_/g, " "), typeof v === "object" && !Array.isArray(v) ? JSON.stringify(v) : v])]);
   }
@@ -198,7 +217,11 @@ const TOOL_LABEL = {
 
 function argText(args) {
   if (!args || typeof args !== "object") return String(args ?? "");
-  return Object.entries(args).map(([k, v]) => `${k}: ${typeof v === "object" ? JSON.stringify(v) : v}`).join(", ");
+  return Object.entries(args).map(([k, v]) => {
+    const text = typeof v === "object" ? JSON.stringify(v) : String(v);
+    const name = typeof v === "string" && recordName(v);
+    return `${k}: ${text}${name ? ` (${name})` : ""}`;
+  }).join(", ");
 }
 
 // The real tool calls of the agent run, in order (T31). Rejected calls stay visible.
@@ -215,13 +238,15 @@ function stepsBlock(action) {
 // The agent's evidence, grouped as checked / found / applied / proposed.
 function traceBlock(action) {
   const ev = action.evidence || [];
-  const checked = [...new Set(ev.map(e => `${e.source_type} ${e.source_type === "rule" ? e.source_id : nameOf(e.source_id)}`))];
+  const seen = new Set();
+  const checked = ev.filter(e => !seen.has(e.source_type + e.source_id) && seen.add(e.source_type + e.source_id))
+    .map(e => e.source_type === "rule" ? `${e.source_type} ${e.source_id}` : { text: `${e.source_type} ${nameOf(e.source_id)}`, title: e.source_id });
   const found = ev.filter(e => e.source_type !== "rule");
   const applied = ev.filter(e => e.source_type === "rule");
   const li = items => items.length ? `<ul>${items.join("")}</ul>` : '<span class="note">None cited.</span>';
   return `<div class="block"><span class="lbl">Decision trace</span><dl class="trace">
-    <dt>Checked</dt><dd>${li(checked.map(c => `<li><span class="src">${esc(c)}</span></li>`))}</dd>
-    <dt>Found</dt><dd>${li(found.map(e => `<li>${esc(e.description)} <span class="src">${esc(e.source_id)}</span></li>`))}</dd>
+    <dt>Checked</dt><dd>${li(checked.map(c => `<li><span class="src">${cell(c)}</span></li>`))}</dd>
+    <dt>Found</dt><dd>${li(found.map(e => `<li title="${esc(e.source_id)}">${esc(e.description)}</li>`))}</dd>
     <dt>Applied</dt><dd>${li(applied.map(e => `<li><b>${esc(e.source_id)}</b> ${esc(e.description)}</li>`))}</dd>
     <dt>Proposed</dt><dd>${esc(action.title)}</dd></dl></div>`;
 }
@@ -237,10 +262,10 @@ function payloadBlock(action) {
   const p = action.payload || {};
   const to = Array.isArray(p.to) ? p.to.join(", ") : p.to;
   switch (action.action_type) {
-    case "LINK_PAYMENT": return kv([["Link payment", nameOf(p.payment_id)], ["To participant", nameOf(p.participant_id)], ["Reply to", to]]);
+    case "LINK_PAYMENT": return kv([["Link payment", named(p.payment_id)], ["To participant", named(p.participant_id)], ["Reply to", to]]);
     case "SEND_MESSAGE": return kv([["To", to]]);
-    case "MOVE_MEMBER": return kv([["Participant", nameOf(p.participant_id)], ["From group", p.from_group ? nameOf(p.from_group) : "none"],
-                                   ["To group", p.to_group ? nameOf(p.to_group) : "none"]]);
+    case "MOVE_MEMBER": return kv([["Participant", named(p.participant_id)], ["From group", p.from_group ? named(p.from_group) : "none"],
+                                   ["To group", p.to_group ? named(p.to_group) : "none"]]);
     case "UPDATE_GROUPS": return `<div class="groups">${(p.groups || []).map(g =>
       `<div><b>${esc(g.name)}</b> <span class="src">${esc(g.id)}</span><br>${esc(g.members.map(id => (summary().records.participants || {})[id] || id).join(", "))}</div>`).join("")}</div>`;
     case "ESCALATE": return p.note ? `<div class="question">${esc(p.note)}</div>` : "";
@@ -503,6 +528,64 @@ async function chooseOption(optionId) {
   });
 }
 
+// ---------- demo tour (T33) ----------
+
+const TOUR = [
+  { ev: "hackathon", key: "issue:multiple_group_membership:p02", title: "Code finds the problems",
+    text: "Fixed checks read registrations, payments, teams and the inbox, and list what needs attention, blocking first. Here Léa Martin is in two teams, against the one-team rule. No AI is involved yet." },
+  { ev: "hackathon", key: "issue:message:m01", target: '[data-act="retry"], [data-act="edit"]', title: "The agent investigates",
+    text: "Antoine says he already paid from his personal email. Click Run agent on this issue and read the Agent steps: it looks him up, reads the unmatched payments and scores the identity match (0.91). Not sure enough, so it asks you." },
+  { ev: "hackathon", key: "issue:message:m01", target: '[data-act="edit"], [data-act="approve"]', title: "You stay in charge",
+    text: "Edit the drafted reply, then Confirm and link. Only now is the payment linked and the reply added to the Outbox; the payment issue disappears from the list." },
+  { ev: "hackathon", compose: 1, target: "#composeForm button[type=submit]", title: "Try your own message",
+    text: "A sponsor asks for participants' phone numbers. Send it, or type anything in English or French: the agent checks the rules (§10 personal data) and escalates instead of sharing." },
+  { ev: "wei", key: "issue:no_logistics_plan", target: '[data-act="plan"], #answerForm button', title: "Same loop, a trip for 40",
+    text: "Plan the trip. The planner asks whether the budget includes meals before searching. Answer, then compare packages built from real hotel offers (Jinko); rejected ones show why." },
+  { ev: "wei", key: "issue:no_logistics_plan", target: '[data-budget="9000"], [data-act="choose"]', title: "Constraints are never relaxed",
+    text: "Try €90: nothing is valid and the planner says which constraint binds, without relaxing it. Back to €120, choose an option: the waiting issues (reminders, rooms, meeting time) unlock." },
+];
+
+function renderTour() {
+  const el = $("#tour");
+  if (!el) return;
+  el.hidden = ui.tourStep == null;
+  if (el.hidden) return;
+  const k = ui.tourStep;
+  el.innerHTML = `<div class="tourhead"><b>Demo tour</b><span class="note">Tip: Reset demo (click twice) for a fresh start.</span>
+      <button class="btn" type="button" data-tour="close">Close</button></div>
+    <ol class="tourlist">${TOUR.map((t, i) => `<li class="${i === k ? "on" : ""}"><button type="button" data-tour="${i}">
+      <span class="n">${i + 1}</span>${esc(t.title)}</button></li>`).join("")}</ol>
+    <div class="tourtext"><p>${esc(TOUR[k].text)}</p>${ui.tourNote ? `<p class="tournote">${esc(ui.tourNote)}</p>` : ""}
+      ${k < TOUR.length - 1 ? `<button class="btn primary" type="button" data-tour="${k + 1}">Next: ${esc(TOUR[k + 1].title)}</button>` : ""}</div>`;
+}
+
+async function goTour(k) {
+  const step = TOUR[k];
+  ui.tourStep = k;
+  if (ui.current !== step.ev) await selectEvent(step.ev);
+  if (step.compose != null) {
+    ui.tourNote = "";
+    ui.view = "compose";
+    renderIssues(); renderDetail();
+    const ex = EXAMPLES[step.compose], form = $("#composeForm");
+    form.sender.value = ex.sender; form.channel.value = ex.channel; form.text.value = ex.text;
+  } else {
+    ui.view = "issue";
+    const present = summary().issues.some(i => `issue:${i.id}` === step.key && !TERMINAL.includes(i.status));
+    ui.tourNote = present ? "" : "This step was already done on this event. Click Reset demo twice to replay it.";
+    ui.sel[ui.current] = present ? step.key : firstKey(summary());
+    render();
+    const row = document.querySelector(`[data-key="${CSS.escape(step.key)}"]`);
+    if (row) row.scrollIntoView({ block: "nearest" });
+  }
+  renderTour();
+  document.querySelectorAll(".hint").forEach(x => x.classList.remove("hint"));
+  // Selectors are alternatives in priority order (e.g. Edit before Approve), not document order.
+  const target = step.target && step.target.split(",").map(sel => document.querySelector(sel.trim())).find(Boolean);
+  if (target) { target.classList.add("hint"); target.scrollIntoView({ block: "center" }); }
+  else $("#detail").scrollIntoView({ block: "start" });
+}
+
 function outboxHTML() {
   const items = ui.outbox.slice().reverse();
   return `<div class="dhead"><div class="badges"><span class="badge b-kind">outbox</span></div>
@@ -519,6 +602,8 @@ function render() { renderEvents(); renderIssues(); renderDetail(); }
 function firstKey(s) {
   const byIssue = actionsByIssue(s);
   const open = s.issues.filter(i => !TERMINAL.includes(i.status));
+  const planning = open.find(i => i.kind === "no_logistics_plan");
+  if (planning) return `issue:${planning.id}`;
   const sorted = [...open.filter(i => i.blocking), ...open.filter(i => !i.blocking)];
   const ready = sorted.find(i => ["proposed", "human"].includes(viewStatus(i, s, byIssue)));
   const pick = ready || sorted[0];
@@ -536,7 +621,8 @@ function keepSelection() {
 function store(data) {
   ui.summaries[data.id] = { id: data.id, name: data.name, counts: data.counts, issues: data.issues, actions: data.actions,
                             travel: data.travel || null, logistics: data.logistics || null,
-                            records: data.records || { participants: {}, groups: {}, payments: {} } };
+                            records: data.records || { participants: {}, groups: {}, payments: {} },
+                            meta: data.meta || {} };
 }
 
 async function selectEvent(id) {
@@ -729,7 +815,14 @@ $("#detail").addEventListener("click", e => {
   }
 });
 
-$("#runBtn").addEventListener("click", () => runAgent());
+$("#runBtn").addEventListener("click", () => runAgent());   // doubles as Stop during a run
+$("#tourBtn").addEventListener("click", () => { if (!ui.busy) goTour(ui.tourStep ?? 0); });
+$("#tour").addEventListener("click", e => {
+  const b = e.target.closest("[data-tour]");
+  if (!b || ui.busy) return;
+  if (b.dataset.tour === "close") { ui.tourStep = null; renderTour(); document.querySelectorAll(".hint").forEach(x => x.classList.remove("hint")); return; }
+  goTour(+b.dataset.tour);
+});
 $("#composeBtn").addEventListener("click", () => {
   if (ui.busy) return;
   ui.view = "compose";

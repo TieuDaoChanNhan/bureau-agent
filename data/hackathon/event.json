@@ -8,6 +8,11 @@
   "settings": {
     "unpaid_kind": "unpaid_membership",
     "group_kind": "team",
-    "fee_amount_cents": 1000
+    "fee_amount_cents": 1000,
+    "display": {
+      "type": "Hackathon",
+      "dates": "25–27 Sep 2026",
+      "place": "Online, X-IA association"
+    }
   }
 }
