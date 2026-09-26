@@ -9,6 +9,7 @@ from ..core.detect import detect_issues
 from ..core.models import Check, EventState, Evidence, Group, Issue, ProposedAction
 from ..core.store import append_log, merge_issue_status, save_state
 from ..tools.groups import check_groups
+from ..tools.identity import ASK_HUMAN, link_band
 from .prompts import SYSTEM_PROMPT
 from .tool_specs import ACTION_TYPES, TOOLS, build_handlers
 
@@ -70,6 +71,19 @@ def _validate_payload(action_type: str, payload: dict) -> None:
                     raise ValueError(f"Each group requires an integer {key}")
 
 
+def _check_identity(state: EventState, payload: dict) -> None:
+    """The identity threshold is an invariant: enforce it here, not only in the prompt."""
+    payment = next((p for p in state.payments if p.id == payload["payment_id"]), None)
+    person = state.participant(payload["participant_id"])
+    if payment is None or person is None:
+        raise ValueError("LINK_PAYMENT refers to an unknown payment_id or participant_id")
+    band, value = link_band(payment, person)
+    if band == "different":
+        raise ValueError(
+            f"Payment {payment.id} and participant {person.id} score {value} < {ASK_HUMAN}: they are "
+            "treated as different people. Do not link them; ESCALATE or ask for payment details instead.")
+
+
 def _action_from_args(state: EventState, issue: Issue, args: dict) -> ProposedAction:
     action_type = args["action_type"]
     if action_type not in ACTION_TYPES:
@@ -81,6 +95,8 @@ def _action_from_args(state: EventState, issue: Issue, args: dict) -> ProposedAc
         raise ValueError("Include a payload object; nest executor fields inside it, not at the top level")
     payload = args["payload"]
     _validate_payload(action_type, payload)
+    if action_type == "LINK_PAYMENT":
+        _check_identity(state, payload)
     if action_type == "UPDATE_GROUPS":
         replacement = [Group(
             id=g["id"], kind=g["kind"], name=g["name"], members=list(g["members"]),
