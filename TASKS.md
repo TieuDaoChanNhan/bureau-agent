@@ -32,6 +32,18 @@
 | T18 | P2 | Buổi thử với người tổ chức thật | P0 xong | — | [#17](https://github.com/TieuDaoChanNhan/bureau-agent/issues/17) |
 | T19 | P2 | Kiểm tra trước khi nộp, công khai repo, nộp form | T17 | `t19-release` | [#18](https://github.com/TieuDaoChanNhan/bureau-agent/issues/18) |
 | T20 | P2 | Triển khai demo miễn phí | T05, T06 | `t20-deploy` | [#19](https://github.com/TieuDaoChanNhan/bureau-agent/issues/19) |
+| T21 | P0 | Executor hardening (follow-up to T03) | T03 | `t21-executor-hardening` | [#24](https://github.com/TieuDaoChanNhan/bureau-agent/issues/24) |
+| T22 | P0 | Robust agent batch run (shared runner, no lost proposals) | T05, T09 | `t22-robust-batch-run` | [#29](https://github.com/TieuDaoChanNhan/bureau-agent/issues/29) |
+| T23 | P1 | Show names instead of ids in the web console | T06 | `t23-web-names` | [#33](https://github.com/TieuDaoChanNhan/bureau-agent/issues/33) |
+| T24 | P2 | Bulk approval of safe replies in the web console | T06 | `t24-web-bulk-approve` | [#34](https://github.com/TieuDaoChanNhan/bureau-agent/issues/34) |
+| T25 | P2 | Filter and search issues in the web console | T06 | `t25-web-filter` | [#35](https://github.com/TieuDaoChanNhan/bureau-agent/issues/35) |
+| T26 | P2 | Automated tests for the web console | T06 | `t26-web-tests` | [#36](https://github.com/TieuDaoChanNhan/bureau-agent/issues/36) |
+| T27 | P2 | `pyproject.toml` and uv alongside `requirements.txt` | — | `t27-uv` | [#37](https://github.com/TieuDaoChanNhan/bureau-agent/issues/37) |
+| T28 | P1 | Show which issue the agent is working on and overall progress | T06 | `t28-run-progress` | [#40](https://github.com/TieuDaoChanNhan/bureau-agent/issues/40) |
+| T29 | P0 | Enforce the identity threshold in code for `LINK_PAYMENT` | — | `t29-identity-guard` | [#41](https://github.com/TieuDaoChanNhan/bureau-agent/issues/41) |
+| T30 | P0 | Make the validated model (`gpt-4.1`) the default | — | `t30-default-model` | [#43](https://github.com/TieuDaoChanNhan/bureau-agent/issues/43) |
+
+T21–T30 were added after review follow-ups and PM planning; their full specification lives in the linked issue (in English), not in the details below.
 
 ---
 
