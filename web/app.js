@@ -177,6 +177,29 @@ function inputBlock(issue) {
   return `<div class="block"><span class="lbl">Input · detected by fixed checks</span>${body || '<p class="note">No further details.</p>'}</div>`;
 }
 
+const TOOL_LABEL = {
+  get_participant: "Look up participant", get_payment: "Read payment", check_eligibility: "Check who has paid",
+  match_person: "Score identity match", search_rules: "Search the rules", list_rules: "Read all rules",
+  list_groups: "Read teams", list_group_candidates: "Find people seeking a team", check_groups: "Check team rules",
+  propose_groups: "Draft teams", get_event_summary: "Read event summary", propose_action: "Propose action",
+};
+
+function argText(args) {
+  if (!args || typeof args !== "object") return String(args ?? "");
+  return Object.entries(args).map(([k, v]) => `${k}: ${typeof v === "object" ? JSON.stringify(v) : v}`).join(", ");
+}
+
+// The real tool calls of the agent run, in order (T31). Rejected calls stay visible.
+function stepsBlock(action) {
+  const steps = action.trace || [];
+  if (!steps.length) return "";
+  return `<div class="block"><span class="lbl">Agent steps · ${steps.length} tool call${steps.length === 1 ? "" : "s"}, chosen by the model</span>
+    <ol class="steps">${steps.map(t => `<li class="${t.ok ? "" : "bad"}">
+      <span class="mark">${t.ok ? "✓" : "✗"}</span>
+      <span><b>${esc(TOOL_LABEL[t.tool] || t.tool)}</b> <code>${esc(t.tool)}</code>${argText(t.arguments) ? ` <span class="src">${esc(argText(t.arguments))}</span>` : ""}
+      <span class="res">${esc(t.result)}</span></span></li>`).join("")}</ol></div>`;
+}
+
 // The agent's evidence, grouped as checked / found / applied / proposed.
 function traceBlock(action) {
   const ev = action.evidence || [];
@@ -216,6 +239,7 @@ function actionBlocks(action, editable) {
   const draft = ui.drafts[action.id] ?? draftOf(action);
   const edited = ui.drafts[action.id] != null;
   return `
+    ${stepsBlock(action)}
     ${traceBlock(action)}
     ${action.checks && action.checks.length ? `<div class="block"><span class="lbl">Checks</span>${checksList(action.checks)}</div>` : ""}
     <div class="block"><span class="lbl">Agent's note to organizers</span><div class="question">${esc(action.description)}</div></div>

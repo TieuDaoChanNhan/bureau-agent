@@ -111,6 +111,9 @@ class ProposedAction:
     confidence: Optional[float] = None
     requires_approval: bool = True
     payload: dict[str, Any] = field(default_factory=dict)
+    # Tool calls of the agent run that produced this proposal, in order:
+    # {"step", "tool", "arguments", "result", "ok"}. Empty for planner or older actions.
+    trace: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
