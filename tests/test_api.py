@@ -117,18 +117,27 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code, response.text)
         self.assertEqual([issue_id], [a["issue_id"] for a in response.json()["actions"]])
 
-    WEI_EXTRACTED = {"hard": {"participants": 40, "max_cost_per_person_cents": 12000, "arrive_before": "21:00",
+    WEI_EXTRACTED = {"hard": {"participants": 100, "max_cost_per_person_cents": 15000, "arrive_before": "21:00",
                               "no_overnight": True, "step_free_rooms": 2},
-                     "soft": ["fewer_changes", "near_station", "early_return"],
+                     "soft": ["fewer_changes", "early_return", "lower_cost"],
                      "organizer_verified": ["step_free_rooms"], "clarifications": []}
+    WEI_ANSWER = ("The EUR150 ceiling includes round-trip coach hire, lodging, groceries "
+                  "and food transport.")
 
-    def plan(self, body=None, clarifications=(), explanation="Option F is the direct train; Option D is cheaper but has one change."):
-        """POST /plan with a scripted planner client: extraction JSON, then the explanation."""
+    def plan(self, body=None, clarifications=(), explanation="Option F includes two coaches, lodging, groceries and food transport."):
+        """Script extraction after the budget answer, or a clarification for the original brief."""
         from tests.fake_llm import FakeClient
-        extracted = {**self.WEI_EXTRACTED, "clarifications": list(clarifications)}
+        extracted = copy.deepcopy(self.WEI_EXTRACTED)
+        extracted["clarifications"] = list(clarifications)
+        body = dict(body or {})
+        if clarifications:
+            extracted["hard"]["max_cost_per_person_cents"] = None
+        else:
+            body.setdefault("text", load_event("wei").travel["request"] +
+                            "\n\nOrganizer answers: " + self.WEI_ANSWER)
         self.planner_client = FakeClient([json.dumps(extracted), explanation])
         with mock.patch("api.main._planner_client", return_value=self.planner_client):
-            return self.client.post("/api/events/wei/plan", json=body or {})
+            return self.client.post("/api/events/wei/plan", json=body)
 
     def plan_action(self, response):
         return next(a for a in response.json()["actions"] if a["id"] == response.json()["action_id"])
@@ -138,14 +147,42 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code, response.text)
         action = self.plan_action(response)
         self.assertEqual("SELECT_TRAVEL_PLAN", action["action_type"])
-        self.assertGreaterEqual(len(action["payload"]["ranked_valid"]), 1)
-        self.assertEqual(12000, action["payload"]["constraints"]["hard"]["max_cost_per_person_cents"])
+        self.assertEqual(["F", "C", "E"], action["payload"]["ranked_valid"])
+        self.assertEqual(15000, action["payload"]["constraints"]["hard"]["max_cost_per_person_cents"])
         self.assertEqual("llm", action["payload"]["constraints_source"])
-        self.assertEqual("F", action["payload"]["ranked_valid"][0])   # Jinko hotels (replay) x recorded transport
-        self.assertTrue(action["description"].startswith("Option F is the direct train"))
+        self.assertEqual("F", action["payload"]["ranked_valid"][0])   # Jinko hotels (replay) x recorded coaches
+        self.assertTrue(action["description"].startswith("Option F includes two coaches"))
         self.assertIn("jinko:replay", action["payload"]["options"][0]["option"]["source"])
+        for row in action["payload"]["options"]:
+            option = row["option"]
+            costs = option["cost_breakdown_per_person_cents"]
+            self.assertEqual(2000, costs["groceries"])
+            self.assertEqual(200, costs["food_transport"])
+            self.assertEqual(sum(costs.values()), option["cost_per_person_cents"])
+            self.assertGreaterEqual(option["transport"]["capacity"], 100)
         self.assertEqual("proposed", next(i for i in response.json()["issues"]
                                           if i["id"] == "no_logistics_plan")["status"])
+
+    def test_lower_120_budget_rejects_jinko_packages_with_meals_included(self):
+        response = self.plan({"overrides": {"max_cost_per_person_cents": 12000}})
+        self.assertEqual(200, response.status_code, response.text)
+        action = self.plan_action(response)
+        self.assertEqual("ESCALATE", action["action_type"])
+        self.assertEqual(12000, action["payload"]["constraints"]["hard"]["max_cost_per_person_cents"])
+        self.assertTrue(action["payload"]["options"])
+        self.assertTrue(all(not row["valid"] for row in action["payload"]["options"]))
+
+    def test_missing_food_transport_budget_asks_before_searching(self):
+        state = store.load_state("wei")
+        del state.travel["catering"]["food_transport_per_person_cents"]
+        store.save_state(state)
+        with mock.patch("bureau.planner.planner.search_options") as search:
+            response = self.plan()
+        self.assertEqual(200, response.status_code, response.text)
+        action = self.plan_action(response)
+        self.assertEqual("ESCALATE", action["action_type"])
+        self.assertIn("allocations", action["payload"]["clarifications"][0])
+        search.assert_not_called()
 
     def test_plan_what_if_budget_escalates_with_suggestions_and_replaces_the_proposal(self):
         self.plan()
@@ -156,17 +193,24 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(plans[0]["payload"]["suggestions"])
 
     def test_plan_asks_clarifications_before_searching_and_accepts_answers(self):
-        question = "Does the €120 budget include meals?"
-        response = self.plan(clarifications=[question])
+        question = "Does the EUR150 ceiling include the coach hire?"
+        with mock.patch("bureau.planner.planner.search_options") as search:
+            response = self.plan(clarifications=[question])
+        search.assert_not_called()
         action = self.plan_action(response)
         self.assertEqual("ESCALATE", action["action_type"])
         self.assertEqual([question], action["payload"]["clarifications"])
         self.assertNotIn("options", action["payload"])           # nothing searched yet
-        answered = action["payload"]["request_text"] + "\n\nOrganizer answers: No, travel and lodging only."
+        self.assertEqual(load_event("wei").travel["request"], action["payload"]["request_text"])
+        self.assertNotIn("max_cost_per_person_cents", action["payload"]["constraints"]["hard"])
+        answered = action["payload"]["request_text"] + "\n\nOrganizer answers: " + self.WEI_ANSWER
         response = self.plan({"text": answered})
-        self.assertEqual("SELECT_TRAVEL_PLAN", self.plan_action(response)["action_type"])
+        selected = self.plan_action(response)
+        self.assertEqual("SELECT_TRAVEL_PLAN", selected["action_type"])
+        self.assertEqual(["F", "C", "E"], selected["payload"]["ranked_valid"])
+        self.assertEqual(15000, selected["payload"]["constraints"]["hard"]["max_cost_per_person_cents"])
         sent = json.loads(self.planner_client.requests[0]["messages"][1]["content"])
-        self.assertTrue(sent["text"].endswith("travel and lodging only."))
+        self.assertTrue(sent["text"].endswith(self.WEI_ANSWER))
 
     def test_plan_without_a_key_is_503_unless_recorded_constraints_are_requested(self):
         with mock.patch("api.main._planner_client", return_value=None):
@@ -203,7 +247,7 @@ class ApiTests(unittest.TestCase):
     def test_summary_carries_event_context_for_the_cards(self):
         meta = self.client.get("/api/events/wei").json()["meta"]
         self.assertEqual("Integration weekend", meta["type"])
-        self.assertEqual(8, meta["participants"])
+        self.assertEqual(100, meta["participants"])
 
     def test_summary_carries_display_names_for_ids(self):
         records = self.client.get("/api/events/hackathon").json()["records"]

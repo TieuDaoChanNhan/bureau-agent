@@ -3,40 +3,61 @@
   "event_id": "wei",
   "issue_id": "no_logistics_plan",
   "action_type": "SELECT_TRAVEL_PLAN",
-  "title": "2 of 5 options pass every verified hard constraint",
-  "description": "Option A ranks first under the current priorities (fewer_changes, near_station, early_return) at €112/person. Other valid options: Option B (€118). Rejected: Option C (arrive before 21:00); Option D (cost ≤ €120/person); Option E (arrive before 21:00, no overnight travel). Organizers choose; nothing is booked automatically.",
+  "title": "3 of 8 options pass every verified hard constraint",
+  "description": "Option F ranks first under the current priorities (fewer_changes, early_return, lower_cost) at €142.59/person. Other valid options: Option C (€135.59), Option E (€140.59). Rejected: Option A (arrive before 21:00, no overnight travel); Option B (arrive before 21:00); Option D (arrive before 21:00, no overnight travel); Option G (arrive before 21:00); Option H (cost ≤ €150/person). Organizers choose; nothing is booked automatically.",
   "evidence": [
     {
       "source_type": "travel_option",
       "source_id": "A",
-      "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+      "description": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations"
     },
     {
       "source_type": "travel_option",
       "source_id": "B",
-      "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+      "description": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations"
     },
     {
       "source_type": "travel_option",
       "source_id": "C",
-      "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+      "description": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations"
     },
     {
       "source_type": "travel_option",
       "source_id": "D",
-      "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+      "description": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations"
     },
     {
       "source_type": "travel_option",
       "source_id": "E",
-      "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+      "description": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations"
+    },
+    {
+      "source_type": "travel_option",
+      "source_id": "F",
+      "description": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations"
+    },
+    {
+      "source_type": "travel_option",
+      "source_id": "G",
+      "description": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations"
+    },
+    {
+      "source_type": "travel_option",
+      "source_id": "H",
+      "description": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations"
     }
   ],
   "checks": [
     {
-      "name": "cost ≤ €120/person",
+      "name": "itemized cost matches total",
       "passed": true,
-      "detail": "€112",
+      "detail": "coach: €42 + lodging: €78.59 + groceries: €20 + food_transport: €2",
+      "verified": true
+    },
+    {
+      "name": "cost ≤ €150/person",
+      "passed": true,
+      "detail": "€142.59",
       "verified": true
     },
     {
@@ -52,15 +73,15 @@
       "verified": true
     },
     {
-      "name": "lodging for 40",
+      "name": "lodging for 100",
       "passed": true,
-      "detail": "40",
+      "detail": "100",
       "verified": true
     },
     {
       "name": "≥ 2 step-free rooms",
-      "passed": true,
-      "detail": "listed in facilities; confirm with the venue",
+      "passed": false,
+      "detail": "not listed",
       "verified": false
     }
   ],
@@ -68,257 +89,58 @@
   "requires_approval": true,
   "payload": {
     "ranked_valid": [
-      "A",
-      "B"
+      "F",
+      "C",
+      "E"
     ],
     "options": [
       {
         "option": {
           "id": "A",
           "transport": {
-            "mode": "train",
-            "depart": "18:10",
-            "arrive": "20:15",
-            "changes": 0,
-            "overnight": false,
-            "return_arrive": "19:05"
-          },
-          "lodging": {
-            "name": "Group hostel",
-            "rooms": 10,
-            "capacity": 40,
-            "walk_minutes": 6,
-            "step_free_hint": true
-          },
-          "cost_per_person_cents": 11200,
-          "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
-        },
-        "checks": [
-          {
-            "name": "cost ≤ €120/person",
-            "passed": true,
-            "detail": "€112",
-            "verified": true
-          },
-          {
-            "name": "arrive before 21:00",
-            "passed": true,
-            "detail": "20:15",
-            "verified": true
-          },
-          {
-            "name": "no overnight travel",
-            "passed": true,
-            "detail": "",
-            "verified": true
-          },
-          {
-            "name": "lodging for 40",
-            "passed": true,
-            "detail": "40",
-            "verified": true
-          },
-          {
-            "name": "≥ 2 step-free rooms",
-            "passed": true,
-            "detail": "listed in facilities; confirm with the venue",
-            "verified": false
-          }
-        ],
-        "valid": true
-      },
-      {
-        "option": {
-          "id": "B",
-          "transport": {
-            "mode": "train",
-            "depart": "17:52",
-            "arrive": "20:40",
-            "changes": 1,
-            "overnight": false,
-            "return_arrive": "19:40"
-          },
-          "lodging": {
-            "name": "Hotel",
-            "rooms": 20,
-            "capacity": 40,
-            "walk_minutes": 12,
-            "step_free_hint": true
-          },
-          "cost_per_person_cents": 11800,
-          "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
-        },
-        "checks": [
-          {
-            "name": "cost ≤ €120/person",
-            "passed": true,
-            "detail": "€118",
-            "verified": true
-          },
-          {
-            "name": "arrive before 21:00",
-            "passed": true,
-            "detail": "20:40",
-            "verified": true
-          },
-          {
-            "name": "no overnight travel",
-            "passed": true,
-            "detail": "",
-            "verified": true
-          },
-          {
-            "name": "lodging for 40",
-            "passed": true,
-            "detail": "40",
-            "verified": true
-          },
-          {
-            "name": "≥ 2 step-free rooms",
-            "passed": true,
-            "detail": "listed in facilities; confirm with the venue",
-            "verified": false
-          }
-        ],
-        "valid": true
-      },
-      {
-        "option": {
-          "id": "C",
-          "transport": {
             "mode": "coach",
-            "depart": "18:30",
-            "arrive": "22:10",
-            "changes": 0,
-            "overnight": false,
-            "return_arrive": "20:30"
-          },
-          "lodging": {
-            "name": "Hotel",
-            "rooms": 20,
-            "capacity": 40,
-            "walk_minutes": 5,
-            "step_free_hint": true
-          },
-          "cost_per_person_cents": 9600,
-          "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
-        },
-        "checks": [
-          {
-            "name": "cost ≤ €120/person",
-            "passed": true,
-            "detail": "€96",
-            "verified": true
-          },
-          {
-            "name": "arrive before 21:00",
-            "passed": false,
-            "detail": "22:10",
-            "verified": true
-          },
-          {
-            "name": "no overnight travel",
-            "passed": true,
-            "detail": "",
-            "verified": true
-          },
-          {
-            "name": "lodging for 40",
-            "passed": true,
-            "detail": "40",
-            "verified": true
-          },
-          {
-            "name": "≥ 2 step-free rooms",
-            "passed": true,
-            "detail": "listed in facilities; confirm with the venue",
-            "verified": false
-          }
-        ],
-        "valid": false
-      },
-      {
-        "option": {
-          "id": "D",
-          "transport": {
-            "mode": "train",
-            "depart": "18:10",
-            "arrive": "20:15",
-            "changes": 0,
-            "overnight": false,
-            "return_arrive": "19:05"
-          },
-          "lodging": {
-            "name": "Seafront hotel",
-            "rooms": 20,
-            "capacity": 40,
-            "walk_minutes": 15,
-            "step_free_hint": true
-          },
-          "cost_per_person_cents": 14100,
-          "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
-        },
-        "checks": [
-          {
-            "name": "cost ≤ €120/person",
-            "passed": false,
-            "detail": "€141 (+€21)",
-            "verified": true
-          },
-          {
-            "name": "arrive before 21:00",
-            "passed": true,
-            "detail": "20:15",
-            "verified": true
-          },
-          {
-            "name": "no overnight travel",
-            "passed": true,
-            "detail": "",
-            "verified": true
-          },
-          {
-            "name": "lodging for 40",
-            "passed": true,
-            "detail": "40",
-            "verified": true
-          },
-          {
-            "name": "≥ 2 step-free rooms",
-            "passed": true,
-            "detail": "listed in facilities; confirm with the venue",
-            "verified": false
-          }
-        ],
-        "valid": false
-      },
-      {
-        "option": {
-          "id": "E",
-          "transport": {
-            "mode": "night coach",
+            "charter": true,
+            "capacity": 106,
+            "round_trip": true,
+            "charter_verified": false,
             "depart": "23:00",
             "arrive": "02:30",
             "arrives_next_day": true,
             "changes": 0,
             "overnight": true,
-            "return_arrive": "21:00"
+            "return_arrive": "21:00",
+            "vehicles": 2,
+            "seats_per_vehicle": 53
           },
           "lodging": {
-            "name": "Group hostel",
-            "rooms": 10,
-            "capacity": 40,
-            "walk_minutes": 6,
-            "step_free_hint": true
+            "name": "ibis budget Deauville",
+            "rooms": 50,
+            "capacity": 100,
+            "walk_minutes": 18,
+            "step_free_hint": false,
+            "group_block_confirmed": false,
+            "hotel_id": "lp8facd"
           },
-          "cost_per_person_cents": 7800,
-          "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+          "cost_per_person_cents": 12259,
+          "source": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations",
+          "cost_breakdown_per_person_cents": {
+            "coach": 2200,
+            "lodging": 7859,
+            "groceries": 2000,
+            "food_transport": 200
+          }
         },
         "checks": [
           {
-            "name": "cost ≤ €120/person",
+            "name": "itemized cost matches total",
             "passed": true,
-            "detail": "€78",
+            "detail": "coach: €22 + lodging: €78.59 + groceries: €20 + food_transport: €2",
+            "verified": true
+          },
+          {
+            "name": "cost ≤ €150/person",
+            "passed": true,
+            "detail": "€122.59",
             "verified": true
           },
           {
@@ -334,15 +156,541 @@
             "verified": true
           },
           {
-            "name": "lodging for 40",
+            "name": "lodging for 100",
             "passed": true,
-            "detail": "40",
+            "detail": "100",
             "verified": true
           },
           {
             "name": "≥ 2 step-free rooms",
+            "passed": false,
+            "detail": "not listed",
+            "verified": false
+          }
+        ],
+        "valid": false
+      },
+      {
+        "option": {
+          "id": "B",
+          "transport": {
+            "mode": "coach",
+            "charter": true,
+            "capacity": 106,
+            "round_trip": true,
+            "charter_verified": false,
+            "depart": "18:30",
+            "arrive": "22:10",
+            "changes": 0,
+            "overnight": false,
+            "return_arrive": "20:30",
+            "vehicles": 2,
+            "seats_per_vehicle": 53
+          },
+          "lodging": {
+            "name": "ibis budget Deauville",
+            "rooms": 50,
+            "capacity": 100,
+            "walk_minutes": 18,
+            "step_free_hint": false,
+            "group_block_confirmed": false,
+            "hotel_id": "lp8facd"
+          },
+          "cost_per_person_cents": 13059,
+          "source": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations",
+          "cost_breakdown_per_person_cents": {
+            "coach": 3000,
+            "lodging": 7859,
+            "groceries": 2000,
+            "food_transport": 200
+          }
+        },
+        "checks": [
+          {
+            "name": "itemized cost matches total",
             "passed": true,
-            "detail": "listed in facilities; confirm with the venue",
+            "detail": "coach: €30 + lodging: €78.59 + groceries: €20 + food_transport: €2",
+            "verified": true
+          },
+          {
+            "name": "cost ≤ €150/person",
+            "passed": true,
+            "detail": "€130.59",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": false,
+            "detail": "22:10",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": true,
+            "detail": "",
+            "verified": true
+          },
+          {
+            "name": "lodging for 100",
+            "passed": true,
+            "detail": "100",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": false,
+            "detail": "not listed",
+            "verified": false
+          }
+        ],
+        "valid": false
+      },
+      {
+        "option": {
+          "id": "C",
+          "transport": {
+            "mode": "coach",
+            "charter": true,
+            "capacity": 106,
+            "round_trip": true,
+            "charter_verified": false,
+            "depart": "18:10",
+            "arrive": "20:15",
+            "changes": 0,
+            "overnight": false,
+            "return_arrive": "17:30",
+            "vehicles": 2,
+            "seats_per_vehicle": 53
+          },
+          "lodging": {
+            "name": "ibis budget Deauville",
+            "rooms": 50,
+            "capacity": 100,
+            "walk_minutes": 18,
+            "step_free_hint": false,
+            "group_block_confirmed": false,
+            "hotel_id": "lp8facd"
+          },
+          "cost_per_person_cents": 13559,
+          "source": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations",
+          "cost_breakdown_per_person_cents": {
+            "coach": 3500,
+            "lodging": 7859,
+            "groceries": 2000,
+            "food_transport": 200
+          }
+        },
+        "checks": [
+          {
+            "name": "itemized cost matches total",
+            "passed": true,
+            "detail": "coach: €35 + lodging: €78.59 + groceries: €20 + food_transport: €2",
+            "verified": true
+          },
+          {
+            "name": "cost ≤ €150/person",
+            "passed": true,
+            "detail": "€135.59",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": true,
+            "detail": "20:15",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": true,
+            "detail": "",
+            "verified": true
+          },
+          {
+            "name": "lodging for 100",
+            "passed": true,
+            "detail": "100",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": false,
+            "detail": "not listed",
+            "verified": false
+          }
+        ],
+        "valid": true
+      },
+      {
+        "option": {
+          "id": "D",
+          "transport": {
+            "mode": "coach",
+            "charter": true,
+            "capacity": 106,
+            "round_trip": true,
+            "charter_verified": false,
+            "depart": "23:00",
+            "arrive": "02:30",
+            "arrives_next_day": true,
+            "changes": 0,
+            "overnight": true,
+            "return_arrive": "21:00",
+            "vehicles": 2,
+            "seats_per_vehicle": 53
+          },
+          "lodging": {
+            "name": "B&B HOTEL Deauville-Touques",
+            "rooms": 50,
+            "capacity": 100,
+            "walk_minutes": 17,
+            "step_free_hint": false,
+            "group_block_confirmed": false,
+            "hotel_id": "lp6556fcca"
+          },
+          "cost_per_person_cents": 13946,
+          "source": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations",
+          "cost_breakdown_per_person_cents": {
+            "coach": 2200,
+            "lodging": 9546,
+            "groceries": 2000,
+            "food_transport": 200
+          }
+        },
+        "checks": [
+          {
+            "name": "itemized cost matches total",
+            "passed": true,
+            "detail": "coach: €22 + lodging: €95.46 + groceries: €20 + food_transport: €2",
+            "verified": true
+          },
+          {
+            "name": "cost ≤ €150/person",
+            "passed": true,
+            "detail": "€139.46",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": false,
+            "detail": "02:30",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": false,
+            "detail": "overnight",
+            "verified": true
+          },
+          {
+            "name": "lodging for 100",
+            "passed": true,
+            "detail": "100",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": false,
+            "detail": "not listed",
+            "verified": false
+          }
+        ],
+        "valid": false
+      },
+      {
+        "option": {
+          "id": "E",
+          "transport": {
+            "mode": "coach",
+            "charter": true,
+            "capacity": 106,
+            "round_trip": true,
+            "charter_verified": false,
+            "depart": "18:05",
+            "arrive": "20:40",
+            "changes": 0,
+            "overnight": false,
+            "return_arrive": "18:00",
+            "vehicles": 2,
+            "seats_per_vehicle": 53
+          },
+          "lodging": {
+            "name": "ibis budget Deauville",
+            "rooms": 50,
+            "capacity": 100,
+            "walk_minutes": 18,
+            "step_free_hint": false,
+            "group_block_confirmed": false,
+            "hotel_id": "lp8facd"
+          },
+          "cost_per_person_cents": 14059,
+          "source": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations",
+          "cost_breakdown_per_person_cents": {
+            "coach": 4000,
+            "lodging": 7859,
+            "groceries": 2000,
+            "food_transport": 200
+          }
+        },
+        "checks": [
+          {
+            "name": "itemized cost matches total",
+            "passed": true,
+            "detail": "coach: €40 + lodging: €78.59 + groceries: €20 + food_transport: €2",
+            "verified": true
+          },
+          {
+            "name": "cost ≤ €150/person",
+            "passed": true,
+            "detail": "€140.59",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": true,
+            "detail": "20:40",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": true,
+            "detail": "",
+            "verified": true
+          },
+          {
+            "name": "lodging for 100",
+            "passed": true,
+            "detail": "100",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": false,
+            "detail": "not listed",
+            "verified": false
+          }
+        ],
+        "valid": true
+      },
+      {
+        "option": {
+          "id": "F",
+          "transport": {
+            "mode": "coach",
+            "charter": true,
+            "capacity": 106,
+            "round_trip": true,
+            "charter_verified": false,
+            "depart": "18:10",
+            "arrive": "20:15",
+            "changes": 0,
+            "overnight": false,
+            "return_arrive": "17:00",
+            "vehicles": 2,
+            "seats_per_vehicle": 53
+          },
+          "lodging": {
+            "name": "ibis budget Deauville",
+            "rooms": 50,
+            "capacity": 100,
+            "walk_minutes": 18,
+            "step_free_hint": false,
+            "group_block_confirmed": false,
+            "hotel_id": "lp8facd"
+          },
+          "cost_per_person_cents": 14259,
+          "source": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations",
+          "cost_breakdown_per_person_cents": {
+            "coach": 4200,
+            "lodging": 7859,
+            "groceries": 2000,
+            "food_transport": 200
+          }
+        },
+        "checks": [
+          {
+            "name": "itemized cost matches total",
+            "passed": true,
+            "detail": "coach: €42 + lodging: €78.59 + groceries: €20 + food_transport: €2",
+            "verified": true
+          },
+          {
+            "name": "cost ≤ €150/person",
+            "passed": true,
+            "detail": "€142.59",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": true,
+            "detail": "20:15",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": true,
+            "detail": "",
+            "verified": true
+          },
+          {
+            "name": "lodging for 100",
+            "passed": true,
+            "detail": "100",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": false,
+            "detail": "not listed",
+            "verified": false
+          }
+        ],
+        "valid": true
+      },
+      {
+        "option": {
+          "id": "G",
+          "transport": {
+            "mode": "coach",
+            "charter": true,
+            "capacity": 106,
+            "round_trip": true,
+            "charter_verified": false,
+            "depart": "18:30",
+            "arrive": "22:10",
+            "changes": 0,
+            "overnight": false,
+            "return_arrive": "20:30",
+            "vehicles": 2,
+            "seats_per_vehicle": 53
+          },
+          "lodging": {
+            "name": "B&B HOTEL Deauville-Touques",
+            "rooms": 50,
+            "capacity": 100,
+            "walk_minutes": 17,
+            "step_free_hint": false,
+            "group_block_confirmed": false,
+            "hotel_id": "lp6556fcca"
+          },
+          "cost_per_person_cents": 14746,
+          "source": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations",
+          "cost_breakdown_per_person_cents": {
+            "coach": 3000,
+            "lodging": 9546,
+            "groceries": 2000,
+            "food_transport": 200
+          }
+        },
+        "checks": [
+          {
+            "name": "itemized cost matches total",
+            "passed": true,
+            "detail": "coach: €30 + lodging: €95.46 + groceries: €20 + food_transport: €2",
+            "verified": true
+          },
+          {
+            "name": "cost ≤ €150/person",
+            "passed": true,
+            "detail": "€147.46",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": false,
+            "detail": "22:10",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": true,
+            "detail": "",
+            "verified": true
+          },
+          {
+            "name": "lodging for 100",
+            "passed": true,
+            "detail": "100",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": false,
+            "detail": "not listed",
+            "verified": false
+          }
+        ],
+        "valid": false
+      },
+      {
+        "option": {
+          "id": "H",
+          "transport": {
+            "mode": "coach",
+            "charter": true,
+            "capacity": 106,
+            "round_trip": true,
+            "charter_verified": false,
+            "depart": "18:10",
+            "arrive": "20:15",
+            "changes": 0,
+            "overnight": false,
+            "return_arrive": "17:30",
+            "vehicles": 2,
+            "seats_per_vehicle": 53
+          },
+          "lodging": {
+            "name": "B&B HOTEL Deauville-Touques",
+            "rooms": 50,
+            "capacity": 100,
+            "walk_minutes": 17,
+            "step_free_hint": false,
+            "group_block_confirmed": false,
+            "hotel_id": "lp6556fcca"
+          },
+          "cost_per_person_cents": 15246,
+          "source": "recorded transport (illustrative private coach hire, not a Jinko quote) + jinko:replay + organizer-provided grocery and food-transport allocations",
+          "cost_breakdown_per_person_cents": {
+            "coach": 3500,
+            "lodging": 9546,
+            "groceries": 2000,
+            "food_transport": 200
+          }
+        },
+        "checks": [
+          {
+            "name": "itemized cost matches total",
+            "passed": true,
+            "detail": "coach: €35 + lodging: €95.46 + groceries: €20 + food_transport: €2",
+            "verified": true
+          },
+          {
+            "name": "cost ≤ €150/person",
+            "passed": false,
+            "detail": "€152.46 (+€2.46)",
+            "verified": true
+          },
+          {
+            "name": "arrive before 21:00",
+            "passed": true,
+            "detail": "20:15",
+            "verified": true
+          },
+          {
+            "name": "no overnight travel",
+            "passed": true,
+            "detail": "",
+            "verified": true
+          },
+          {
+            "name": "lodging for 100",
+            "passed": true,
+            "detail": "100",
+            "verified": true
+          },
+          {
+            "name": "≥ 2 step-free rooms",
+            "passed": false,
+            "detail": "not listed",
             "verified": false
           }
         ],

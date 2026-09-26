@@ -278,6 +278,11 @@ class PlanningEvaluationTests(unittest.TestCase):
         return {
             "id": "planning-test", "event": "wei",
             "text": "Travel for 40 people; at most EUR 120 each, excluding meals.",
+            "request_context": {
+                "participants": 40, "origin": "Paris", "destination": "Trouville-Deauville",
+                "depart_after": "2026-10-09T17:00:00+02:00",
+                "return_by": "2026-10-11T18:00:00+02:00",
+            },
             "expected_hard": {"participants": 40, "max_cost_per_person_cents": 12000},
             "expected_clarifications": [], "feasible": True, **overrides,
         }
@@ -293,6 +298,8 @@ class PlanningEvaluationTests(unittest.TestCase):
                 self.assertIsInstance(case["expected_clarifications"], list)
                 self.assertIs(type(case["feasible"]), bool)
                 self.assertEqual(case["expected_hard"]["participants"], 40)
+                self.assertEqual(case["request_context"]["participants"], 40)
+                self.assertEqual(case["options_fixture"], "planning_options.json")
         self.assertTrue(any(case["expected_clarifications"] for case in cases))
         self.assertTrue(any(not case["expected_clarifications"] for case in cases))
 
@@ -303,7 +310,9 @@ class PlanningEvaluationTests(unittest.TestCase):
             requests.append(asdict(request))
             return Constraints(hard={"participants": 40, "max_cost_per_person_cents": 12000})
 
-        report = run_eval.evaluate_planning([self.case()], extractor=extract)
+        report = run_eval.evaluate_planning(
+            [self.case(options_fixture="planning_options.json")], extractor=extract,
+        )
         self.assertEqual(report["mode"], "llm_extraction_recorded_options")
         row = report["cases"][0]
         self.assertIsNone(row["error"])
@@ -312,8 +321,103 @@ class PlanningEvaluationTests(unittest.TestCase):
         self.assertTrue(row["feasibility_correct"])
         self.assertEqual(requests[0]["text"], self.case()["text"])
         self.assertEqual(requests[0]["participants"], 40)
+        self.assertEqual(requests[0]["origin"], "Paris")
+        self.assertEqual(requests[0]["return_by"].isoformat(), self.case()["request_context"]["return_by"])
         self.assertFalse(any(key.startswith("expected_") for key in requests[0]))
         self.assertNotIn("feasible", requests[0])
+        self.assertNotIn("options_fixture", requests[0])
+
+    def test_historical_options_are_isolated_from_current_wei_packages(self):
+        cases = [self.case(options_fixture="planning_options.json"), self.case(id="event-options")]
+        constraints = Constraints(hard={"participants": 40, "max_cost_per_person_cents": 12000})
+
+        report = run_eval.evaluate_planning(cases, extractor=lambda request: constraints)
+
+        historical, current = report["cases"]
+        self.assertIsNone(historical["error"])
+        self.assertIsNone(current["error"])
+        historical_a = historical["action"]["payload"]["options"][0]["option"]
+        current_a = current["action"]["payload"]["options"][0]["option"]
+        self.assertEqual(historical_a["transport"]["mode"], "train")
+        self.assertEqual(historical_a["lodging"]["capacity"], 40)
+        self.assertEqual(historical_a["cost_per_person_cents"], 11200)
+        self.assertEqual(historical_a.get("cost_breakdown_per_person_cents", {}), {})
+        self.assertEqual(current_a["transport"]["mode"], "coach")
+        self.assertEqual(current_a["lodging"]["capacity"], 100)
+        self.assertEqual(historical["options_fixture"]["name"], "planning_options.json")
+        self.assertEqual(len(historical["options_fixture"]["sha256"]), 64)
+        self.assertNotIn("options_fixture", current)
+
+    def test_historical_travel_only_budget_still_rejects_ninety_euros(self):
+        case = self.case(options_fixture="planning_options.json", feasible=False)
+        constraints = Constraints(hard={"participants": 40, "max_cost_per_person_cents": 9000,
+                                        "arrive_before": "21:00", "no_overnight": True})
+
+        report = run_eval.evaluate_planning([case], extractor=lambda request: constraints)
+
+        row = report["cases"][0]
+        self.assertIsNone(row["error"])
+        self.assertTrue(row["feasibility_correct"])
+        self.assertEqual(row["action"]["action_type"], "ESCALATE")
+
+    def test_clarification_does_not_load_an_options_fixture(self):
+        case = self.case(options_fixture="planning_options.json")
+        constraints = Constraints(hard={}, clarifications=["Does the budget include meals?"])
+        with mock.patch.object(run_eval, "_load_planning_options") as load_options:
+            report = run_eval.evaluate_planning([case], extractor=lambda request: constraints)
+        load_options.assert_not_called()
+        self.assertEqual(report["cases"][0]["action"]["action_type"], "ESCALATE")
+        self.assertIsNone(report["cases"][0]["feasibility_correct"])
+
+    def test_bad_options_fixture_is_a_case_error_and_later_cases_continue(self):
+        constraints = Constraints(hard={"participants": 40})
+        with tempfile.TemporaryDirectory() as tmp:
+            Path(tmp, "broken.json").write_text("{", encoding="utf-8")
+            Path(tmp, "object.json").write_text("{}", encoding="utf-8")
+            Path(tmp, "incomplete.json").write_text('[{"id":"A"}]', encoding="utf-8")
+            for filename, error in (("missing.json", "FileNotFoundError"),
+                                    ("broken.json", "JSONDecodeError"),
+                                    ("object.json", "ValueError"),
+                                    ("incomplete.json", "TypeError"),
+                                    ("../planning_options.json", "ValueError")):
+                with self.subTest(fixture=filename), mock.patch.object(run_eval, "CASES", Path(tmp)):
+                    report = run_eval.evaluate_planning(
+                        [self.case(options_fixture=filename), self.case(id="later")],
+                        extractor=lambda request: constraints,
+                    )
+                failed, later = report["cases"]
+                self.assertEqual(failed["error"]["type"], error)
+                self.assertIsNone(failed["action"])
+                self.assertIsNone(failed["feasibility_correct"])
+                self.assertIsNone(later["error"])
+
+    def test_request_context_is_independent_of_expected_labels(self):
+        case = self.case(expected_hard={"participants": 999})
+        extract = mock.Mock(return_value=Constraints(hard={"participants": 40}))
+
+        report = run_eval.evaluate_planning([case], extractor=extract)
+
+        self.assertEqual(extract.call_args.args[0].participants, 40)
+        self.assertFalse(report["cases"][0]["hard_correct"])
+
+    def test_request_context_defaults_to_event_when_omitted(self):
+        travel = load_event("wei").travel
+        case = self.case(
+            text=f"Travel for {travel['participants']} people.",
+            expected_hard={"participants": travel["participants"]},
+        )
+        del case["request_context"]
+        extract = mock.Mock(return_value=Constraints(hard=case["expected_hard"]))
+
+        report = run_eval.evaluate_planning([case], extractor=extract)
+
+        request = extract.call_args.args[0]
+        self.assertEqual(request.participants, travel["participants"])
+        self.assertEqual(request.origin, travel["origin"])
+        self.assertEqual(request.destination, travel["destination"])
+        self.assertEqual(request.depart_after.isoformat(), travel["depart_after"])
+        self.assertEqual(request.return_by.isoformat(), travel["return_by"])
+        self.assertTrue(report["cases"][0]["hard_correct"])
 
     def test_extra_hard_constraint_fails_and_is_visible_in_field_scores(self):
         constraints = Constraints(hard={

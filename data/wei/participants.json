@@ -1,10 +1,808 @@
 [
-  {"id": "w01", "name": "Camille Dupont", "emails": ["camille.dupont@etu.example.fr"], "registered_at": "2026-09-15T10:00:00+02:00"},
-  {"id": "w02", "name": "Tom Girard", "emails": ["tom.girard@etu.example.fr"], "registered_at": "2026-09-15T11:00:00+02:00"},
-  {"id": "w03", "name": "Inès Roux", "emails": ["ines.roux@etu.example.fr"], "registered_at": "2026-09-15T12:00:00+02:00", "needs": ["step_free"]},
-  {"id": "w04", "name": "Lucas Bernard", "emails": ["lucas.bernard@etu.example.fr"], "registered_at": "2026-09-16T09:00:00+02:00"},
-  {"id": "w05", "name": "Emma Laurent", "emails": ["emma.laurent@etu.example.fr"], "registered_at": "2026-09-16T10:00:00+02:00", "needs": ["step_free"]},
-  {"id": "w06", "name": "Nathan Moreau", "emails": ["nathan.moreau@etu.example.fr"], "registered_at": "2026-09-16T11:00:00+02:00"},
-  {"id": "w07", "name": "Sarah Lefebvre", "emails": ["sarah.lefebvre@etu.example.fr"], "registered_at": "2026-09-17T09:00:00+02:00"},
-  {"id": "w08", "name": "Hugo Garnier", "emails": ["hugo.garnier@etu.example.fr"], "registered_at": "2026-09-17T10:00:00+02:00"}
+  {
+    "id": "w01",
+    "name": "Camille Dupont",
+    "emails": [
+      "camille.dupont@wei.example"
+    ],
+    "registered_at": "2026-09-15T10:00:00+02:00"
+  },
+  {
+    "id": "w02",
+    "name": "Tom Girard",
+    "emails": [
+      "tom.girard@wei.example"
+    ],
+    "registered_at": "2026-09-15T11:00:00+02:00"
+  },
+  {
+    "id": "w03",
+    "name": "Inès Roux",
+    "emails": [
+      "ines.roux@wei.example"
+    ],
+    "registered_at": "2026-09-15T12:00:00+02:00",
+    "needs": [
+      "step_free"
+    ]
+  },
+  {
+    "id": "w04",
+    "name": "Lucas Bernard",
+    "emails": [
+      "lucas.bernard@wei.example"
+    ],
+    "registered_at": "2026-09-16T09:00:00+02:00"
+  },
+  {
+    "id": "w05",
+    "name": "Emma Laurent",
+    "emails": [
+      "emma.laurent@wei.example"
+    ],
+    "registered_at": "2026-09-16T10:00:00+02:00",
+    "needs": [
+      "step_free"
+    ]
+  },
+  {
+    "id": "w06",
+    "name": "Nathan Moreau",
+    "emails": [
+      "nathan.moreau@wei.example"
+    ],
+    "registered_at": "2026-09-16T11:00:00+02:00"
+  },
+  {
+    "id": "w07",
+    "name": "Sarah Lefebvre",
+    "emails": [
+      "sarah.lefebvre@wei.example"
+    ],
+    "registered_at": "2026-09-17T09:00:00+02:00"
+  },
+  {
+    "id": "w08",
+    "name": "Hugo Garnier",
+    "emails": [
+      "hugo.garnier@wei.example"
+    ],
+    "registered_at": "2026-09-17T10:00:00+02:00"
+  },
+  {
+    "id": "w09",
+    "name": "Alice Martin",
+    "emails": [
+      "student09@wei.example"
+    ],
+    "registered_at": "2026-09-18T07:00:00+02:00"
+  },
+  {
+    "id": "w10",
+    "name": "Gabriel Petit",
+    "emails": [
+      "student10@wei.example"
+    ],
+    "registered_at": "2026-09-18T08:00:00+02:00"
+  },
+  {
+    "id": "w11",
+    "name": "Chloé Simon",
+    "emails": [
+      "student11@wei.example"
+    ],
+    "registered_at": "2026-09-18T09:00:00+02:00"
+  },
+  {
+    "id": "w12",
+    "name": "Louis Robert",
+    "emails": [
+      "student12@wei.example"
+    ],
+    "registered_at": "2026-09-18T10:00:00+02:00"
+  },
+  {
+    "id": "w13",
+    "name": "Manon Richard",
+    "emails": [
+      "student13@wei.example"
+    ],
+    "registered_at": "2026-09-18T11:00:00+02:00"
+  },
+  {
+    "id": "w14",
+    "name": "Adam Durand",
+    "emails": [
+      "student14@wei.example"
+    ],
+    "registered_at": "2026-09-18T12:00:00+02:00"
+  },
+  {
+    "id": "w15",
+    "name": "Jade Michel",
+    "emails": [
+      "student15@wei.example"
+    ],
+    "registered_at": "2026-09-18T13:00:00+02:00"
+  },
+  {
+    "id": "w16",
+    "name": "Arthur Thomas",
+    "emails": [
+      "student16@wei.example"
+    ],
+    "registered_at": "2026-09-18T14:00:00+02:00"
+  },
+  {
+    "id": "w17",
+    "name": "Lina Garcia",
+    "emails": [
+      "student17@wei.example"
+    ],
+    "registered_at": "2026-09-18T15:00:00+02:00"
+  },
+  {
+    "id": "w18",
+    "name": "Paul Fontaine",
+    "emails": [
+      "student18@wei.example"
+    ],
+    "registered_at": "2026-09-18T16:00:00+02:00"
+  },
+  {
+    "id": "w19",
+    "name": "Clara Chevalier",
+    "emails": [
+      "student19@wei.example"
+    ],
+    "registered_at": "2026-09-18T17:00:00+02:00"
+  },
+  {
+    "id": "w20",
+    "name": "Noé François",
+    "emails": [
+      "student20@wei.example"
+    ],
+    "registered_at": "2026-09-18T18:00:00+02:00"
+  },
+  {
+    "id": "w21",
+    "name": "Maya Legrand",
+    "emails": [
+      "student21@wei.example"
+    ],
+    "registered_at": "2026-09-18T19:00:00+02:00"
+  },
+  {
+    "id": "w22",
+    "name": "Rayan Gauthier",
+    "emails": [
+      "student22@wei.example"
+    ],
+    "registered_at": "2026-09-18T20:00:00+02:00"
+  },
+  {
+    "id": "w23",
+    "name": "Léa Garnier",
+    "emails": [
+      "student23@wei.example"
+    ],
+    "registered_at": "2026-09-18T21:00:00+02:00"
+  },
+  {
+    "id": "w24",
+    "name": "Ethan Roussel",
+    "emails": [
+      "student24@wei.example"
+    ],
+    "registered_at": "2026-09-18T22:00:00+02:00"
+  },
+  {
+    "id": "w25",
+    "name": "Zoé Vincent",
+    "emails": [
+      "student25@wei.example"
+    ],
+    "registered_at": "2026-09-19T07:00:00+02:00"
+  },
+  {
+    "id": "w26",
+    "name": "Samuel Muller",
+    "emails": [
+      "student26@wei.example"
+    ],
+    "registered_at": "2026-09-19T08:00:00+02:00"
+  },
+  {
+    "id": "w27",
+    "name": "Anna Faure",
+    "emails": [
+      "student27@wei.example"
+    ],
+    "registered_at": "2026-09-19T09:00:00+02:00"
+  },
+  {
+    "id": "w28",
+    "name": "Nicolas André",
+    "emails": [
+      "student28@wei.example"
+    ],
+    "registered_at": "2026-09-19T10:00:00+02:00"
+  },
+  {
+    "id": "w29",
+    "name": "Nora Mercier",
+    "emails": [
+      "student29@wei.example"
+    ],
+    "registered_at": "2026-09-19T11:00:00+02:00"
+  },
+  {
+    "id": "w30",
+    "name": "Raphaël Blanc",
+    "emails": [
+      "student30@wei.example"
+    ],
+    "registered_at": "2026-09-19T12:00:00+02:00"
+  },
+  {
+    "id": "w31",
+    "name": "Louise Guérin",
+    "emails": [
+      "student31@wei.example"
+    ],
+    "registered_at": "2026-09-19T13:00:00+02:00"
+  },
+  {
+    "id": "w32",
+    "name": "Sacha Boyer",
+    "emails": [
+      "student32@wei.example"
+    ],
+    "registered_at": "2026-09-19T14:00:00+02:00"
+  },
+  {
+    "id": "w33",
+    "name": "Yasmine Perrin",
+    "emails": [
+      "student33@wei.example"
+    ],
+    "registered_at": "2026-09-19T15:00:00+02:00"
+  },
+  {
+    "id": "w34",
+    "name": "Victor Morel",
+    "emails": [
+      "student34@wei.example"
+    ],
+    "registered_at": "2026-09-19T16:00:00+02:00"
+  },
+  {
+    "id": "w35",
+    "name": "Eva Masson",
+    "emails": [
+      "student35@wei.example"
+    ],
+    "registered_at": "2026-09-19T17:00:00+02:00"
+  },
+  {
+    "id": "w36",
+    "name": "Alexandre Colin",
+    "emails": [
+      "student36@wei.example"
+    ],
+    "registered_at": "2026-09-19T18:00:00+02:00"
+  },
+  {
+    "id": "w37",
+    "name": "Julia Renault",
+    "emails": [
+      "student37@wei.example"
+    ],
+    "registered_at": "2026-09-19T19:00:00+02:00"
+  },
+  {
+    "id": "w38",
+    "name": "Omar Leroy",
+    "emails": [
+      "student38@wei.example"
+    ],
+    "registered_at": "2026-09-19T20:00:00+02:00"
+  },
+  {
+    "id": "w39",
+    "name": "Lucie Bonnet",
+    "emails": [
+      "student39@wei.example"
+    ],
+    "registered_at": "2026-09-19T21:00:00+02:00"
+  },
+  {
+    "id": "w40",
+    "name": "Théo Marchand",
+    "emails": [
+      "student40@wei.example"
+    ],
+    "registered_at": "2026-09-19T22:00:00+02:00"
+  },
+  {
+    "id": "w41",
+    "name": "Adèle Delcourt",
+    "emails": [
+      "student41@wei.example"
+    ],
+    "registered_at": "2026-09-20T07:00:00+02:00"
+  },
+  {
+    "id": "w42",
+    "name": "Bastien Delcourt",
+    "emails": [
+      "student42@wei.example"
+    ],
+    "registered_at": "2026-09-20T08:00:00+02:00"
+  },
+  {
+    "id": "w43",
+    "name": "Célia Delcourt",
+    "emails": [
+      "student43@wei.example"
+    ],
+    "registered_at": "2026-09-20T09:00:00+02:00"
+  },
+  {
+    "id": "w44",
+    "name": "Dorian Delcourt",
+    "emails": [
+      "student44@wei.example"
+    ],
+    "registered_at": "2026-09-20T10:00:00+02:00"
+  },
+  {
+    "id": "w45",
+    "name": "Élise Delcourt",
+    "emails": [
+      "student45@wei.example"
+    ],
+    "registered_at": "2026-09-20T11:00:00+02:00"
+  },
+  {
+    "id": "w46",
+    "name": "Farid Delcourt",
+    "emails": [
+      "student46@wei.example"
+    ],
+    "registered_at": "2026-09-20T12:00:00+02:00"
+  },
+  {
+    "id": "w47",
+    "name": "Gaëlle Delcourt",
+    "emails": [
+      "student47@wei.example"
+    ],
+    "registered_at": "2026-09-20T13:00:00+02:00"
+  },
+  {
+    "id": "w48",
+    "name": "Ilyes Delcourt",
+    "emails": [
+      "student48@wei.example"
+    ],
+    "registered_at": "2026-09-20T14:00:00+02:00"
+  },
+  {
+    "id": "w49",
+    "name": "Jeanne Delcourt",
+    "emails": [
+      "student49@wei.example"
+    ],
+    "registered_at": "2026-09-20T15:00:00+02:00"
+  },
+  {
+    "id": "w50",
+    "name": "Kilian Delcourt",
+    "emails": [
+      "student50@wei.example"
+    ],
+    "registered_at": "2026-09-20T16:00:00+02:00"
+  },
+  {
+    "id": "w51",
+    "name": "Adèle Vidal",
+    "emails": [
+      "student51@wei.example"
+    ],
+    "registered_at": "2026-09-20T17:00:00+02:00"
+  },
+  {
+    "id": "w52",
+    "name": "Bastien Vidal",
+    "emails": [
+      "student52@wei.example"
+    ],
+    "registered_at": "2026-09-20T18:00:00+02:00"
+  },
+  {
+    "id": "w53",
+    "name": "Célia Vidal",
+    "emails": [
+      "student53@wei.example"
+    ],
+    "registered_at": "2026-09-20T19:00:00+02:00"
+  },
+  {
+    "id": "w54",
+    "name": "Dorian Vidal",
+    "emails": [
+      "student54@wei.example"
+    ],
+    "registered_at": "2026-09-20T20:00:00+02:00"
+  },
+  {
+    "id": "w55",
+    "name": "Élise Vidal",
+    "emails": [
+      "student55@wei.example"
+    ],
+    "registered_at": "2026-09-20T21:00:00+02:00"
+  },
+  {
+    "id": "w56",
+    "name": "Farid Vidal",
+    "emails": [
+      "student56@wei.example"
+    ],
+    "registered_at": "2026-09-20T22:00:00+02:00"
+  },
+  {
+    "id": "w57",
+    "name": "Gaëlle Vidal",
+    "emails": [
+      "student57@wei.example"
+    ],
+    "registered_at": "2026-09-21T07:00:00+02:00"
+  },
+  {
+    "id": "w58",
+    "name": "Ilyes Vidal",
+    "emails": [
+      "student58@wei.example"
+    ],
+    "registered_at": "2026-09-21T08:00:00+02:00"
+  },
+  {
+    "id": "w59",
+    "name": "Jeanne Vidal",
+    "emails": [
+      "student59@wei.example"
+    ],
+    "registered_at": "2026-09-21T09:00:00+02:00"
+  },
+  {
+    "id": "w60",
+    "name": "Kilian Vidal",
+    "emails": [
+      "student60@wei.example"
+    ],
+    "registered_at": "2026-09-21T10:00:00+02:00"
+  },
+  {
+    "id": "w61",
+    "name": "Adèle Renaud",
+    "emails": [
+      "student61@wei.example"
+    ],
+    "registered_at": "2026-09-21T11:00:00+02:00"
+  },
+  {
+    "id": "w62",
+    "name": "Bastien Renaud",
+    "emails": [
+      "student62@wei.example"
+    ],
+    "registered_at": "2026-09-21T12:00:00+02:00"
+  },
+  {
+    "id": "w63",
+    "name": "Célia Renaud",
+    "emails": [
+      "student63@wei.example"
+    ],
+    "registered_at": "2026-09-21T13:00:00+02:00"
+  },
+  {
+    "id": "w64",
+    "name": "Dorian Renaud",
+    "emails": [
+      "student64@wei.example"
+    ],
+    "registered_at": "2026-09-21T14:00:00+02:00"
+  },
+  {
+    "id": "w65",
+    "name": "Élise Renaud",
+    "emails": [
+      "student65@wei.example"
+    ],
+    "registered_at": "2026-09-21T15:00:00+02:00"
+  },
+  {
+    "id": "w66",
+    "name": "Farid Renaud",
+    "emails": [
+      "student66@wei.example"
+    ],
+    "registered_at": "2026-09-21T16:00:00+02:00"
+  },
+  {
+    "id": "w67",
+    "name": "Gaëlle Renaud",
+    "emails": [
+      "student67@wei.example"
+    ],
+    "registered_at": "2026-09-21T17:00:00+02:00"
+  },
+  {
+    "id": "w68",
+    "name": "Ilyes Renaud",
+    "emails": [
+      "student68@wei.example"
+    ],
+    "registered_at": "2026-09-21T18:00:00+02:00"
+  },
+  {
+    "id": "w69",
+    "name": "Jeanne Renaud",
+    "emails": [
+      "student69@wei.example"
+    ],
+    "registered_at": "2026-09-21T19:00:00+02:00"
+  },
+  {
+    "id": "w70",
+    "name": "Kilian Renaud",
+    "emails": [
+      "student70@wei.example"
+    ],
+    "registered_at": "2026-09-21T20:00:00+02:00"
+  },
+  {
+    "id": "w71",
+    "name": "Adèle Lemoine",
+    "emails": [
+      "student71@wei.example"
+    ],
+    "registered_at": "2026-09-21T21:00:00+02:00"
+  },
+  {
+    "id": "w72",
+    "name": "Bastien Lemoine",
+    "emails": [
+      "student72@wei.example"
+    ],
+    "registered_at": "2026-09-21T22:00:00+02:00"
+  },
+  {
+    "id": "w73",
+    "name": "Célia Lemoine",
+    "emails": [
+      "student73@wei.example"
+    ],
+    "registered_at": "2026-09-22T07:00:00+02:00"
+  },
+  {
+    "id": "w74",
+    "name": "Dorian Lemoine",
+    "emails": [
+      "student74@wei.example"
+    ],
+    "registered_at": "2026-09-22T08:00:00+02:00"
+  },
+  {
+    "id": "w75",
+    "name": "Élise Lemoine",
+    "emails": [
+      "student75@wei.example"
+    ],
+    "registered_at": "2026-09-22T09:00:00+02:00"
+  },
+  {
+    "id": "w76",
+    "name": "Farid Lemoine",
+    "emails": [
+      "student76@wei.example"
+    ],
+    "registered_at": "2026-09-22T10:00:00+02:00"
+  },
+  {
+    "id": "w77",
+    "name": "Gaëlle Lemoine",
+    "emails": [
+      "student77@wei.example"
+    ],
+    "registered_at": "2026-09-22T11:00:00+02:00"
+  },
+  {
+    "id": "w78",
+    "name": "Ilyes Lemoine",
+    "emails": [
+      "student78@wei.example"
+    ],
+    "registered_at": "2026-09-22T12:00:00+02:00"
+  },
+  {
+    "id": "w79",
+    "name": "Jeanne Lemoine",
+    "emails": [
+      "student79@wei.example"
+    ],
+    "registered_at": "2026-09-22T13:00:00+02:00"
+  },
+  {
+    "id": "w80",
+    "name": "Kilian Lemoine",
+    "emails": [
+      "student80@wei.example"
+    ],
+    "registered_at": "2026-09-22T14:00:00+02:00"
+  },
+  {
+    "id": "w81",
+    "name": "Adèle Marin",
+    "emails": [
+      "student81@wei.example"
+    ],
+    "registered_at": "2026-09-22T15:00:00+02:00"
+  },
+  {
+    "id": "w82",
+    "name": "Bastien Marin",
+    "emails": [
+      "student82@wei.example"
+    ],
+    "registered_at": "2026-09-22T16:00:00+02:00"
+  },
+  {
+    "id": "w83",
+    "name": "Célia Marin",
+    "emails": [
+      "student83@wei.example"
+    ],
+    "registered_at": "2026-09-22T17:00:00+02:00"
+  },
+  {
+    "id": "w84",
+    "name": "Dorian Marin",
+    "emails": [
+      "student84@wei.example"
+    ],
+    "registered_at": "2026-09-22T18:00:00+02:00"
+  },
+  {
+    "id": "w85",
+    "name": "Élise Marin",
+    "emails": [
+      "student85@wei.example"
+    ],
+    "registered_at": "2026-09-22T19:00:00+02:00"
+  },
+  {
+    "id": "w86",
+    "name": "Farid Marin",
+    "emails": [
+      "student86@wei.example"
+    ],
+    "registered_at": "2026-09-22T20:00:00+02:00"
+  },
+  {
+    "id": "w87",
+    "name": "Gaëlle Marin",
+    "emails": [
+      "student87@wei.example"
+    ],
+    "registered_at": "2026-09-22T21:00:00+02:00"
+  },
+  {
+    "id": "w88",
+    "name": "Ilyes Marin",
+    "emails": [
+      "student88@wei.example"
+    ],
+    "registered_at": "2026-09-22T22:00:00+02:00"
+  },
+  {
+    "id": "w89",
+    "name": "Jeanne Marin",
+    "emails": [
+      "student89@wei.example"
+    ],
+    "registered_at": "2026-09-23T07:00:00+02:00"
+  },
+  {
+    "id": "w90",
+    "name": "Kilian Marin",
+    "emails": [
+      "student90@wei.example"
+    ],
+    "registered_at": "2026-09-23T08:00:00+02:00"
+  },
+  {
+    "id": "w91",
+    "name": "Adèle Pascal",
+    "emails": [
+      "student91@wei.example"
+    ],
+    "registered_at": "2026-09-23T09:00:00+02:00"
+  },
+  {
+    "id": "w92",
+    "name": "Bastien Pascal",
+    "emails": [
+      "student92@wei.example"
+    ],
+    "registered_at": "2026-09-23T10:00:00+02:00"
+  },
+  {
+    "id": "w93",
+    "name": "Célia Pascal",
+    "emails": [
+      "student93@wei.example"
+    ],
+    "registered_at": "2026-09-23T11:00:00+02:00"
+  },
+  {
+    "id": "w94",
+    "name": "Dorian Pascal",
+    "emails": [
+      "student94@wei.example"
+    ],
+    "registered_at": "2026-09-23T12:00:00+02:00"
+  },
+  {
+    "id": "w95",
+    "name": "Élise Pascal",
+    "emails": [
+      "student95@wei.example"
+    ],
+    "registered_at": "2026-09-23T13:00:00+02:00"
+  },
+  {
+    "id": "w96",
+    "name": "Farid Pascal",
+    "emails": [
+      "student96@wei.example"
+    ],
+    "registered_at": "2026-09-23T14:00:00+02:00"
+  },
+  {
+    "id": "w97",
+    "name": "Gaëlle Pascal",
+    "emails": [
+      "student97@wei.example"
+    ],
+    "registered_at": "2026-09-23T15:00:00+02:00"
+  },
+  {
+    "id": "w98",
+    "name": "Ilyes Pascal",
+    "emails": [
+      "student98@wei.example"
+    ],
+    "registered_at": "2026-09-23T16:00:00+02:00"
+  },
+  {
+    "id": "w99",
+    "name": "Jeanne Pascal",
+    "emails": [
+      "student99@wei.example"
+    ],
+    "registered_at": "2026-09-23T17:00:00+02:00"
+  },
+  {
+    "id": "w100",
+    "name": "Kilian Pascal",
+    "emails": [
+      "student100@wei.example"
+    ],
+    "registered_at": "2026-09-23T18:00:00+02:00"
+  }
 ]

@@ -90,7 +90,7 @@ Tài liệu này mô tả hệ thống sẽ được xây dựng: các thành ph
 | `detect` | Phát hiện vấn đề bằng code | [đã có] |
 | `tools/*` | Công cụ cố định: quy chế, điều kiện, danh tính, nhóm | [đã có] |
 | `agent` | Vòng lặp OpenAI, kết thúc bằng `propose_action` | [đã có, chưa chạy với API] |
-| `planner/*` | Tách ràng buộc, tìm kiếm, cổng ràng buộc, xếp hạng, chẩn đoán | Cổng/xếp hạng/chẩn đoán [đã có]; tách ràng buộc và Jinko [cần làm] |
+| `planner/*` | Tách ràng buộc, tìm kiếm, cổng ràng buộc, xếp hạng, chẩn đoán | Đã có; khách sạn Jinko live/replay, đi lại minh họa do ground search trả 404 |
 | `store` | Lưu và đọc trạng thái, hành động, hộp thư đã gửi | [cần làm] |
 | `executor` | Áp hành động đã duyệt lên trạng thái | [cần làm] |
 | `api` | HTTP API cho giao diện | [cần làm] |
@@ -200,8 +200,8 @@ Phân công: **LLM hiểu yêu cầu → code ghép và kiểm tra → LLM giả
       │
       ├── clarifications không rỗng? ──► ProposedAction ESCALATE (câu hỏi cho người tổ chức), dừng
       ▼
- search_options()  ── Jinko ground_search + hotel_search (sandbox) ──► kết quả thô
-      │                (chế độ replay: đọc kết quả đã lưu)
+ search_options()  ── Jinko hotel_search + đi lại minh họa ──► kết quả tìm kiếm
+      │                (khách sạn live/replay; ground_search trả 404 với khóa hiện tại)
       ▼
  compose_packages()  ── CODE: ghép đi lại × chỗ ở thành phương án trọn gói, tính giá/người (cent)
       │
@@ -222,14 +222,18 @@ Phân công: **LLM hiểu yêu cầu → code ghép và kiểm tra → LLM giả
 
 ### 6.2. Hợp đồng (`planner/interface.py`) [đã có]
 ```python
-TravelRequest(event_id, text, participants, origin, destination, depart_after, return_by=None)
+TravelRequest(event_id, text, participants, origin, destination, depart_after, return_by=None,
+              catering: dict = ...)  # tùy chọn, mặc định rỗng
 Constraints(hard: dict, soft: list[str], organizer_verified: list[str], clarifications: list[str])
-TravelOption(id, transport: dict, lodging: dict, cost_per_person_cents: int, source: str)
+TravelOption(id, transport: dict, lodging: dict, cost_per_person_cents: int, source: str,
+             cost_breakdown_per_person_cents: dict[str, int] = ...)  # tùy chọn, mặc định rỗng
 
 extract_constraints(req) -> Constraints
 plan_trip(req, constraints) -> ProposedAction      # SELECT_TRAVEL_PLAN hoặc ESCALATE
 ```
 **Khóa ràng buộc cứng được hỗ trợ:** `participants`, `max_cost_per_person_cents`, `arrive_before` (HH:MM), `no_overnight`, `step_free_rooms` (luôn thuộc `organizer_verified`).
+
+Giá và trần ngân sách áp dụng cho toàn bộ gói được yêu cầu. Với WEI, ràng buộc ghi sẵn dùng trần 150€/người cho xe, lưu trú, thực phẩm và vận chuyển thực phẩm do hội sinh viên lo; phí tạm thu trong cả 97 khoản thanh toán cũng là 150€. `TravelRequest.catering` là trường tùy chọn, mặc định rỗng, mang phân bổ theo người từ `travel.catering`: demo 20€ thực phẩm và 2€ vận chuyển mỗi người (2000€ + 200€ cho 100 người), được cộng đúng một lần khi ghép gói. Gói dự phòng đã gồm các khoản này. `TravelOption.cost_breakdown_per_person_cents` là bảng chi phí tùy chọn, mặc định rỗng; nếu có, code kiểm tra từng khoản là số cent nguyên không âm và cộng đúng tổng, không cộng bảng này thêm lần nữa. Giá và lịch trình chưa được xác nhận; bản công khai dùng tên hội trung tính và vẫn chờ thành viên từng tham gia hoặc tổ chức WEI duyệt trước khi merge.
 
 **Hai loại ràng buộc cứng:**
 | Loại | Ví dụ | Dùng để loại phương án? |
@@ -238,28 +242,30 @@ plan_trip(req, constraints) -> ProposedAction      # SELECT_TRAVEL_PLAN hoặc E
 | Người tổ chức xác nhận | Phòng không bậc thang (Jinko chỉ có mô tả tiện nghi dạng chữ) | Không; hiện thành việc cần xác nhận | Thêm khóa mới = thêm một nhánh trong `check_option` và một bài kiểm thử.
 **Khóa ưu tiên mềm:** `fewer_changes`, `near_station`, `early_return`, `lower_cost`.
 
-### 6.3. Tách ràng buộc bằng LLM [cần làm]
+### 6.3. Tách ràng buộc bằng LLM [đã có]
 - Dùng đầu ra có cấu trúc (JSON schema khớp `Constraints`).
 - Quy tắc cho mô hình: chỉ tách điều người dùng nói; chỗ mơ hồ ghi vào `clarifications` thay vì tự đoán (ví dụ ngân sách có gồm ăn uống không).
+- Yêu cầu WEI ngắn bằng giọng ban điều hành đã nêu rõ ăn uống, nhưng cố ý để ngỏ tiền thuê xe có nằm trong trần 150€ không. Luồng live cần hỏi lại phạm vi này, nhận câu trả lời toàn bộ gói rồi mới tìm phương án; `--recorded-constraints` dùng phạm vi toàn bộ gói đã ghi sẵn để chạy offline.
 - **Được đánh giá riêng** trên ~10 yêu cầu có đáp án (mục 8), vì tách sai thì cổng ràng buộc cũng vô dụng.
 
-### 6.4. Kết nối Jinko [cần làm]
+### 6.4. Kết nối Jinko [đã có, giới hạn nhà cung cấp]
 | Mục | Chi tiết |
 |---|---|
-| Môi trường | Sandbox: `https://api.sandbox.gojinko.com`, khóa sandbox riêng [VERIFY] |
-| Xác thực | `Authorization: Bearer jnk_...` |
-| Đi lại | `POST /v1/ground_search` (tàu, xe khách, phà). Mã ga/thành phố dạng ISO quốc gia + thành phố, ví dụ `GBLON`. Kết quả có `departure_time`, `arrival_time`, `duration_minutes` |
-| Chỗ ở | `POST /v1/hotel_search`: số người lớn, số phòng, ngày; có bộ lọc `facility_ids`. Giá khách sạn là đơn vị chính (euro), cần đổi sang cent. `hotel_details` có `facilities` (chuỗi) và `max_occupancy` theo loại phòng |
+| Môi trường | `https://api.gojinko.com` (ghi đè bằng `JINKO_BASE_URL`); khóa thử hiện tại xác thực được ở đây, endpoint sandbox trả 401 |
+| Xác thực | Client gửi `X-API-Key`; không lưu khóa trong cache |
+| Đi lại | `POST /v1/ground_search` trả 404 với khóa hiện tại. Demo dùng xe thuê minh họa, chưa xác minh Jinko hỗ trợ thuê xe riêng |
+| Chỗ ở | `POST /v1/hotel_search` đã kiểm tra trực tiếp. `total_amount` là giá cả kỳ lưu trú cho một phòng bằng euro; cộng thuế chưa gồm rồi đổi sang cent. Demo nhân giá phòng đôi thành 50 phòng cho 100 người; `group_block_confirmed = False` |
 | Khả năng tiếp cận | Chỉ có trong `facilities` dạng chữ, không có trường đúng/sai. Vì vậy chỉ là gợi ý, cần người xác nhận |
 | Giá vé máy bay | Đơn vị nhỏ nhất (chia cho `decimal_places`); không dùng trong P1 |
 | Hạn token | Kết quả có thể hết hạn sau khoảng 30 phút; chỉ dùng để so sánh, không đặt |
 | Chế độ | `JINKO_MODE=live` gọi thật và lưu phản hồi vào `data/wei/jinko_cache/`; `replay` chỉ đọc bộ nhớ đệm. **Demo dùng `replay` với dữ liệu thật đã lưu** |
 | Đặt vé | Không làm. P2 mới thử đặt trên sandbox |
 
-### 6.5. Ghép phương án (`compose_packages`) [cần làm]
-- Lấy tối đa 5 chuyến đi lại tốt nhất và 5 chỗ ở đủ sức chứa, ghép chéo, bỏ tổ hợp rõ ràng vô lý (ví dụ chỗ ở ở thành phố khác ga đến).
-- **Hoàn toàn bằng code, không dùng LLM.** Tính `cost_per_person_cents = giá đi lại/người + giá chỗ ở/đêm × số đêm ÷ số người`, mọi phép tính bằng số nguyên.
-- Giữ lại **cả phương án rẻ nhất vi phạm ràng buộc** để bảng so sánh cho thấy vì sao bị loại.
+### 6.5. Ghép phương án (`compose_packages`) [đã có]
+- Ghép đi lại × chỗ ở đủ sức chứa; giữ một gói cho mỗi phương án đi lại trước để bảng so sánh có lựa chọn đa dạng.
+- **Hoàn toàn bằng code, không dùng LLM.** Giá/người gồm đi lại, phần lưu trú chia cho nhóm (làm tròn lên) và ngân sách thực phẩm/vận chuyển thực phẩm nếu có; mọi khoản dùng số nguyên cent.
+- Giữ lại **cả phương án rẻ nhất vi phạm ràng buộc** để bảng so sánh cho thấy vì sao bị loại. Nếu tìm khách sạn không khả dụng, đọc các gói minh họa trọn gói trong `travel_options.json`.
+- Với cache hiện tại và trần demo 150€, C/E/F đạt các kiểm tra hỗ trợ ở 135,59€/140,59€/142,59€; F đứng đầu do về sớm hơn, C rẻ nhất trong các gói hợp lệ. Thử trần 120€ hoặc 90€ trả `ESCALATE`. Riêng bộ gói dự phòng, A/B/D đạt trần 150€ (D đứng đầu do về sớm), A/B đạt trần 120€. Giá phòng nhân theo nhóm không xác nhận còn đủ phòng, bếp hay quyền tổ chức hoạt động.
 
 ---
 
@@ -379,7 +385,7 @@ Danh sách task, phụ thuộc và tiêu chí hoàn thành nằm trong [`TASKS.m
 |---|---|---|
 | Thứ Sáu 25/09, tối | Duyệt kiến trúc; tạo repo; CI; mỗi người clone và chạy được kiểm thử | `python -m unittest discover -s tests -t .` qua trên máy mọi người |
 | Thứ Bảy 26/09, 12:00 | **P0 chạy trọn luồng**: agent thật + store + executor + API + giao diện cho hackathon | Duyệt một đề xuất trên giao diện làm vấn đề biến mất |
-| Thứ Bảy 26/09, 18:00 | P1: planner với Jinko (replay), bảng so sánh trên giao diện | Chạy được cả hai ngân sách 120€ và 90€ |
+| Thứ Bảy 26/09, 18:00 | P1: planner với Jinko (replay), bảng so sánh trên giao diện | Chạy được lựa chọn ở trần 150€ và chẩn đoán không khả thi ở trần 120€ |
 | Thứ Bảy 26/09, 23:00 | Bộ đánh giá chạy được; **ngừng thêm tính năng** | Có bảng chỉ số |
 | Chủ Nhật 27/09 | Sửa lỗi, README, video; nộp trước 22:00 | Chạy README trên máy khác |
 

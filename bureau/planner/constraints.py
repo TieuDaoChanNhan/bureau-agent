@@ -17,6 +17,17 @@ def eur(cents: int) -> str:
 def check_option(opt: TravelOption, c: Constraints) -> list[Check]:
     hard = c.hard
     checks: list[Check] = []
+    breakdown = opt.cost_breakdown_per_person_cents
+    if breakdown != {}:
+        amounts_valid = isinstance(breakdown, dict) and all(
+            isinstance(name, str) and name.strip() and type(amount) is int and amount >= 0
+            for name, amount in breakdown.items()
+        )
+        ok = (amounts_valid and type(opt.cost_per_person_cents) is int
+              and sum(breakdown.values()) == opt.cost_per_person_cents)
+        detail = (" + ".join(f"{name}: {eur(amount)}" for name, amount in breakdown.items())
+                  if amounts_valid else "Components must be non-negative integer cents")
+        checks.append(Check("itemized cost matches total", bool(ok), detail))
     if "max_cost_per_person_cents" in hard:
         limit = hard["max_cost_per_person_cents"]
         cost = opt.cost_per_person_cents

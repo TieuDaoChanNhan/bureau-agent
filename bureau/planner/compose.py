@@ -2,8 +2,12 @@
 
 The LLM never composes packages or adds prices. Rules:
   - every transport result x every lodging result that fits the group (capacity)
-  - cost_per_person_cents = transport price per person
-                            + lodging price per night * nights / participants   (integers only)
+  - transport/lodging subtotal = transport price per person
+                                + lodging price per night * nights / participants
+  - when the request includes meals, add the organizer's grocery and food-transport
+    allocation before validating the complete package cost (integers only);
+    missing allocations must be clarified, never treated as zero
+  - cost_breakdown_per_person_cents itemizes costs already included in the total
   - keep at most N packages, but always keep the cheapest one even if it will fail
     a constraint, so the comparison table can show why it was rejected
 
@@ -21,6 +25,10 @@ from typing import Any
 from .interface import TravelOption, TravelRequest
 
 
+class CateringBudgetError(ValueError):
+    """An organizer must clarify the included food budget before packages can be priced."""
+
+
 def _per_person_lodging(price_per_night_cents: int, nights: int, participants: int) -> int:
     """Lodging share per person, rounded up so a package is never cheaper than it is."""
     return -(-price_per_night_cents * nights // participants)
@@ -28,6 +36,22 @@ def _per_person_lodging(price_per_night_cents: int, nights: int, participants: i
 
 def _label(k: int) -> str:
     return ascii_uppercase[k] if k < 26 else f"P{k + 1}"
+
+
+def catering_costs(req: TravelRequest) -> dict[str, int]:
+    """Validate explicit meal allocations; an absent catering brief keeps legacy travel-only pricing."""
+    catering = req.catering
+    if catering == {}:
+        return {}
+    if not isinstance(catering, dict) or type(catering.get("included_in_participation_fee")) is not bool:
+        raise CateringBudgetError("Confirm whether meals and food transport are included in the participation fee.")
+    if not catering["included_in_participation_fee"]:
+        return {}
+    costs = {"groceries": catering.get("groceries_per_person_cents"),
+             "food_transport": catering.get("food_transport_per_person_cents")}
+    if any(type(amount) is not int or amount < 0 for amount in costs.values()):
+        raise CateringBudgetError("Confirm the per-person grocery and food-transport allocations in non-negative integer cents.")
+    return costs
 
 
 def compose_packages(req: TravelRequest, transports: list[dict[str, Any]],
@@ -40,12 +64,15 @@ def compose_packages(req: TravelRequest, transports: list[dict[str, Any]],
     """
     if nights < 1 or req.participants < 1:
         raise ValueError("nights and participants must be positive")
+    meals = catering_costs(req)
     fitting = [l for l in lodgings if int(l.get("capacity", 0)) >= req.participants]
     combos = []
     for t_index, t in enumerate(transports):
+        if "capacity" in t and int(t["capacity"]) < req.participants:
+            continue
         for l in fitting:
             cost = int(t["price_cents"]) + _per_person_lodging(int(l["price_per_night_cents"]), nights,
-                                                               req.participants)
+                                                               req.participants) + sum(meals.values())
             combos.append((cost, t_index, t, l))
     if not combos:
         return []
@@ -71,6 +98,14 @@ def compose_packages(req: TravelRequest, transports: list[dict[str, Any]],
         transport = {key: value for key, value in t.items() if key not in ("price_cents", "source")}
         lodging = {key: value for key, value in l.items() if key not in ("price_per_night_cents", "source")}
         source = " + ".join(x for x in (t.get("source"), l.get("source")) if x) or "jinko"
+        breakdown = {}
+        if meals:
+            transport_key = "coach" if t.get("mode") == "coach" else "transport"
+            breakdown = {transport_key: int(t["price_cents"]),
+                         "lodging": _per_person_lodging(int(l["price_per_night_cents"]), nights,
+                                                        req.participants), **meals}
+            source += " + organizer-provided grocery and food-transport allocations"
         packages.append(TravelOption(id=_label(k), transport=transport, lodging=lodging,
-                                     cost_per_person_cents=cost, source=source))
+                                     cost_per_person_cents=cost, source=source,
+                                     cost_breakdown_per_person_cents=breakdown))
     return packages

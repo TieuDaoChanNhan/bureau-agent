@@ -10,10 +10,10 @@
   },
   {
     "id": "wei",
-    "name": "WEI 2026 (sample data)",
+    "name": "Student association WEI (demo)",
     "counts": {
       "blocking": 4,
-      "non_blocking": 2,
+      "non_blocking": 7,
       "resolved": 0
     }
   }
