@@ -206,6 +206,30 @@ class AgentLoopTests(unittest.TestCase):
         self.assertIn("unknown payment_id", json.loads(replies[-1]["content"])["error"])
         self.assertEqual(action.action_type, "ESCALATE")
 
+    def test_proposal_records_the_ordered_tool_calls_including_rejections(self):
+        state = load_event("hackathon")
+        client = FakeClient([
+            [("get_participant", {"id_or_email": "a.nguyen@polytechnique.edu"})],
+            [("match_person", {"payment_id": "f90"})],
+            [("propose_action", {**PROPOSAL, "payload": {"payment_id": "f90", "participant_id": "p18"}})],
+            [("propose_action", PROPOSAL)],
+        ])
+        action = resolve_issue(state, message_issue(state), client=client, verbose=False)
+        self.assertEqual([t["tool"] for t in action.trace],
+                         ["get_participant", "match_person", "propose_action", "propose_action"])
+        self.assertEqual([t["step"] for t in action.trace], [1, 2, 3, 4])
+        self.assertEqual(action.trace[1]["arguments"], {"payment_id": "f90"})
+        self.assertIn("Antoine Nguyen (p01) 0.91 ask_human", action.trace[1]["result"])
+        self.assertEqual([t["ok"] for t in action.trace], [True, True, False, True])
+        self.assertIn("different people", action.trace[2]["result"])
+        # A proposal's payload is not duplicated into the trace.
+        self.assertEqual(action.trace[3]["arguments"], {"action_type": "LINK_PAYMENT"})
+
+    def test_trace_results_are_truncated(self):
+        from bureau.agent.loop import TRACE_RESULT_CHARS, _summarize
+        self.assertLessEqual(len(_summarize({"text": "x" * 5000})), TRACE_RESULT_CHARS)
+        self.assertEqual(_summarize({"error": "boom"}), "error: boom")
+
     def test_invalid_group_replacement_is_rejected_without_mutating_state(self):
         state = load_event("hackathon")
         original = deepcopy(state.groups)

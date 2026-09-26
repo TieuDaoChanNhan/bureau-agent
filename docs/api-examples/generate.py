@@ -61,6 +61,16 @@ def main() -> None:
                 Check("Email local part has the same parts", True, "nguyen.a@gmail.com"),
                 Check("Identity score ≥ 0.98", False, "0.91: ask a human")],
         confidence=0.91, payload={"payment_id": "f90", "participant_id": "p01"},
+        trace=[
+            {"step": 1, "tool": "get_participant", "arguments": {"id_or_email": "a.nguyen@polytechnique.edu"},
+             "result": '{"id": "p01", "name": "Antoine Nguyen", ...}', "ok": True},
+            {"step": 1, "tool": "check_eligibility", "arguments": {},
+             "result": '{"unpaid": ["p01", ...], "unmatched_payments": ["f90", "f91"]}', "ok": True},
+            {"step": 2, "tool": "match_person", "arguments": {"payment_id": "f90"},
+             "result": '3 results: [{"participant_id": "p01", "score": 0.91, "band": "ask_human"}, ...]', "ok": True},
+            {"step": 3, "tool": "propose_action", "arguments": {"action_type": "LINK_PAYMENT"},
+             "result": "proposal recorded for organizer approval", "ok": True},
+        ],
     )
     dump("action_LINK_PAYMENT.json", asdict(link))
 

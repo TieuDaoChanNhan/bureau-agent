@@ -27,6 +27,7 @@ Issue + source messages -> model -> tool call -> result -> ... -> propose_action
 - `get_payment` and `list_groups` expose actual records rather than requiring guessed ids or memberships. `list_group_candidates` returns ungrouped participants who want a group, including their names, skills and needs; payment eligibility is checked separately.
 - Rules are in English. `search_rules` uses English keywords; `list_rules` lets the model read all sections before declaring a policy absent.
 - Verbose mode prints the complete tool arguments on `->` lines for review.
+- Every proposal stores the run's tool calls in `ProposedAction.trace` (T31): step, tool, parsed arguments, a one-line readable result (`_summarize`, at most 240 characters) and `ok`. Rejected proposals stay in the trace with their error; a proposal's payload is not duplicated there. The web console shows it as the **Agent steps** timeline.
 
 The Chat Completions flow follows the [OpenAI function-calling guide](https://developers.openai.com/api/docs/guides/function-calling).
 
