@@ -42,9 +42,9 @@ organizer roster, supplier quote or confirmed destination was supplied. The
 source and unconfirmed assumptions are also stored in `travel.provenance` so
 they survive loading and runtime persistence. Public demo fixtures use the neutral
 labels **Student association WEI (demo)** and **Unnamed student association**;
-no permission to publish a real association's identity was supplied. A teammate
-who has attended or organized a WEI has not yet approved this scenario. That sign-off
-remains pending before merge and must not be inferred from the owner's briefing.
+no permission to publish a real association's identity was supplied. The scenario
+was written and reviewed by a team member who has taken part in a WEI (pectpait,
+PR #62); it reflects that experience, not an official association dataset.
 
 | Field | Demo assumption, requiring organizer confirmation |
 |---|---|

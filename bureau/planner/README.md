@@ -62,8 +62,8 @@ and EUR 2 for food transport per person once, alongside transport and lodging
 packages already include these allocations in their unchanged totals; option A
 costs EUR 112, independently of the EUR 150 provisional participation fee.
 Composed prices may also differ from that fee. These fictional budgets await
-organizer confirmation; approval of the scenario by a teammate who has attended
-or organized a WEI remains pending before merge. An optional
+organizer confirmation; the scenario was reviewed by a team member who has taken
+part in a WEI (see `data/README.md`). An optional
 `cost_breakdown_per_person_cents` dictionary (empty by default) itemizes a `TravelOption`; code requires
 nonnegative integer values whose sum equals `cost_per_person_cents` and never
 adds the breakdown a second time. Menus, quantities, dietary needs, purchasing
@@ -116,7 +116,7 @@ returned `ESCALATE` with a question about coach inclusion; an appended all-inclu
 budget answer returned `SELECT_TRAVEL_PLAN`, ranked F/C/E. The recorded EUR 120
 what-if returned `ESCALATE`. Restoring EUR 150 and approving F removed
 `no_logistics_plan` and unlocked dependent issues. This verifies the API flow;
-it is not a manual browser-tour check or an experienced organizer's sign-off.
+the browser tour copy is updated separately.
 
 `tests/test_extract.py` covers the provider boundary using scripted completions.
 The eight synthetic planning cases cover English/French, decimal budgets, time
