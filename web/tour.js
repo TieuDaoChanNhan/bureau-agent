@@ -51,7 +51,7 @@ const STEPS = [
   {
     el: "#eventbar", title: "One console, several events",
     text: `<p>An association runs several events at once. Each tab is one event: here a 50-person hackathon; the second tab is a
-      40-person integration weekend with a trip to organize.</p>
+      100-student integration weekend (WEI) with a trip to organize.</p>
       <p>The numbers below are live for the selected event: ${b("blocking")} issues stop the event from running (unpaid fees,
       broken teams), ${b("ready for your review")} counts proposals waiting for you, ${b("waiting")} issues depend on another one,
       and ${b("resolved")} is what is done.</p>`,
@@ -161,25 +161,25 @@ const STEPS = [
   {
     el: "#runBtn", title: "Run the agent on everything",
     text: `<p>${b("Run agent")} processes every issue that is ready, one at a time: the row being investigated shows ${b("Running…")},
-      the status line shows "Investigating 7/30", and the button becomes ${b("Stop")}. The agent only proposes; you still review each
+      the status line shows the progress ("Investigating 7/27…"), and the button becomes ${b("Stop")}. The agent only proposes; you still review each
       proposal. (Not run in this tour, to save time and credit.)</p>`,
   },
   {
     el: '[data-ev="wei"]', title: "Same loop, another kind of event", action: true,
-    text: `<p>The integration weekend adds something harder: organizing a trip for 40 people under several constraints.</p>${CLICK("the WEI 2026 tab")}`,
+    text: `<p>The integration weekend adds something harder: organizing a trip for 100 students under several constraints.</p>${CLICK("the Student association WEI tab")}`,
     done: () => ui.current === "wei",
   },
   {
     el: "#issues", title: "Issues waiting for a decision",
-    text: `<p>Several issues show ${b("Waiting")}: payment reminders need the exact price, rooms need the chosen lodging, and the
-      "what time do we meet?" message needs the departure time. They all depend on ${b("No validated travel and lodging plan")},
-      which is selected on the right.</p>`,
+    text: `<p>Several issues show ${b("Waiting")}: payment reminders need the exact price, rooms need the chosen lodging,
+      and four student messages (meeting time, step-free access, the kitchen, the coaches) need the chosen package. They all
+      depend on ${b("No validated travel and lodging plan")}, which is selected on the right.</p>`,
   },
   {
     el: '[data-act="plan"]', title: "Plan the trip", action: true,
     prepare: () => tourShow("wei", "issue:no_logistics_plan"),
-    text: `<p>The request is the organizers' own words (shown above): 40 people, leave Paris Friday after class, max €120 per person,
-      arrive before 21:00, no overnight travel, two step-free rooms.</p>
+    text: `<p>The request is the organizers' own words (shown above): 100 students, leave the Palaiseau campus Friday after 17:00,
+      €150 per person with meals included, arrive before 21:00, no overnight travel, two step-free rooms, two coaches.</p>
       <p>An AI model turns these words into structured constraints; code will then check every package against them.</p>${CLICK("Plan the trip")}`,
     done: () => !!(document.querySelector("#answerForm") || document.querySelector(".opts")),
   },
@@ -187,10 +187,10 @@ const STEPS = [
     el: "#clarify", title: "The planner asks before searching", action: true, side: "left",
     prepare: () => {
       const form = $("#answerForm");
-      if (form) form.answer.value = "No, the budget covers travel and lodging only. Meals are paid separately.";
+      if (form) form.answer.value = "Yes, the €150 covers the complete package: coaches, lodging and meals.";
     },
-    text: `<p>The request does not say whether the €120 includes meals, so the planner ${b("asks")} instead of assuming, and nothing is
-      searched yet. We filled in an answer; you can change it.</p>${CLICK("Answer and plan again")}<p class="tour-wait">About 10 seconds.</p>`,
+    text: `<p>The organizers say meals are included but are unsure whether the €150 also covers ${b("coach hire")}. The planner
+      ${b("asks")} instead of assuming, and nothing is searched yet. We filled in an answer; you can change it.</p>${CLICK("Answer and plan again")}<p class="tour-wait">About 10 seconds.</p>`,
     done: () => !!document.querySelector(".opts"),
   },
   {
@@ -202,25 +202,26 @@ const STEPS = [
   },
   {
     el: ".optwrap", title: "Packages built from real hotel offers",
-    text: `<p>Each package is one departure plus one hotel, priced per person in code. Hotels come from ${b("Jinko")} (real offers in
-      Deauville, cached); departures are recorded fares. The valid packages are the cards, ranked first highlighted; the table lists
-      the rejected ones with the broken constraint in red (arrives after 21:00, overnight travel, over budget).</p>
-      <p>Jinko only quotes small bookings, so every hotel says ${b("Group block to confirm with the hotel")}: the agent is explicit about
-      what it could not verify.</p>`,
+    text: `<p>Each package is a round-trip coach charter plus one hotel for two nights, priced per person in code. Every card shows
+      the return time and the split (${b("coach · lodging · meals")}); the meal budget is added once. Hotels come from ${b("Jinko")}
+      (real offers in Deauville, cached); coach prices are illustrative. The ranked-first card is highlighted; the table lists the
+      rejected packages with the broken constraint in red (arrives after 21:00, overnight travel, over budget). Here 3 of 8 pass.</p>
+      <p>Jinko only quotes small bookings, so every hotel says ${b("Group block to confirm with the hotel")}: the planner is explicit
+      about what it could not verify.</p>`,
   },
   {
-    el: '[data-budget="9000"]', title: "What if the budget were lower?", action: true,
-    text: `<p>Organizers often ask "and with less money?". Try a budget of €90 per person.</p>${CLICK("€90 (what if)")}`,
+    el: '[data-budget]:not([data-budget=""])', title: "What if the budget were lower?", action: true,
+    text: `<p>Organizers often ask "could we charge students less?". Try €120 per person.</p>${CLICK("€120 (what if)")}`,
     done: () => !!document.querySelector(".diag"),
   },
   {
     el: ".diag", title: "No valid option: it says so",
-    text: `<p>At €90 no package passes every hard constraint. The planner ${b("does not relax any constraint by itself")}: it explains
+    text: `<p>At €120 no package passes every hard constraint. The planner ${b("does not relax any constraint by itself")}: it explains
       which single change would unlock each option, and leaves that decision to the organizers.</p>`,
   },
   {
     el: '[data-budget=""]', title: "Back to the requested budget", action: true,
-    text: `<p>Return to the budget the organizers asked for.</p>${CLICK("€120 (as requested)")}`,
+    text: `<p>Return to the budget the organizers asked for.</p>${CLICK("€150 (as requested)")}`,
     done: () => !!document.querySelector('[data-act="choose"]'),
   },
   {
@@ -231,8 +232,8 @@ const STEPS = [
   },
   {
     el: "#issues", title: "Dependent issues are unlocked",
-    text: `<p>The plan is set, so the reminders, room assignment and meeting-time question are no longer ${b("Waiting")}: they can now
-      be run through the agent with the real price and departure time. Resolving one issue unlocked three others.</p>`,
+    text: `<p>The plan is set, so the reminders, room assignment and the four messages are no longer ${b("Waiting")}: they can now
+      be run through the agent with the real price and departure time. Resolving one issue unlocked six others.</p>`,
   },
   {
     title: "That's the whole loop",
@@ -262,6 +263,13 @@ async function tourAdvance() {
     try { await nxt.prepare(); } catch (err) { setRun(err.message, "error"); }
   }
   d.moveNext();
+  // If the console re-renders while Driver animates to the next step (for example the Edit click
+  // swaps the draft), the animation can stop before the popover is shown: highlight the step again.
+  const shown = d.getActiveIndex();
+  setTimeout(() => {
+    const pop = document.querySelector(".driver-popover");
+    if (tourState.driver === d && d.getActiveIndex() === shown && (!pop || pop.style.display === "none")) d.moveTo(shown);
+  }, 1000);
 }
 
 // Poll for the expected result of an action step, and move on when it appears.

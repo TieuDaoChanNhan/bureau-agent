@@ -457,7 +457,7 @@ async function submitMessage(form) {
 const euro = cents => `€${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
 const HARD_LABEL = {
   participants: v => `${v} participants`,
-  max_cost_per_person_cents: v => `≤ ${euro(v)} per person (travel + lodging)`,
+  max_cost_per_person_cents: v => `≤ ${euro(v)} per person (whole package)`,
   arrive_before: v => `Arrive before ${v}`,
   no_overnight: v => (v ? "No overnight travel" : "Overnight travel allowed"),
   step_free_rooms: v => `≥ ${v} step-free rooms`,
@@ -471,7 +471,21 @@ function requestedBudget(s) {
 }
 
 const travelLine = t => `${esc(t.mode || "")} · ${esc(t.depart || "?")} → ${esc(t.arrive || "?")} · `
-  + `${t.changes ? `${esc(t.changes)} change${t.changes > 1 ? "s" : ""}` : "direct"}${t.overnight ? " · overnight" : ""}`;
+  + `${t.changes ? `${esc(t.changes)} change${t.changes > 1 ? "s" : ""}` : "direct"}${t.overnight ? " · overnight" : ""}`
+  + `${t.return_arrive ? ` · back Sunday ${esc(t.return_arrive)}` : ""}`;
+// Per-person cost split (T16 data), meal items grouped: "Coach €42 · Lodging €78.59 · Meals €22".
+const COST_LABEL = { coach: "Coach", transport: "Travel", lodging: "Lodging" };
+function costLine(o) {
+  const parts = o.cost_breakdown_per_person_cents || {};
+  if (!Object.keys(parts).length) return "";
+  let meals = 0;
+  const shown = [];
+  for (const [k, v] of Object.entries(parts)) {
+    if (COST_LABEL[k]) shown.push(`${COST_LABEL[k]} ${euro(v)}`); else meals += v;
+  }
+  if (meals) shown.push(`Meals ${euro(meals)}`);
+  return `<div class="line cost">${esc(shown.join(" · "))}</div>`;
+}
 const lodgingLine = l => `${esc(l.name || "")}${l.walk_minutes != null ? ` · ${esc(l.walk_minutes)} min walk` : ""}`
   + `${l.capacity ? ` · ${esc(l.capacity)} beds` : ""}`;
 
@@ -487,6 +501,7 @@ function optionsBlock(action, decided) {
     return `<div class="optcard ${k === 0 ? "first" : ""}">
       <div class="top"><b>Option ${esc(o.id)}</b><span class="verdict ${k === 0 ? "v-pick" : "v-alt"}">${k === 0 ? "Ranked 1st" : "Valid"}</span></div>
       <div class="price">${euro(o.cost_per_person_cents)} <small>per person</small></div>
+      ${costLine(o)}
       <div class="line">🚆 ${travelLine(t)}</div>
       <div class="line">🏨 ${lodgingLine(l)}</div>
       ${confirm.length ? `<span class="confirm">Organizers confirm: ${esc(confirm.join(", "))}</span>` : ""}
@@ -535,7 +550,8 @@ function planDetail(issue, action, st) {
   const c = (action.payload && action.payload.constraints) || { hard: {}, soft: [], organizer_verified: [] };
   const budget = c.hard.max_cost_per_person_cents;
   const requested = requestedBudget(s);
-  const whatIf = requested && requested > 9000 ? 9000 : null;
+  // What-if: 20% below the requested budget, rounded to €10 (€150 -> €120).
+  const whatIf = requested ? Math.round(requested * 0.8 / 1000) * 1000 : null;
   const hard = Object.entries(c.hard).map(([k, v]) =>
     `<li>${esc(HARD_LABEL[k] ? HARD_LABEL[k](v) : `${k}: ${v}`)}${(c.organizer_verified || []).includes(k) ? ' <span class="confirm">organizers confirm</span>' : ""}</li>`).join("");
   const soft = (c.soft || []).map(k => `<li>${esc(SOFT_LABEL[k] || k)}</li>`).join("");
