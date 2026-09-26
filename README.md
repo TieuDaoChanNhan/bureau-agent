@@ -162,4 +162,4 @@ How we worked: issues, pull requests and reviews ([CONTRIBUTING.md](CONTRIBUTING
 
 ## License
 
-TODO (T19): MIT unless the team decides otherwise.
+[MIT](LICENSE). Third-party: Driver.js 1.3.1 (MIT, `web/vendor/DRIVER_LICENSE`).
