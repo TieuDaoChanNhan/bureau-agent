@@ -123,6 +123,28 @@ but missed the labeled budget clarification (0/1). This reflects the pending T10
 extractor, not a successful language-understanding evaluation.
 
 The full local report is `eval/results/20260926T091933.899736Z.json` (Git-ignored).
+
+## Model comparison
+
+Same corpus and agent code (commit `cc4917b`), one run per model on 2026-09-26:
+
+| Metric | `gpt-4.1` (default) | `gpt-4o-mini` |
+|---|---|---|
+| Action accuracy | **45/50 (90.0%)** | 38/50 (76.0%) |
+| Required tool selection | 44/50 (88.0%) | 44/50 (88.0%) |
+| Rule citation | **29/30 (96.7%)** | 27/30 (90.0%) |
+| Human handling heuristic | **42/50 (84.0%)** | 33/50 (66.0%) |
+| Unnecessary organizer questions | **6** | 15 |
+| Invariant violations | **0** | 1 |
+| Agent errors | 0 | 0 |
+
+`gpt-4.1` is therefore the default (`bureau/config.py`). `gpt-4o-mini` is cheaper per
+token but less accurate, asks organizers more than twice as often, and produced a
+proposal the executor refuses. In a separate live run through the console it also
+proposed linking payment `f90` to the wrong participant (`p18`); T29 now rejects that
+in code. `gpt-4o-mini` report: `eval/results/20260926T095524.317780Z.json` (Git-ignored).
+Run the same comparison for any other model before switching:
+`OPENAI_MODEL=<model> python -m eval.run_eval`.
 Dataset SHA-256: `1a2f1192229cc3d8ebfc9fa3debd80b661b007ffdf8230cedfee3eb5bed317eb`.
 Fixture and runtime file hashes were unchanged after the run. Results can vary
 between model calls; rerun this baseline when changing the agent, model or corpus.
