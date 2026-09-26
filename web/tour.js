@@ -7,8 +7,12 @@
 // `prepare()` runs before a step is shown and does the navigation (select an event or issue,
 // pre-fill a form), so the viewer's clicks are only the product's real actions.
 // To add a step: insert an object in STEPS below; `el` is a CSS selector resolved when shown.
+//
+// Two tours share these steps (T38): QUICK (about 3 minutes, the default, short copy) picks steps
+// by `id` and overrides their text; STEPS is the full tour ("See every feature"). Each step shows
+// its chapter in the progress line.
 
-const tourState = { driver: null, poll: null, started: 0 };
+const tourState = { driver: null, poll: null, started: 0, steps: [] };
 
 const hackathon = () => ui.summaries.hackathon;
 const wei = () => ui.summaries.wei;
@@ -40,6 +44,7 @@ const CLICK = label => `<p class="tour-do">👉 Click ${b(label)} (highlighted).
 
 const STEPS = [
   {
+    id: "welcome",
     title: "Welcome to Bureau Agent",
     text: `<p>Volunteer boards run events on top of their studies: registrations, fees, teams, rooms, trips and dozens of messages.
       Bureau Agent keeps an event consistent. <b>Code</b> detects what needs attention, an <b>AI agent</b> investigates with tools and
@@ -72,6 +77,7 @@ const STEPS = [
       only where language and judgment are needed.</p>`,
   },
   {
+    id: "investigate",
     el: '[data-act="retry"], #detail .thinking', title: "Let the agent investigate a message", action: true,
     prepare: () => tourShow("hackathon", "issue:message:m01"),
     text: `<p>Antoine writes (in French) that he already paid his membership fee from his personal email, yet keeps getting reminders.
@@ -95,6 +101,7 @@ const STEPS = [
       folded by default so the proposal stays in front; open it whenever you want to audit a decision.</p>`,
   },
   {
+    id: "asks",
     el: "#detail .proposal-card .question", title: "The agent asks instead of guessing",
     text: `<p>The identity score is 0.91: a strong match, but below the 0.98 needed to be sure. So the agent does not decide alone. It
       proposes the link ${b("and asks you to confirm")}, which is why the issue shows ${b("Needs you")}.</p>
@@ -114,6 +121,7 @@ const STEPS = [
     done: () => !document.querySelector('#draft[contenteditable="true"]'),
   },
   {
+    id: "approve",
     el: '[data-act="approve"]', title: "You approve, then it happens", action: true, side: "left",
     text: `<p>Only an organizer's approval changes data. Approving will link the payment to Antoine, mark him as paid, and put
       ${b("your edited reply")} in the outbox. The executor re-checks every rule at this moment.</p>${CLICK("Confirm and link")}`,
@@ -143,6 +151,7 @@ const STEPS = [
     done: () => ui.view === "compose",
   },
   {
+    id: "risky",
     el: "#composeForm, #detail .thinking", title: "A risky request", action: true,
     prepare: () => {
       const ex = EXAMPLES[1], form = $("#composeForm");
@@ -153,6 +162,7 @@ const STEPS = [
     done: () => hackathon().actions.some(a => a.issue_id.startsWith("message:live")),
   },
   {
+    id: "refuses",
     el: "#detail", title: "It refuses to share personal data",
     text: `<p>The agent searched the rules, found the personal-data section (§10), and ${b("escalated")} to the organizers instead of
       sharing anything. Questions the rules do not answer, refunds and exceptions are escalated the same way.</p>
@@ -165,6 +175,7 @@ const STEPS = [
       proposal. (Not run in this tour, to save time and credit.)</p>`,
   },
   {
+    id: "wei",
     el: '[data-ev="wei"]', title: "Same loop, another kind of event", action: true,
     text: `<p>The integration weekend adds something harder: organizing a trip for 100 students under several constraints.</p>${CLICK("the Student association WEI tab")}`,
     done: () => ui.current === "wei",
@@ -176,6 +187,7 @@ const STEPS = [
       depend on ${b("No validated travel and lodging plan")}, which is selected on the right.</p>`,
   },
   {
+    id: "plan",
     el: '[data-act="plan"]', title: "Plan the trip", action: true,
     prepare: () => tourShow("wei", "issue:no_logistics_plan"),
     text: `<p>The request is the organizers' own words (shown above): 100 students, leave the Palaiseau campus Friday after 17:00,
@@ -184,6 +196,7 @@ const STEPS = [
     done: () => !!(document.querySelector("#answerForm") || document.querySelector(".opts")),
   },
   {
+    id: "clarify",
     el: "#clarify", title: "The planner asks before searching", action: true, side: "left",
     prepare: () => {
       const form = $("#answerForm");
@@ -201,6 +214,7 @@ const STEPS = [
       or reject a package.</p>`,
   },
   {
+    id: "packages",
     el: ".optwrap", title: "Packages built from real hotel offers",
     text: `<p>Each package is a round-trip coach charter plus one hotel for two nights, priced per person in code. Every card shows
       the return time and the split (${b("coach · lodging · meals")}); the meal budget is added once. Hotels come from ${b("Jinko")}
@@ -210,11 +224,13 @@ const STEPS = [
       about what it could not verify.</p>`,
   },
   {
+    id: "whatif",
     el: '[data-budget]:not([data-budget=""])', title: "What if the budget were lower?", action: true,
     text: `<p>Organizers often ask "could we charge students less?". Try €120 per person.</p>${CLICK("€120 (what if)")}`,
     done: () => !!document.querySelector(".diag"),
   },
   {
+    id: "novalid",
     el: ".diag", title: "No valid option: it says so",
     text: `<p>At €120 no package passes every hard constraint. The planner ${b("does not relax any constraint by itself")}: it explains
       which single change would unlock each option, and leaves that decision to the organizers.</p>`,
@@ -225,12 +241,14 @@ const STEPS = [
     done: () => !!document.querySelector('[data-act="choose"]'),
   },
   {
+    id: "choose",
     el: '[data-act="choose"]', title: "Choose a package", action: true,
     text: `<p>The first valid package is ranked first under the stated preferences, with the trade-off explained above the buttons.
       Nothing is booked: organizers book the chosen option themselves.</p>${CLICK("Choose option …")}`,
     done: () => !!(wei() && wei().logistics),
   },
   {
+    id: "unlocked",
     el: "#issues", title: "Dependent issues are unlocked",
     text: `<p>The plan is set, so the reminders, room assignment and the four messages are no longer ${b("Waiting")}: they can now
       be run through the agent with the real price and departure time. Resolving one issue unlocked six others.</p>`,
@@ -244,6 +262,77 @@ const STEPS = [
   },
 ];
 
+// Chapters of the full tour, by index of the first step of each chapter.
+[[0, "Intro"], [4, "Agent"], [14, "Messages"], [18, "Trip"], [29, "Wrap-up"]].forEach(([from, ch], k, all) => {
+  const to = k + 1 < all.length ? all[k + 1][0] : STEPS.length;
+  for (let i = from; i < to; i++) STEPS[i].ch = ch;
+});
+
+const step = id => STEPS.find(s => s.id === id);
+const WAIT = secs => `<p class="tour-wait">About ${secs} seconds; the tour continues by itself.</p>`;
+
+// Quick tour (T38): the highlights in about 3 minutes, short copy, numbers at the end.
+const QUICK = [
+  { ...step("welcome"), ch: "Intro", title: "Bureau Agent in 3 minutes",
+    text: `<p>${b("Student boards run events with no operations team.")} Code finds what needs attention, an AI agent investigates
+      and proposes, and ${b("you approve")}.</p><p>You will drive the live agent on two sample events. Next resets the demo data.</p>` },
+  { ...step("investigate"), ch: "Agent",
+    text: `<p>${b("A student says he paid but still gets reminders.")} Answering means checking records and payments.</p>
+      ${CLICK("Run agent on this issue")}${WAIT("15")}` },
+  { ...step("asks"), ch: "Agent",
+    text: `<p>${b("It found the payment, but it is not sure it is his.")} The match scores 0.91, so the agent proposes the link
+      ${b("and asks you")}. Below 0.70, code would refuse the link whatever the model says.</p>` },
+  { ...step("approve"), ch: "Agent",
+    text: `<p>${b("Nothing happens until you approve.")} Approving links the payment, marks him as paid and queues the drafted reply.
+      Code re-checks every rule at that moment.</p>${CLICK("Confirm and link")}` },
+  { ...step("risky"), ch: "Safety",
+    prepare: async () => {
+      // The approval may still be refreshing the console: open the form once it is idle.
+      for (let k = 0; k < 50 && ui.busy; k++) await new Promise(r => setTimeout(r, 100));
+      ui.view = "compose";
+      renderIssues(); renderDetail();
+      const ex = EXAMPLES[1], form = $("#composeForm");
+      if (form) { form.sender.value = ex.sender; form.channel.value = ex.channel; form.text.value = ex.text; }
+    },
+    text: `<p>${b("Now a risky request:")} a sponsor asks for every participant's phone number. We filled it in; you can edit it.</p>
+      ${CLICK("Send to the agent")}${WAIT("15")}` },
+  { ...step("refuses"), ch: "Safety",
+    text: `<p>${b("It refuses and escalates.")} The agent found the personal-data rule (§10) and handed the request to the
+      organizers instead of sharing anything.</p>` },
+  { ...step("wei"), ch: "Trip",
+    text: `<p>${b("Harder: a weekend trip for 100 students")} with a budget, an arrival time, no overnight travel and step-free rooms.</p>
+      ${CLICK("the Student association WEI tab")}` },
+  { ...step("plan"), ch: "Trip",
+    text: `<p>${b("The organizers' request, in their own words,")} is shown above. A model turns it into constraints; code checks every
+      package against them.</p>${CLICK("Plan the trip")}` },
+  { ...step("clarify"), ch: "Trip",
+    text: `<p>${b("It asks before searching.")} The request does not say whether €150 covers the coaches. We filled in an answer.</p>
+      ${CLICK("Answer and plan again")}${WAIT("10")}` },
+  { ...step("packages"), ch: "Trip",
+    text: `<p>${b("3 of 8 packages pass every hard constraint.")} Hotels are real Jinko offers; each card shows the return time and the
+      cost split. Rejected packages list the broken constraint in red.</p>` },
+  { ...step("whatif"), ch: "Trip",
+    text: `<p>${b("What if students paid less?")}</p>${CLICK("€120 (what if)")}` },
+  { ...step("novalid"), ch: "Trip", action: true,
+    text: `<p>${b("No package fits €120, and it says so.")} It never relaxes a constraint by itself; it explains what would unlock
+      each option.</p><p class="tour-do">👉 Click ${b("Back to €150")} below.</p>`,
+    button: { label: "Back to €150", run: () => { const btn = document.querySelector('[data-budget=""]'); if (btn) btn.click(); } },
+    done: () => !!document.querySelector('[data-act="choose"]') },
+  { ...step("choose"), ch: "Trip",
+    text: `<p>${b("Pick the package ranked first.")} Nothing is booked: organizers book it themselves.</p>${CLICK("Choose option F")}` },
+  { ...step("unlocked"), ch: "Trip",
+    text: `<p>${b("One decision unlocked six issues:")} reminders, rooms and four student questions can now be answered with the real
+      price and times.</p>` },
+  { ch: "Wrap-up", title: "What you just saw",
+    text: `<ul class="tour-nums">
+        <li><b>31</b> issues found by code in the sample hackathon</li>
+        <li><b>90%</b> correct action type on 50 labelled messages</li>
+        <li><b>0</b> actions without an organizer's approval</li>
+        <li><b>3 of 8</b> trip packages valid at €150, none at €120</li></ul>
+      <p>Explore on your own, or see every feature (outbox, editing replies, evidence) in the full tour.</p>`,
+    button: { label: "Full tour (6 min)", ghost: true, run: () => startTour("full") } },
+];
+
 function tourStopPolling() {
   if (tourState.poll) { clearInterval(tourState.poll); tourState.poll = null; }
 }
@@ -253,12 +342,13 @@ async function tourAdvance() {
   const d = tourState.driver;
   const i = d.getActiveIndex();
   if (i == null) return;
-  const cur = STEPS[i];
+  const steps = tourState.steps;
+  const cur = steps[i];
   if (cur.next) {
     try { await cur.next(); } catch (err) { setRun(err.message, "error"); }
   }
-  if (i + 1 >= STEPS.length) { d.destroy(); return; }
-  const nxt = STEPS[i + 1];
+  if (i + 1 >= steps.length) { d.destroy(); return; }
+  const nxt = steps[i + 1];
   if (nxt.prepare) {
     try { await nxt.prepare(); } catch (err) { setRun(err.message, "error"); }
   }
@@ -298,9 +388,10 @@ function tourWatch(step) {
   }, 400);
 }
 
-function startTour() {
+function startTour(mode = "quick") {
   if (!window.driver || !window.driver.js) { setRun("The tour library did not load.", "error"); return; }
   if (tourState.driver) tourState.driver.destroy();
+  const steps = tourState.steps = mode === "full" ? STEPS : QUICK;
   const d = window.driver.js.driver({
     showProgress: true,
     progressText: "Step {{current}} of {{total}}",
@@ -310,7 +401,7 @@ function startTour() {
     popoverClass: "tour-popover",
     nextBtnText: "Next →",
     doneBtnText: "Finish",
-    steps: STEPS.map(s => ({
+    steps: steps.map(s => ({
       element: s.el,
       popover: {
         title: s.title,
@@ -322,15 +413,17 @@ function startTour() {
     })),
     onNextClick: () => { tourAdvance(); },
     onPopoverRender: (popover, { state }) => {
-      const s = STEPS[state.activeIndex];
-      if (!s || !s.action) return;
+      const s = steps[state.activeIndex];
+      if (!s) return;
+      popover.progress.innerHTML = `<span class="tour-ch">${s.ch || ""}</span> Step ${state.activeIndex + 1} of ${steps.length}`;
+      if (!s.action && !s.button) return;
       const extra = document.createElement("div");
       extra.className = "tour-extra";
-      extra.innerHTML = `<span class="tour-status" aria-live="polite">Waiting for you…</span>
-        ${s.button ? `<button type="button" class="tour-act">${s.button.label}</button>` : ""}
-        <button type="button" class="tour-skip">Skip step</button>`;
+      extra.innerHTML = `${s.action ? '<span class="tour-status" aria-live="polite">Waiting for you…</span>' : ""}
+        ${s.button ? `<button type="button" class="tour-act${s.button.ghost ? " ghost" : ""}">${s.button.label}</button>` : ""}
+        ${s.action ? '<button type="button" class="tour-skip">Skip step</button>' : ""}`;
       if (s.button) extra.querySelector(".tour-act").addEventListener("click", s.button.run);
-      extra.querySelector(".tour-skip").addEventListener("click", () => tourAdvance());
+      if (s.action) extra.querySelector(".tour-skip").addEventListener("click", () => tourAdvance());
       popover.description.appendChild(extra);
     },
     // A click on the dimmed page must not end the tour (easy to do by accident); the close button
@@ -344,5 +437,6 @@ function startTour() {
 }
 
 $("#tourBtn").addEventListener("click", () => { if (!ui.busy) startTour(); });
-$("#heroTourBtn").addEventListener("click", () => { if (!ui.busy) startTour(); });
+$("#heroTourBtn").addEventListener("click", () => { if (!ui.busy) startTour("quick"); });
+$("#fullTourLink").addEventListener("click", e => { e.preventDefault(); if (!ui.busy) startTour("full"); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && tourState.driver) tourState.driver.destroy(); });
