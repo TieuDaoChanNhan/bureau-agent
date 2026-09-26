@@ -34,7 +34,9 @@ and `needs_human` issues without a proposal, skips `no_logistics_plan` and issue
 blocked by an unresolved dependency, and defaults to five attempted issues per
 request. Existing proposals and terminal issues are skipped. Each successful
 proposal is saved before the next issue; an agent error is appended to the audit
-log and does not discard earlier work or stop the rest of the bounded batch.
+log, the issue is marked `agent_failed`, and the rest of the bounded batch goes on.
+`agent_failed` issues are not counted in `remaining` or retried by later calls, so a
+client can call `run` until `remaining` is 0; `run?issue_id=<id>` retries one issue.
 An OpenAI key is required only when there is work to do. The route never applies
 a proposal.
 

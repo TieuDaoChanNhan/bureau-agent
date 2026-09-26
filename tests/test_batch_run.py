@@ -1,24 +1,4 @@
 """T09 batch agent runner tests using the scripted fake LLM."""
-import pathlib
-import tempfile
-import unittest
-from unittest.mock import patch
-
-from bureau.core.models import Issue, ProposedAction
-
-
-def _fake_resolve(state, issue, verbose=True, client=None, max_steps=8):
-    a = ProposedAction(
-        id=f"hackathon:{issue.id}", event_id="hackathon", issue_id=issue.id,
-        action_type="LINK_PAYMENT", title="t", description="d",
-        evidence=[], checks=[], payload={},
-    )
-    state.actions.append(a)
-    issue.status = "proposed"
-    return a
-
-
-"""T09 batch agent runner tests using the scripted fake LLM."""
 import json
 import pathlib
 import tempfile
@@ -155,3 +135,48 @@ class BatchRunTests(unittest.TestCase):
         self.assertEqual([{"issue_id": "issue:3", "error": "rate limit"}], result.errors)
         self.assertEqual(["issue:1", "issue:2", "issue:4"], [action.issue_id for action in saved.actions])
         self.assertEqual([{"type": "agent_error", "issue_id": "issue:3", "error": "rate limit"}], log)
+
+    def test_permanent_failure_is_not_retried_by_later_batches(self):
+        """A failed issue leaves the backlog, so repeated batches terminate."""
+        from bureau.core import store
+
+        issues = [
+            Issue(id="broken", kind="unprocessed_message", blocking=False, title="Broken", status="open"),
+            Issue(id="fine", kind="unprocessed_message", blocking=False, title="Fine", status="open"),
+        ]
+        attempts = []
+
+        def always_fail_broken(state, issue, verbose=False, client=None):
+            attempts.append(issue.id)
+            if issue.id == "broken":
+                raise RuntimeError("model keeps failing")
+            return _propose(state, issue, verbose=verbose, client=client)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(store, "RUNTIME_DIR", pathlib.Path(tmp)),                  patch("bureau.agent.loop.detect_issues", return_value=issues),                  patch("bureau.agent.loop.resolve_issue", side_effect=always_fail_broken):
+                state = load_event("hackathon")
+                first = run_pending(state, limit=5, verbose=False)
+                second = run_pending(state, limit=5, verbose=False)
+                saved = store.load_state("hackathon")
+
+        self.assertEqual(0, first.remaining)
+        self.assertEqual(0, second.remaining)
+        self.assertEqual([], second.errors)
+        self.assertEqual(1, attempts.count("broken"))
+        self.assertEqual("agent_failed", next(i for i in saved.issues if i.id == "broken").status)
+
+    def test_failed_issue_is_retried_when_requested_by_id(self):
+        """Organizers can re-run one failed issue explicitly."""
+        from bureau.core import store
+
+        failed = Issue(id="broken", kind="unprocessed_message", blocking=False,
+                       title="Broken", status="agent_failed")
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(store, "RUNTIME_DIR", pathlib.Path(tmp)),                  patch("bureau.agent.loop.detect_issues", return_value=[failed]),                  patch("bureau.agent.loop.resolve_issue", side_effect=_propose):
+                state = load_event("hackathon")
+                state.issues = [failed]
+                batch = run_pending(state, verbose=False)
+                retry = run_pending(state, issue_id="broken", verbose=False)
+
+        self.assertEqual([], batch.actions)
+        self.assertEqual(["broken"], [action.issue_id for action in retry.actions])

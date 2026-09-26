@@ -116,13 +116,18 @@ def _refresh_issues(state: EventState) -> None:
 
 
 def runnable_issues(state: EventState, issue_id: str | None = None) -> list[Issue]:
-    """Return issues eligible for agent proposals from the current state."""
+    """Return issues eligible for agent proposals from the current state.
+
+    An issue whose last agent run failed is retried only when requested by id,
+    so a permanent failure cannot be re-sent (and re-billed) on every batch.
+    """
     issues_by_id = {issue.id: issue for issue in state.issues}
     proposed_issue_ids = {action.issue_id for action in state.actions}
+    statuses = ("open", "needs_human", "agent_failed") if issue_id else ("open", "needs_human")
     return [
         issue for issue in state.issues
         if (issue_id is None or issue.id == issue_id)
-        and issue.status in ("open", "needs_human")
+        and issue.status in statuses
         and issue.id not in proposed_issue_ids
         and issue.kind != "no_logistics_plan"
         and not _is_blocked(issue, issues_by_id)
@@ -136,7 +141,8 @@ def run_pending(state: EventState, issue_id: str | None = None, *, limit: int | 
     An issue is runnable when it is open or needs human input, has no existing
     proposal, and is not waiting for an unresolved dependency. The travel-plan
     issue itself is left to the planner rather than the agent. ``limit`` bounds
-    how many issues one caller attempts; ``None`` means no bound.
+    how many issues one caller attempts; ``None`` means no bound. A failed issue
+    is marked ``agent_failed`` and is only retried when requested by ``issue_id``.
     """
     _refresh_issues(state)
     targets = runnable_issues(state, issue_id)
@@ -152,6 +158,8 @@ def run_pending(state: EventState, issue_id: str | None = None, *, limit: int | 
             error = {"issue_id": issue.id, "error": str(exc)}
             append_log(state.id, {"type": "agent_error", **error})
             errors.append(error)
+            issue.status = "agent_failed"
+            save_state(state)
             continue
         actions.append(action)
         # Do not lose earlier paid API calls if a later issue fails.

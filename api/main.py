@@ -106,14 +106,17 @@ def _todo(task: str):
 
 
 @app.post("/api/events/{event_id}/run")
-def run_agent(event_id: str, limit: int = Query(5, ge=1)):
-    """Propose up to ``limit`` runnable issues and report the remaining backlog."""
+def run_agent(event_id: str, limit: int = Query(5, ge=1), issue_id: str | None = None):
+    """Propose up to ``limit`` runnable issues and report the remaining backlog.
+
+    ``issue_id`` runs one issue, including one whose previous agent run failed.
+    """
     if event_id not in _events():
         raise HTTPException(404, "unknown event")
     state = _load_and_refresh(event_id)
-    if runnable_issues(state) and not config.OPENAI_API_KEY:
+    if runnable_issues(state, issue_id) and not config.OPENAI_API_KEY:
         raise HTTPException(503, "OPENAI_API_KEY is not set")
-    result = run_pending(state, limit=limit, verbose=False)
+    result = run_pending(state, issue_id=issue_id, limit=limit, verbose=False)
     summary = _event_summary(state)
     summary["remaining"] = result.remaining
     summary["errors"] = result.errors
