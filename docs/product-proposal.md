@@ -73,7 +73,7 @@ Hội là **thị trường khởi đầu**. Cùng kiểu vận hành rời rạ
 
 ### 1.3. Hai ví dụ dùng để demo
 - **Hackathon của X-IA:** 108 người đăng ký, điều kiện phí hội viên 10€, đội 1–4 người (thi cá nhân hoặc đội 2–4), câu hỏi liên tục, ngày chung kết bị dời.
-- **Weekend d'intégration (WEI):** chuyến đi cuối tuần của hội sinh viên cho khoảng 40 người, ngân sách cố định mỗi người, cần chọn phương án đi lại và chỗ ở, thu tiền, xếp phòng.
+- **Weekend d'intégration (WEI):** chuyến đi cuối tuần của hội sinh viên, lấy cảm hứng từ quy trình thực tế được chủ dự án mô tả. Demo công khai dùng tên trung tính **Student association WEI (demo)** và 100 đăng ký hư cấu: đối soát tiền, thuê xe bus, tìm nơi có lưu trú, bếp và không gian vui chơi, rồi xếp phòng. Tiền sinh viên đóng gồm cả ăn uống; hội mua thực phẩm và vận chuyển đến địa điểm. Chưa có sự đồng ý công khai danh tính hội thật; ngày, địa điểm và giá demo chưa xác nhận, và vẫn chờ người từng tổ chức WEI duyệt trước khi merge; [nguồn và giả định](../data/README.md#wei-source-assumptions-and-scenarios-t16--issue-15).
 
 Khi trình bày, bối cảnh được đóng khung là *"chúng tôi nhận ra có bao nhiêu công việc vô hình phía sau một sự kiện như thế này"*, không phải nhận xét cách ban tổ chức làm việc.
 
@@ -178,7 +178,7 @@ class Issue:
     depends_on: list[str]       # issue ids phải giải quyết trước
 
 class Check:
-    name: str                   # ví dụ "budget ≤ €120/person"
+    name: str                   # ví dụ "budget ≤ €150/person"
     passed: bool
     detail: str
 
@@ -235,14 +235,25 @@ class TravelRequest:
     text: str                       # yêu cầu nguyên văn của người tổ chức
     participants: int
     origin: str
+    destination: str
     depart_after: datetime
-    return_by: datetime | None
+    return_by: datetime | None = None
+    catering: dict = field(default_factory=dict)  # phân bổ ăn uống theo người; tùy chọn
 
 class Constraints:
-    hard: dict                      # {"max_cost_per_person": 120, "arrive_before": "21:00",
+    hard: dict                      # {"max_cost_per_person_cents": 15000, "arrive_before": "21:00",
                                     #  "no_overnight": True, "step_free_rooms": 2, ...}
-    soft: list[str]                 # thứ tự ưu tiên, ví dụ ["fewer_changes", "near_station"]
-    clarifications: list[str]       # câu cần hỏi lại (rỗng nếu đủ thông tin)
+    soft: list[str] = field(default_factory=list)  # thứ tự ưu tiên
+    organizer_verified: list[str] = field(default_factory=list)
+    clarifications: list[str] = field(default_factory=list)  # câu cần hỏi lại
+
+class TravelOption:
+    id: str
+    transport: dict
+    lodging: dict
+    cost_per_person_cents: int
+    source: str
+    cost_breakdown_per_person_cents: dict[str, int] = field(default_factory=dict)
 
 def extract_constraints(req: TravelRequest) -> Constraints: ...          # LLM
 def plan_trip(req: TravelRequest, c: Constraints) -> ProposedAction: ...
@@ -271,20 +282,24 @@ def plan_trip(req: TravelRequest, c: Constraints) -> ProposedAction: ...
 Luồng phụ trong cùng sự kiện: người ở hai đội (đề xuất sửa), đội 5 người (yêu cầu đội tự chọn).
 
 ### 5.2. WEI: lập kế hoạch theo nhiều ràng buộc
-**Đầu vào:** *"WEI cho 40 người, đi tối thứ Sáu 9/10 từ Paris, về chiều Chủ Nhật. Tối đa 120€/người cả đi lại và ở. Đến trước 21h. Không đi xe đêm. Hai bạn cần phòng không bậc thang."*
+**Đầu vào demo chưa xác nhận:** yêu cầu ngắn bằng giọng một thành viên ban điều hành, cho 100 người đi 9–11/10/2026 từ campus ở Palaiseau đến khu vực Trouville-Deauville. Yêu cầu nêu rõ tiền ăn và vận chuyển thực phẩm do hội lo, hai phòng không bậc thang, bếp và chỗ sinh hoạt chung; cố ý để ngỏ tiền thuê xe có nằm trong trần 150€/người không. Đây là tình huống cần LLM hỏi lại phạm vi ngân sách trước khi tìm phương án, không phải một xác nhận từ người tổ chức thật.
+
+Phí demo là 150€/người trong cả 97 khoản thanh toán, gồm xe, lưu trú, thực phẩm và vận chuyển thực phẩm. Ngân sách ghi sẵn cũng là 150€/người cho toàn bộ gói, tương ứng câu trả lời cần cung cấp sau bước hỏi lại. Cho 100 người, ngân sách thực phẩm là 2000€ và vận chuyển thực phẩm là 200€, đều nằm trong tổng phí. Riêng phương án dự phòng A giá 112€ gồm 35€ xe + 55€ lưu trú + 20€ thực phẩm + 2€ vận chuyển thực phẩm; đây là giá gói minh họa, khác với phí tạm thu. Giá và phân bổ chưa được xác nhận, hội cần đối soát khi chọn phương án. `TravelRequest.catering` và `TravelOption.cost_breakdown_per_person_cents` đều tùy chọn, mặc định rỗng; bảng chi phí nếu có phải gồm số cent nguyên không âm cộng đúng tổng. Thực đơn, số lượng, nhu cầu ăn uống riêng, cách vận chuyển, sức chứa và bảo quản thực phẩm vẫn cần người tổ chức xác minh.
+
+Jinko đã có tìm khách sạn trực tiếp và phát lại phản hồi đã lưu. Demo dùng giá một phòng đôi để ước tính 50 phòng cho 100 người; chưa xác nhận cả khối phòng còn trống. Tìm đi lại trả 404 với khóa hiện tại, nên giá thuê hai xe 53 chỗ vẫn là minh họa. Quyền thuê xe riêng, dùng bếp và tổ chức hoạt động chưa được kiểm chứng. Bộ đánh giá lịch sử vẫn giữ các ca 40 người với ngữ cảnh riêng.
 
 | Bước | Ai làm | Nội dung |
 |---|---|---|
-| 1 | LLM | Tách ràng buộc cứng (40 người, ≤ 120€, đến trước 21:00, không qua đêm, ≥ 2 phòng không bậc thang) và ưu tiên mềm (ít đổi tàu, gần ga, về trước 20:00 Chủ Nhật) |
-| 2 | LLM | Thấy mơ hồ: ngân sách có gồm ăn uống? → **hỏi lại** trước khi tìm |
-| 3 | Jinko | `ground-search` (tàu, xe khách), `hotel-search` (chỗ ở), trên sandbox |
-| 4 | LLM | Ghép thành phương án trọn gói, cố ý gồm cả phương án rẻ nhất để kiểm tra |
+| 1 | LLM | Tách ràng buộc được hỗ trợ (100 người, đến trước 21:00, không qua đêm, ≥ 2 phòng không bậc thang) và ưu tiên mềm (ít chuyển xe, về sớm, giá thấp); hỏi trần 150€ đã gồm xe chưa, trong khi tiền ăn đã rõ |
+| 2 | LLM + người | Người trả lời 150€ là trần cho toàn bộ gói. Thuê xe riêng, quyền nấu ăn và tổ chức hoạt động chưa được schema kiểm tra; người tổ chức vẫn phải xác minh theo `travel.organizer_checks`. Chế độ offline dùng `--recorded-constraints` để bỏ qua tách bằng LLM và dùng trực tiếp phạm vi này |
+| 3 | Jinko + dữ liệu minh họa | Tìm khách sạn ở chế độ live/replay, nhân giá phòng đôi theo 50 phòng; đi lại dùng hai xe thuê minh họa vì ground search trả 404. Chưa xác nhận khả năng nhận cả nhóm |
+| 4 | Code | Ghép xe × chỗ ở, cộng ngân sách thực phẩm và vận chuyển thực phẩm đúng một lần vào giá/người; kiểm tra các khoản chi là số nguyên cent không âm và cộng đúng tổng giá. Giữ cả phương án rẻ nhất; dùng gói minh họa A–E nếu tìm khách sạn không khả dụng |
 | 5 | Code | `check_constraints`: loại phương án vi phạm, ghi lý do cụ thể |
 | 6 | Code + LLM | Xếp hạng phương án hợp lệ **theo ưu tiên hiện tại** (không tuyên bố "khách quan tốt nhất"); LLM giải thích đánh đổi |
 | 7 | Người | Chọn một phương án |
 | 8 | Hệ thống | Vấn đề `no_logistics_plan` đóng → mở khóa nhắc thanh toán (điền đúng số tiền), xếp phòng, trả lời giờ tập trung |
 
-**Khi không có phương án hợp lệ** (ví dụ ngân sách 90€): agent **không tự nới ràng buộc**. Nó đề xuất hành động `ESCALATE` kèm chẩn đoán: *"Ràng buộc đang chặn: ngân sách ≤ 90€/người. Nếu nâng lên 112€ thì có 1 phương án hợp lệ; nếu chấp nhận đến lúc 22:10 thì có 1 phương án 96€."*
+Ở trần mặc định 150€, cache Jinko hiện tại cho C/E/F đạt các kiểm tra hỗ trợ với giá 135,59€/140,59€/142,59€ đã gồm ăn uống; F đứng đầu do về sớm hơn, C rẻ nhất trong các gói hợp lệ. **Khi không có phương án hợp lệ**, agent **không tự nới ràng buộc**: thử trần 120€ hoặc 90€ với cache này đều trả `ESCALATE`. Riêng bộ gói dự phòng minh họa A–E, A/B/D đạt trần 150€ (D đứng đầu do về sớm), A/B đạt trần 120€; ở trần 90€, A giá 112€ vi phạm ngân sách, còn C giá 96€ vi phạm cả ngân sách và giờ đến (22:10).
 
 ---
 
@@ -448,8 +463,8 @@ bureau-agent/
 | 0:00–0:10 | "Tổ chức một sự kiện thì vui. Vận hành phía sau thì không." Hình: 108 đăng ký, 50 tin nhắn, phí, đội, hạn chót, chuyến đi, phòng. "Và phần lớn do tình nguyện viên làm." |
 | 0:10–0:18 | "Bureau Agent: agent vận hành sự kiện cho các hội." Màn hình: hai sự kiện, số vấn đề chặn. |
 | 0:18–0:42 | Hackathon: tin nhắn mơ hồ về phí → đối chiếu danh tính, hỏi xác nhận → duyệt → vấn đề đóng, nhắc hạn không còn gửi nhầm. |
-| 0:42–1:22 | WEI: yêu cầu bằng lời → ràng buộc cứng/mềm → Jinko → phương án 96€ bị loại vì đến 22:10, 141€ bị loại vì vượt ngân sách → hai phương án hợp lệ → thử ngân sách 90€: "không có phương án hợp lệ, ràng buộc chặn là ngân sách". |
-| 1:22–1:40 | Duyệt phương án 112€ → "Travel plan resolved" → vấn đề tiếp theo: 6 người chưa trả, phòng chưa xếp. |
+| 0:42–1:22 | WEI: yêu cầu bằng lời → hỏi 150€ đã gồm xe chưa → trả lời toàn bộ gói → khách sạn Jinko replay + xe minh họa + ăn uống → C/E/F đạt các kiểm tra, F xếp đầu do về sớm. Thử trần 120€ để thấy `ESCALATE`, không tự nới ngân sách. |
+| 1:22–1:40 | Ở trần demo 150€, duyệt phương án sau khi hiển thị các việc cần xác minh → "Travel plan resolved" → vấn đề tiếp theo: 3 sinh viên chưa có khoản trả, 1 khoản chuyển cần đối soát, phòng chưa xếp. |
 | 1:40–1:52 | Kiến trúc trong một hình: LLM cho chỗ mơ hồ, code cho quy tắc, Jinko cho dữ liệu thật, con người duyệt. Số liệu đánh giá. |
 | 1:52–2:00 | "Một agent. Mọi sự kiện. Người tổ chức vẫn nắm quyền." |
 

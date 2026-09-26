@@ -2,20 +2,20 @@
 
 Pipeline:  extract (LLM) -> search (Jinko) -> compose (code) -> check + rank (code) -> explain (LLM)
 
-Until T11/T12 are done, `search_options` reads pre-built packages from
-data/<event>/travel_options.json.
+Search composes Jinko hotel results with recorded transport. Pre-built packages
+from data/<event>/travel_options.json remain the offline fallback.
 """
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import date, datetime
 
 from ..config import DATA_DIR
 from ..core.models import EventState, Evidence, ProposedAction
 from .constraints import diagnose, eur, evaluate
 from . import jinko
-from .compose import compose_packages
+from .compose import CateringBudgetError, catering_costs, compose_packages
 from .explain import explain, rejection_line
 from .extract import extract_constraints
 from .interface import Constraints, TravelOption, TravelRequest
@@ -45,7 +45,9 @@ def request_from_state(state: EventState, text: str | None = None) -> TravelRequ
         raise ValueError(f"Event '{state.id}' has no travel request")
     return TravelRequest(event_id=state.id, text=text or t["request"], participants=t["participants"],
                          origin=t["origin"], destination=t["destination"],
-                         depart_after=datetime.fromisoformat(t["depart_after"]))
+                         depart_after=datetime.fromisoformat(t["depart_after"]),
+                         return_by=datetime.fromisoformat(t["return_by"]) if t.get("return_by") else None,
+                         catering=dict(t.get("catering", {})))
 
 
 def recorded_packages(event_id: str) -> list[TravelOption]:
@@ -74,7 +76,22 @@ def search_options(req: TravelRequest, search: dict | None = None) -> list[Trave
                 return packages
         except (jinko.JinkoUnavailable, FileNotFoundError, KeyError):
             pass  # fall back to the recorded packages below
-    return recorded_packages(req.event_id)
+    options = recorded_packages(req.event_id)
+    meals = catering_costs(req)
+    if meals:
+        updated = []
+        for option in options:
+            breakdown = option.cost_breakdown_per_person_cents
+            if any(type(breakdown.get(key)) is not int or breakdown[key] < 0 for key in meals):
+                raise CateringBudgetError("Confirm grocery and food-transport amounts already included in the recorded packages.")
+            # Replace the old included allocations, retaining the recorded transport/lodging base.
+            updated.append(replace(option,
+                                   cost_per_person_cents=(option.cost_per_person_cents
+                                                          - sum(breakdown[key] for key in meals)
+                                                          + sum(meals.values())),
+                                   cost_breakdown_per_person_cents={**breakdown, **meals}))
+        options = updated
+    return options
 
 
 def plan_trip(req: TravelRequest, c: Constraints, client=None, search: dict | None = None) -> ProposedAction:
@@ -83,14 +100,20 @@ def plan_trip(req: TravelRequest, c: Constraints, client=None, search: dict | No
     `client` (OpenAI-compatible) lets explain() phrase the trade-offs; ranking and checks
     are computed in code either way.
     """
-    if c.clarifications:
+    clarifications = list(c.clarifications)
+    if not clarifications:
+        try:
+            catering_costs(req)
+            options = search_options(req, search)
+        except CateringBudgetError as exc:
+            clarifications.append(str(exc))
+    if clarifications:
         return ProposedAction(
             id=f"{req.event_id}:clarify_travel", event_id=req.event_id, issue_id="no_logistics_plan",
             action_type="ESCALATE", title="Questions before searching",
-            description="\n".join(c.clarifications), payload={"clarifications": c.clarifications},
+            description="\n".join(clarifications), payload={"clarifications": clarifications},
         )
 
-    options = search_options(req, search)
     valid, results = evaluate(options, c)
     evidence = [Evidence("travel_option", o.id, o.source) for o in options]
     table = [{"option": asdict(o), "checks": [asdict(ch) for ch in results[o.id]], "valid": o in valid}

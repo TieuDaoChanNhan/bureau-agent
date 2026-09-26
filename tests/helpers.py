@@ -1,16 +1,11 @@
 """Shared test fixtures."""
-from datetime import datetime, timedelta, timezone
-
 from bureau.core.loader import load_event
 from bureau.planner.interface import Constraints, TravelRequest
-
-PARIS = timezone(timedelta(hours=2))  # CEST, valid for the sample dates
+from bureau.planner.planner import request_from_state
 
 
 def wei_request() -> TravelRequest:
-    return TravelRequest(event_id="wei", text="", participants=40, origin="Paris",
-                         destination="Trouville-Deauville",
-                         depart_after=datetime(2026, 10, 9, 17, tzinfo=PARIS))
+    return request_from_state(load_event("wei"))
 
 
 def wei_constraints() -> Constraints:

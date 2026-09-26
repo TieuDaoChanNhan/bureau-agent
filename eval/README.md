@@ -9,6 +9,7 @@ scripted clients or extractors without a key.
 |---|---|
 | `cases/messages.jsonl` | 50 labeled cases: all 25 fixture messages plus 25 independently written paraphrases |
 | `cases/planning.jsonl` | Eight labeled trip requests in English and French: hard constraints, clarifications, feasibility, and optional preference/verification labels |
+| `cases/planning_options.json` | Original illustrative transport/lodging-only packages for the 40-person planning corpus; meals are excluded |
 | `run_eval.py` | Runs the real agent and LLM constraint extraction with recorded travel options, prints metrics, writes timestamped JSON to ignored `eval/results/` |
 
 ## Run
@@ -64,9 +65,20 @@ the current agent contract returns an action rather than a predicted intent labe
 Planning rows retain `id`, `event`, `text`, `expected_hard`,
 `expected_clarifications`, and `feasible`. Optional `expected_soft` labels preserve
 preference order; `expected_organizer_verified` labels mark requirements needing
-organizer confirmation. The evaluator passes only the request text and the sample
-event's travel context to the extractor, never any expected values. All requests
-use the WEI context of 40 participants. The original `p001` label is unchanged;
+organizer confirmation. Optional `request_context` contains input fields such as
+participants, origin, destination, departure and return dates. These override the
+sample event's travel context for that case; omitted fields keep the event defaults.
+The extractor receives only this input context and the request text, never expected
+values. All eight requests explicitly retain their original synthetic context of
+40 participants leaving Paris, independently of the 100-person WEI demo. Their
+`options_fixture` input selects `planning_options.json`, preserving the original
+transport/lodging-only prices, train and coach schedules, and lodging for 40 from
+commit `76b379a1ddca8ad3b6ce7467d4b41cc8fd6475a2`. These historical fixtures remain
+separate from the current WEI packages that include groceries and their transport.
+The fixture is loaded only after the planner's clarification gate, without changing
+gold labels or using them to construct options. Cases without `options_fixture`
+continue to use their event's recorded packages. Missing or malformed fixtures
+are case errors; later cases still run. The original `p001` label is unchanged;
 new requests cover decimal euro amounts, French wording, infeasible budgets,
 accessibility, ambiguous budget scope and a missing budget.
 
@@ -118,6 +130,8 @@ not an accessibility guarantee or a claim about live travel availability.
 dataset and fixture hashes, metric definitions and denominators, input messages,
 labels, tool calls, proposals, errors and invariant findings. Empty denominators are
 reported as `N/A` rather than 100%. Inspect the per-case evidence when a metric fails.
+Planning cases that load `options_fixture` also record its filename and SHA-256 in
+the per-case result, so changes to the separate option fixture can be traced.
 
 These are offline metrics. "Approved unchanged", time saved and feedback come only from a real organizer session (T18) and are reported separately.
 

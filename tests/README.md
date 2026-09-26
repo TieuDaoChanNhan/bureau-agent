@@ -13,10 +13,11 @@ python -m unittest tests.test_core.LoaderTests -v          # one class
 |---|---|
 | `test_core.py` | Data model (cents, timezones), loader, detection, idempotency, dependencies |
 | `test_tools.py` | Identity bands, eligibility, group checks, rules search |
-| `test_planner.py` | Constraint gate, ranking, diagnosis, unverifiable constraints, clarifications |
+| `test_planner.py` | Constraint gate, ranking, diagnosis, unverifiable constraints, clarifications, itemized cost validation and food costs within the budget |
+| `test_wei_data.py` | WEI registration/headcount consistency, payment reconciliation scenarios, charter-coach packages, venue verification hints, demo provenance and meals included in the student fee |
 | `test_extract.py` | Strict extraction schema, normalization, refusal/failure handling, accessibility verification, and clarification gate with scripted responses |
 | `test_agent.py` | Agent tool context, argument/proposal recovery, approval-only behavior and loop mechanics with a scripted fake LLM |
-| `test_eval.py` | Labeled corpus integrity, actual tool tracing with fake clients, scoring errors, isolated invariant checks and JSON reports |
+| `test_eval.py` | Labeled corpus integrity, actual tool tracing with fake clients, scoring errors, isolated invariant checks, historical planning-option isolation and JSON reports |
 | `test_pending.py` | Store persistence and all six executor actions |
 | `test_executor_hardening.py` | Executor rejection, payment ownership, optional replies, and unchanged state on failure |
 | `test_api.py` | Runtime API, proposal persistence, approval/dismiss/reset, error responses, and outbox; fake agent and temporary storage |

@@ -21,8 +21,9 @@ def response(**hard):
 
 class ExtractionTests(unittest.TestCase):
     def setUp(self):
-        self.request = replace(wei_request(), event_id="not-a-recorded-event",
-                               text="For 40 people: EUR 99.50 per person, meals excluded. Arrive by 22:30.")
+        self.request = replace(wei_request(), event_id="not-a-recorded-event", participants=40,
+                               text="For 40 people: EUR 99.50 per person, meals excluded. Arrive by 22:30.",
+                               catering={"included_in_participation_fee": False})
 
     def test_request_is_source_of_truth_and_schema_is_strict(self):
         payload = response(max_cost_per_person_cents=9950, arrive_before="22:30")
@@ -60,6 +61,32 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual(action.action_type, "ESCALATE")
         self.assertEqual(action.payload["clarifications"], payload["clarifications"])
         self.assertNotIn("max_cost_per_person_cents", c.hard)
+
+    def test_wei_clarification_preserves_known_catering_and_waits_for_the_budget_answer(self):
+        """Script the provider response to verify the clarification boundary, not model semantics."""
+        request = wei_request()
+        payload = response(participants=100)
+        payload["clarifications"] = ["Does the EUR150 ceiling include the coach hire?"]
+        client = FakeStructuredClient(payload)
+        constraints = extract_constraints(request, client=client)
+        with patch("bureau.planner.planner.search_options") as search:
+            action = plan_trip(request, constraints)
+
+        search.assert_not_called()
+        self.assertEqual(action.action_type, "ESCALATE")
+        self.assertNotIn("max_cost_per_person_cents", constraints.hard)
+        sent = json.loads(client.requests[0]["messages"][1]["content"])
+        self.assertEqual(sent["text"], request.text)
+        self.assertTrue(sent["catering"]["included_in_participation_fee"])
+        self.assertEqual(sent["catering"]["groceries_per_person_cents"], 2000)
+        self.assertEqual(sent["catering"]["food_transport_per_person_cents"], 200)
+
+        answered = replace(request, text=request.text + "\nThe EUR150 ceiling includes round-trip "
+                           "coach hire, lodging, groceries and food transport.")
+        constraints = extract_constraints(answered, client=FakeStructuredClient(
+            response(participants=100, max_cost_per_person_cents=15000)))
+        self.assertEqual(constraints.hard["max_cost_per_person_cents"], 15000)
+        self.assertEqual(constraints.clarifications, [])
 
     def test_rejects_invalid_hard_values_without_coercion(self):
         for key, value in (("participants", True), ("participants", 0),

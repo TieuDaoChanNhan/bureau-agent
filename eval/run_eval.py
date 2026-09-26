@@ -24,7 +24,7 @@ from bureau.core import executor
 from bureau.core.detect import detect_issues
 from bureau.core.loader import load_event
 from bureau.core.models import EventState, Issue, ProposedAction
-from bureau.planner.interface import Constraints, TravelRequest
+from bureau.planner.interface import Constraints, TravelOption, TravelRequest
 from bureau.planner.planner import extract_constraints, plan_trip
 
 CASES = Path(__file__).resolve().parent / "cases"
@@ -248,6 +248,18 @@ def summarize_messages(rows: list[dict]) -> dict:
     return result
 
 
+def _load_planning_options(name: str) -> tuple[list[TravelOption], str]:
+    """Read a named evaluation fixture independently of event data and gold labels."""
+    if (not isinstance(name, str) or not name or Path(name).name != name
+            or "/" in name or "\\" in name or Path(name).suffix != ".json"):
+        raise ValueError("options_fixture must name a JSON file in eval/cases")
+    content = (CASES / name).read_bytes()
+    raw = json.loads(content)
+    if not isinstance(raw, list) or not raw or any(not isinstance(item, dict) for item in raw):
+        raise ValueError("options_fixture must contain a non-empty array of travel options")
+    return [TravelOption(**item) for item in raw], hashlib.sha256(content).hexdigest()
+
+
 def evaluate_planning(
     cases: list[dict], *, extractor: Callable[[TravelRequest], Constraints] | None = None,
 ) -> dict:
@@ -265,11 +277,12 @@ def evaluate_planning(
         }
         try:
             state = load_event(case["event"])
-            travel = state.travel
+            travel = {**state.travel, **case.get("request_context", {})}
             request = TravelRequest(
                 event_id=state.id, text=case["text"], participants=travel["participants"],
                 origin=travel["origin"], destination=travel["destination"],
                 depart_after=datetime.fromisoformat(travel["depart_after"]),
+                return_by=datetime.fromisoformat(travel["return_by"]) if travel.get("return_by") else None,
             )
             row["input"] = asdict(request)
             constraints = extract(request)
@@ -286,7 +299,18 @@ def evaluate_planning(
                                              == set(case["expected_organizer_verified"])
                                              if "expected_organizer_verified" in case else None),
             )
-            action = plan_trip(request, constraints)
+            if "options_fixture" in case:
+                def search_recorded(_request, search=None):
+                    options, digest = _load_planning_options(case["options_fixture"])
+                    row["options_fixture"] = {"name": case["options_fixture"], "sha256": digest}
+                    return options
+
+                # Load only when plan_trip passes its clarification gate. The fixture
+                # is case input, never derived from expected constraints or feasibility.
+                with patch("bureau.planner.planner.search_options", side_effect=search_recorded):
+                    action = plan_trip(request, constraints)
+            else:
+                action = plan_trip(request, constraints)
             row["action"] = asdict(action)
             # plan_trip owns the clarification gate and the recorded-option checks.
             # Do not search again here: that would bypass the organizer's answer.

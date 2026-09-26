@@ -17,7 +17,7 @@ class LoaderTests(unittest.TestCase):
         self.assertIsNone(load_event("hackathon").travel)
         travel = load_event("wei").travel
         self.assertEqual(travel["destination"], "Trouville-Deauville")
-        self.assertEqual(travel["constraints"]["hard"]["max_cost_per_person_cents"], 12000)
+        self.assertEqual(travel["constraints"]["hard"]["max_cost_per_person_cents"], 15000)
 
 
 class DetectionTests(unittest.TestCase):

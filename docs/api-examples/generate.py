@@ -16,8 +16,8 @@ sys.path.insert(0, str(ROOT))
 from bureau.core.detect import detect_issues  # noqa: E402
 from bureau.core.loader import load_event  # noqa: E402
 from bureau.core.models import Check, Evidence, ProposedAction  # noqa: E402
-from bureau.planner.interface import Constraints, TravelRequest  # noqa: E402
-from bureau.planner.planner import plan_trip  # noqa: E402
+from bureau.planner.interface import Constraints  # noqa: E402
+from bureau.planner.planner import plan_trip, request_from_state  # noqa: E402
 
 OUT = Path(__file__).resolve().parent
 
@@ -76,20 +76,21 @@ def main() -> None:
 
     wei = load_event("wei")
     t = wei.travel
-    from datetime import datetime
-    req = TravelRequest(event_id="wei", text=t["request"], participants=t["participants"], origin=t["origin"],
-                        destination=t["destination"], depart_after=datetime.fromisoformat(t["depart_after"]))
+    req = request_from_state(wei)
     # API examples must remain reproducible without a model call or API key.
     recorded = t["constraints"]
     c = Constraints(hard=dict(recorded["hard"]), soft=list(recorded["soft"]),
                     organizer_verified=list(recorded.get("organizer_verified", [])),
                     clarifications=list(recorded.get("clarifications", [])))
-    dump("action_SELECT_TRAVEL_PLAN.json", asdict(plan_trip(req, c)))
-    c90 = Constraints(hard={**c.hard, "max_cost_per_person_cents": 9000}, soft=c.soft,
+    # Recorded constraints represent the organizer's clarified complete-package budget.
+    selection = plan_trip(req, c, search=t.get("search"))
+    dump("action_SELECT_TRAVEL_PLAN.json", asdict(selection))
+    c120 = Constraints(hard={**c.hard, "max_cost_per_person_cents": 12000}, soft=c.soft,
                       organizer_verified=c.organizer_verified)
-    dump("action_ESCALATE_no_valid_plan.json", asdict(plan_trip(req, c90)))
+    dump("action_ESCALATE_no_valid_plan.json", asdict(plan_trip(req, c120, search=t.get("search"))))
 
-    dump("POST_approve_request.json", {"edited_description": None, "option_id": "A"})
+    dump("POST_approve_request.json", {"edited_description": None,
+                                       "option_id": selection.payload["ranked_valid"][0]})
     dump("GET_outbox.json", [{"action_id": "hackathon:message:m01", "to": ["a.nguyen@polytechnique.edu"],
                               "text": "Bonjour Antoine, ...", "sent_at": "2026-09-25T21:08:00+02:00"}])
     del wei
