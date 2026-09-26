@@ -286,8 +286,11 @@ const QUICK = [
     text: `<p>${b("Nothing happens until you approve.")} Approving links the payment, marks him as paid and queues the drafted reply.
       Code re-checks every rule at that moment.</p>${CLICK("Confirm and link")}` },
   { ...step("risky"), ch: "Safety",
-    prepare: () => {
-      $("#composeBtn").click();
+    prepare: async () => {
+      // The approval may still be refreshing the console: open the form once it is idle.
+      for (let k = 0; k < 50 && ui.busy; k++) await new Promise(r => setTimeout(r, 100));
+      ui.view = "compose";
+      renderIssues(); renderDetail();
       const ex = EXAMPLES[1], form = $("#composeForm");
       if (form) { form.sender.value = ex.sender; form.channel.value = ex.channel; form.text.value = ex.text; }
     },
@@ -327,7 +330,7 @@ const QUICK = [
         <li><b>0</b> actions without an organizer's approval</li>
         <li><b>3 of 8</b> trip packages valid at €150, none at €120</li></ul>
       <p>Explore on your own, or see every feature (outbox, editing replies, evidence) in the full tour.</p>`,
-    button: { label: "Full tour (6 min)", run: () => startTour("full") } },
+    button: { label: "Full tour (6 min)", ghost: true, run: () => startTour("full") } },
 ];
 
 function tourStopPolling() {
@@ -417,7 +420,7 @@ function startTour(mode = "quick") {
       const extra = document.createElement("div");
       extra.className = "tour-extra";
       extra.innerHTML = `${s.action ? '<span class="tour-status" aria-live="polite">Waiting for you…</span>' : ""}
-        ${s.button ? `<button type="button" class="tour-act">${s.button.label}</button>` : ""}
+        ${s.button ? `<button type="button" class="tour-act${s.button.ghost ? " ghost" : ""}">${s.button.label}</button>` : ""}
         ${s.action ? '<button type="button" class="tour-skip">Skip step</button>' : ""}`;
       if (s.button) extra.querySelector(".tour-act").addEventListener("click", s.button.run);
       if (s.action) extra.querySelector(".tour-skip").addEventListener("click", () => tourAdvance());

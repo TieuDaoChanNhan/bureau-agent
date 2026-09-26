@@ -11,7 +11,7 @@ uvicorn api.main:app --reload     # then open http://127.0.0.1:8000
 |---|---|
 | `index.html` | Page shell: top bar, event cards, status line, issue list, detail pane |
 | `app.js` | State, API calls, rendering and event handlers |
-| `tour.js` | The guided product tour (T34): the `STEPS` list and the logic that waits for each action |
+| `tour.js` | The guided product tours (T34, T38): the full `STEPS` list, the `QUICK` tour built from it, and the logic that waits for each action |
 | `vendor/` | Driver.js 1.3.1 (MIT, licence in `DRIVER_LICENSE`), vendored so the tour works offline and when deployed |
 | `style.css` | Design tokens (light and dark) and components, taken from the mockup |
 | `reference/mockup.html` | Target design: the interactive mockup with hard-coded sample data |
@@ -39,7 +39,7 @@ uvicorn api.main:app --reload     # then open http://127.0.0.1:8000
 | Area | Behaviour | API |
 |---|---|---|
 | Intro (T33) | One sentence on what the product does and the loop in three steps | — |
-| Demo tour (T34) | A 30-step guided tour (Driver.js): "Step n of 30", the page dimmed and one element highlighted, a detailed explanation next to it. Action steps name the button to click and move on by themselves when the result appears; Skip step, Close and Esc always work; clicks on the dimmed page do not end the tour. It resets both sample events first and uses the live agent (a few cents) | the routes the steps trigger |
+| Demo tour (T34, T38) | Two guided tours (Driver.js). **Quick** (default, 15 steps, about 3 minutes): the highlights with short copy and the key numbers at the end. **Full** ("see every feature", 30 steps). Each step shows its chapter (Intro, Agent, Safety or Messages, Trip, Wrap-up) and "Step n of N", the page dimmed and one element highlighted, a detailed explanation next to it. Action steps name the button to click and move on by themselves when the result appears; Skip step, Close and Esc always work; clicks on the dimmed page do not end the tour. It resets both sample events first and uses the live agent (a few cents) | the routes the steps trigger |
 | Event cards | Open blocking / non-blocking counts, proposals ready for review, resolved issues | `GET /api/events/{id}` |
 | Issue list | Blocking first, then non-blocking; resolved and dismissed issues move to a collapsed **Done** group | same |
 | Status pills | `Running…` (being investigated), `Not analysed` (no proposal), `Action proposed`, `Needs you` (escalation, or identity link below 0.98), `Waiting` (unresolved `depends_on`), `Agent failed`, `Resolved`, `Dismissed` | same |
@@ -72,5 +72,6 @@ Add an object to `STEPS` in `tour.js`:
 - `action: true` with `done()`: the step waits for the viewer's click and moves on when `done()` becomes true.
 - `button`: optional; an extra button in the popover (used to save the edited reply).
 - `side`: optional; where the popover goes (`top`, `left`…).
+- `id`: needed only if the quick tour reuses the step. `QUICK` entries spread a step (`{ ...step("id"), ch, text }`) and override its copy; the full tour's chapters are set by index after `STEPS`.
 
-Keep steps short enough to be read in about ten seconds.
+Keep steps short enough to be read in about ten seconds; quick-tour steps stay under about 45 words plus the click instruction.
