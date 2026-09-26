@@ -2,6 +2,8 @@
 
 Example JSON bodies for every route in `api/README.md`, generated from the real code.
 Use them to build and mock the web UI while a route still returns 501.
+The generator uses explicit recorded travel constraints so it works without an
+API key. Live constraint extraction is evaluated separately in `eval/`.
 
 | File | Route |
 |---|---|
