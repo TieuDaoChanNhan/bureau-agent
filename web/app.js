@@ -10,6 +10,8 @@ const ui = {
   outbox: [],
   doneOpen: false,
   busy: false,
+  running: null,        // issue id the agent is investigating right now
+  stopRequested: false,
 };
 
 const $ = s => document.querySelector(s);
@@ -18,7 +20,7 @@ const TERMINAL = ["resolved", "dismissed"];
 const APPROVE_LABEL = { LINK_PAYMENT: "Confirm and link", SEND_MESSAGE: "Approve and send", ESCALATE: "Mark as handled" };
 const PILL = {
   new: ["p-new", "Not analysed"], proposed: ["p-proposed", "Action proposed"], human: ["p-human", "Needs you"],
-  waiting: ["p-wait", "Waiting"], failed: ["p-fail", "Agent failed"], resolved: ["p-res", "Resolved"], dismissed: ["p-rej", "Dismissed"],
+  waiting: ["p-wait", "Waiting"], running: ["p-run", "Running…"], failed: ["p-fail", "Agent failed"], resolved: ["p-res", "Resolved"], dismissed: ["p-rej", "Dismissed"],
 };
 
 async function api(path, options = {}) {
@@ -116,7 +118,7 @@ function renderIssues() {
   const byIssue = actionsByIssue(s);
   const sel = ui.sel[ui.current];
   const row = issue => {
-    const st = viewStatus(issue, s, byIssue);
+    const st = ui.running === issue.id ? "running" : viewStatus(issue, s, byIssue);
     const [cls, label] = PILL[st];
     return `<button class="issue ${TERMINAL.includes(st) ? "res" : ""}" type="button" data-key="issue:${esc(issue.id)}"
         aria-current="${ui.view === "issue" && sel === `issue:${issue.id}`}">
@@ -371,26 +373,65 @@ async function decide(kind) {
   });
 }
 
-// Calls /run in bounded batches until the backlog is empty or a batch makes no progress.
+// The runnable rule mirrors bureau/agent/loop.py:runnable_issues; the server
+// re-checks it, so a stale client list only costs a no-op request.
+function runnableIds(s) {
+  const byIssue = actionsByIssue(s);
+  return s.issues
+    .filter(i => ["open", "needs_human"].includes(i.status) && !byIssue[i.id]
+      && i.kind !== "no_logistics_plan" && !isWaiting(i, s))
+    .sort((a, b) => b.blocking - a.blocking)
+    .map(i => i.id);
+}
+
+// One request per issue, so the list shows which issue is being investigated and
+// each result appears as soon as it is ready. Stop takes effect after the current issue.
 async function runAgent(issueId = null) {
-  await busy(issueId ? `Agent investigating ${issueId}…` : "Agent investigating…", async () => {
-    let proposed = 0, failed = 0, remaining = 0;
-    for (let round = 0; round < 20; round++) {
-      const qs = issueId ? `?limit=1&issue_id=${encodeURIComponent(issueId)}` : "?limit=5";
-      const before = summary().actions.length;
-      const data = await api(`/api/events/${encodeURIComponent(ui.current)}/run${qs}`, { method: "POST" });
-      store(data);
-      const added = data.actions.length - before;
-      proposed += added; failed += data.errors.length; remaining = data.remaining;
-      renderEvents(); renderIssues();
-      setRun(`Agent: ${proposed} proposed, ${failed} failed, ${remaining} left…`, "busy");
-      if (issueId || remaining === 0 || (added === 0 && data.errors.length === 0)) break;
-    }
-    keepSelection();
+  if (ui.busy) {
+    if (ui.running) { ui.stopRequested = true; setRun("Stopping after the current issue…", "busy"); }
+    return;
+  }
+  const queue = issueId ? [issueId] : runnableIds(summary());
+  if (!queue.length) {
+    setRun("Nothing for the agent to do: every runnable issue already has a proposal.");
+    return;
+  }
+  await busy("Agent investigating…", async () => {
+    ui.stopRequested = false;
+    const runBtn = $("#runBtn");
+    runBtn.disabled = false;
+    runBtn.textContent = "Stop";
+    let proposed = 0, failed = 0, remaining = null;
     const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
-    setRun(proposed || failed
-      ? `Agent finished: ${plural(proposed, "proposal")} ready for review${failed ? `, ${failed} failed (see the audit log)` : ""}${remaining ? `, ${plural(remaining, "issue")} left` : ""}.`
-      : "Nothing for the agent to do: every runnable issue already has a proposal.", failed && !proposed ? "error" : "");
+    try {
+      for (const [k, id] of queue.entries()) {
+        if (ui.stopRequested) break;
+        const issue = summary().issues.find(i => i.id === id);
+        ui.running = id;
+        renderIssues();
+        const row = document.querySelector(`[data-key="issue:${CSS.escape(id)}"]`);
+        if (row) row.scrollIntoView({ block: "nearest" });
+        setRun(`Investigating ${k + 1}/${queue.length}: "${issue ? issue.title : id}"`, "busy");
+        const data = await api(`/api/events/${encodeURIComponent(ui.current)}/run?limit=1&issue_id=${encodeURIComponent(id)}`,
+                               { method: "POST" });
+        store(data);
+        proposed += data.errors.length ? 0 : 1;
+        failed += data.errors.length;
+        remaining = issueId ? null : data.remaining;
+        ui.running = null;
+        renderEvents(); renderIssues();
+        if (ui.sel[ui.current] === `issue:${id}`) renderDetail();
+      }
+    } finally {
+      ui.running = null;
+      runBtn.textContent = "Run agent";
+    }
+    const stopped = ui.stopRequested;
+    ui.stopRequested = false;
+    keepSelection();
+    setRun(`${stopped ? "Stopped" : "Agent finished"}: ${plural(proposed, "proposal")} ready for review`
+      + `${failed ? `, ${failed} failed (see the audit log)` : ""}`
+      + `${remaining ? `, ${plural(remaining, "issue")} left` : ""}.`, failed && !proposed ? "error" : "");
   });
 }
 
@@ -451,7 +492,7 @@ $("#detail").addEventListener("click", e => {
   }
 });
 
-$("#runBtn").addEventListener("click", () => runAgent());
+$("#runBtn").addEventListener("click", () => runAgent());   // doubles as Stop during a run
 $("#resetBtn").addEventListener("click", () => resetDemo());
 $("#outboxBtn").addEventListener("click", async () => {
   if (ui.busy) return;
