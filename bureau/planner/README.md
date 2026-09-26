@@ -19,7 +19,7 @@ LLM interprets and explains. Code composes, prices and validates. The planner ne
 | `extract.py` | Words → `Constraints` with OpenAI strict structured output | done (T10) |
 | `jinko.py` | `ground_search`, `hotel_search`, live/replay cache under `data/<event>/jinko_cache/` | done (T11): hotels verified live; ground search returns 404 for our key |
 | `compose.py` | Transport × lodging → packages, integer cents; lodging share rounded up; one package per transport first, cheapest always kept | done (T12) |
-| `explain.py` | Plain-language trade-offs, never changes the ranking | template (T13) |
+| `explain.py` | Plain-language trade-offs: LLM prose when a client is given (OpenAI), template otherwise; the list of rejected options and broken constraints is always appended by code; never changes the ranking | done (T13) |
 
 ## Hard constraints
 | Key | Checked by | Can reject an option |

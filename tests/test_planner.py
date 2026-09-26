@@ -1,6 +1,8 @@
 """Travel planner: hard-constraint gate, ranking, diagnosis."""
 from contextlib import redirect_stdout
+from copy import deepcopy
 import io
+import json
 import unittest
 from unittest import mock
 
@@ -131,6 +133,67 @@ class ComposeTests(unittest.TestCase):
                                    [_lodging("Hostel", 40000)], nights=2)
         valid, _ = evaluate(options, wei_constraints())
         self.assertEqual([12000], [o.cost_per_person_cents for o in valid])
+
+
+class ExplainTests(unittest.TestCase):
+    def setUp(self):
+        from bureau.planner.constraints import evaluate
+        from bureau.planner.planner import search_options
+        self.req = wei_request()
+        self.c = wei_constraints()
+        self.valid, self.checks = evaluate(search_options(self.req), self.c)
+
+    def assert_names_present(self, text):
+        self.assertIn(f"Option {self.valid[0].id}", text)
+        for option_id, option_checks in self.checks.items():
+            if option_id in {o.id for o in self.valid}:
+                continue
+            self.assertIn(f"Option {option_id}", text)
+            for ch in option_checks:
+                if ch.verified and not ch.passed:
+                    self.assertIn(ch.name, text)
+
+    def test_template_names_the_top_option_and_every_broken_constraint(self):
+        from bureau.planner.explain import explain
+        self.assert_names_present(explain(self.valid, self.checks, self.c))
+
+    def test_llm_prose_is_used_and_the_rejection_list_is_still_exact(self):
+        from bureau.planner.explain import explain
+        from tests.fake_llm import FakeClient
+        client = FakeClient(["Option A is direct and 6 minutes from the station; Option B costs more "
+                             "and has one change."])
+        text = explain(self.valid, self.checks, self.c, client=client)
+        self.assertTrue(text.startswith("Option A is direct"))
+        self.assert_names_present(text)
+        facts = json.loads(client.requests[0]["messages"][1]["content"])
+        self.assertEqual(["A", "B"], [o["option"] for o in facts["valid_options_ranked"]])
+
+    def test_llm_text_without_the_top_option_falls_back_to_the_template(self):
+        from bureau.planner.explain import explain
+        from tests.fake_llm import FakeClient
+        text = explain(self.valid, self.checks, self.c, client=FakeClient(["The hotel is nice."]))
+        self.assertNotIn("The hotel is nice", text)
+        self.assert_names_present(text)
+
+    def test_llm_failure_falls_back_to_the_template(self):
+        from bureau.planner.explain import explain
+        from tests.fake_llm import FakeClient
+        text = explain(self.valid, self.checks, self.c, client=FakeClient([]))  # empty script: raises
+        self.assert_names_present(text)
+
+    def test_explain_never_changes_ranking_or_checks(self):
+        from bureau.planner.explain import explain
+        from tests.fake_llm import FakeClient
+        ranked_before, checks_before = deepcopy(self.valid), deepcopy(self.checks)
+        explain(self.valid, self.checks, self.c, client=FakeClient(["Option A wins."]))
+        self.assertEqual(ranked_before, self.valid)
+        self.assertEqual(checks_before, self.checks)
+
+    def test_plan_trip_passes_the_client_to_explain(self):
+        from tests.fake_llm import FakeClient
+        action = plan_trip(self.req, self.c, client=FakeClient(["Option A is the direct train."]))
+        self.assertTrue(action.description.startswith("Option A is the direct train."))
+        self.assertEqual(["A", "B"], action.payload["ranked_valid"])
 
 
 if __name__ == "__main__":
