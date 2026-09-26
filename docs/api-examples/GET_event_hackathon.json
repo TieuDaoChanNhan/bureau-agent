@@ -3,7 +3,7 @@
   "name": "X-IA Hackathon #1 (sample data)",
   "counts": {
     "blocking": 4,
-    "non_blocking": 7,
+    "non_blocking": 27,
     "resolved": 0
   },
   "issues": [
@@ -128,14 +128,16 @@
       "id": "solo_participants",
       "kind": "solo_participants",
       "blocking": false,
-      "title": "6 participants are looking for a team",
+      "title": "8 participants are looking for a team",
       "subject_ids": [
         "p13",
         "p14",
         "p15",
         "p16",
         "p17",
-        "p18"
+        "p18",
+        "p48",
+        "p49"
       ],
       "details": {},
       "status": "open",
@@ -212,6 +214,306 @@
       ],
       "details": {
         "text": "Hi team, could you send us the full list of participants with emails and schools so we can reach out to them after the event?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m06",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from amelie.derval@participants.example",
+      "subject_ids": [
+        "m06"
+      ],
+      "details": {
+        "text": "Bonjour, quel est le montant de la cotisation 2026 et faut-il aussi s'inscrire sur Luma pour participer ?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m07",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from noah.belcourt@participants.example",
+      "subject_ids": [
+        "m07"
+      ],
+      "details": {
+        "text": "Hi, could you confirm the submission checklist? Is a two-minute video enough, or do we also need a description, repository link and team member names?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m08",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New discord message from datadragons_marc",
+      "subject_ids": [
+        "m08"
+      ],
+      "details": {
+        "text": "Bonjour, nous sommes cinq dans DataDragons. Est-ce autorisé si une personne s'occupe seulement du pitch ?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m09",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from lea.martin@polytechnique.edu",
+      "subject_ids": [
+        "m09"
+      ],
+      "details": {
+        "text": "Hello, I appear in both Orbit and NeuralNomads. Can I keep both memberships until the final? I have not decided which team to stay with."
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m10",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from elias.vernet@participants.example",
+      "subject_ids": [
+        "m10"
+      ],
+      "details": {
+        "text": "Bonjour, je suis Elias Vernet (p22), actuellement dans Lantern. Je souhaite rejoindre Mosaic. Les deux équipes sont d'accord : Lantern passerait de quatre à trois membres et Mosaic de trois à quatre. Pouvez-vous préparer le changement pour validation ?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m11",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from elena.vossel@participants.example",
+      "subject_ids": [
+        "m11"
+      ],
+      "details": {
+        "text": "Hi, I am Elena Vossel (p25) from Mosaic. Could you move me to Cobalt? I see they already have four members, but they said a fifth person would be useful."
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m12",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New form message from daria.nivelle@participants.example",
+      "subject_ids": [
+        "m12"
+      ],
+      "details": {
+        "text": "Bonjour, je suis Daria Nivelle (p48), designer sans équipe. Kenji Aster (p49), développeur backend, cherche aussi une équipe. Pouvez-vous nous proposer une répartition avec les autres personnes disponibles, sans dépasser quatre par équipe ?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m13",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from malik.auvray@participants.example",
+      "subject_ids": [
+        "m13"
+      ],
+      "details": {
+        "text": "Hello, could you check that my membership payment is recorded? I paid using malik.personal@mail.example, which is also listed on my registration. Please do not record a second payment."
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m14",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from victor.leroy@polytechnique.edu",
+      "subject_ids": [
+        "m14"
+      ],
+      "details": {
+        "text": "Bonjour, j'ai payé ma cotisation hier selon mes souvenirs, mais je ne retrouve pas le reçu. Pouvez-vous me marquer comme à jour tout de suite ?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m15",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from emma.lioran@participants.example",
+      "subject_ids": [
+        "m15"
+      ],
+      "details": {
+        "text": "Hi, can I sell unused partner credits to another participant after the hackathon?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m16",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from oscar.nerac@participants.example",
+      "subject_ids": [
+        "m16"
+      ],
+      "details": {
+        "text": "Bonjour, puis-je utiliser les crédits partenaires pour une mission de conseil personnelle après le concours ?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m17",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from lina.valcourt@participants.example",
+      "subject_ids": [
+        "m17"
+      ],
+      "details": {
+        "text": "Hello, a friend has paid the membership fee but has not registered on Luma. Is the payment alone enough to enter the hackathon?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m18",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from adam.solvier@participants.example",
+      "subject_ids": [
+        "m18"
+      ],
+      "details": {
+        "text": "Bonjour, à quelle heure exacte doit-on déposer le projet dimanche 27 septembre, et dans quel fuseau horaire ?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m19",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from sarah.meriel@participants.example",
+      "subject_ids": [
+        "m19"
+      ],
+      "details": {
+        "text": "Hi, the upload might take longer than expected. Would a submission just after the deadline still be accepted under the rules?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m20",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from theo.brisac@participants.example",
+      "subject_ids": [
+        "m20"
+      ],
+      "details": {
+        "text": "Bonjour, quel est le montant du premier prix et les frais de déplacement pour la finale sont-ils pris en charge ? Je ne trouve pas ces informations dans le règlement."
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m21",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from nora.calven@participants.example",
+      "subject_ids": [
+        "m21"
+      ],
+      "details": {
+        "text": "Hello, I use a wheelchair and listed this need when registering. Can you confirm step-free access and an accessible toilet at the final venue?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m22",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New form message from louis.arven@participants.example",
+      "subject_ids": [
+        "m22"
+      ],
+      "details": {
+        "text": "Bonjour, j'ai indiqué un besoin de repas végétariens à l'inscription. Est-ce qu'un repas adapté est prévu lors de la finale ?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m23",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from eva.rivel@participants.example",
+      "subject_ids": [
+        "m23"
+      ],
+      "details": {
+        "text": "Hello, I need to cancel my participation. Could you refund my membership fee and confirm the refund policy?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m24",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from salome.vandel@participants.example",
+      "subject_ids": [
+        "m24"
+      ],
+      "details": {
+        "text": "Bonjour, je souhaite participer seule et je ne cherche pas d'équipe. La participation individuelle est-elle autorisée ?"
+      },
+      "status": "open",
+      "depends_on": [],
+      "resolved_by_action_id": null
+    },
+    {
+      "id": "message:m25",
+      "kind": "unprocessed_message",
+      "blocking": false,
+      "title": "New email message from kenji.aster@participants.example",
+      "subject_ids": [
+        "m25"
+      ],
+      "details": {
+        "text": "Hi, would a dashboard with fixed scripts and no LLM qualify as an agentic project for this hackathon?"
       },
       "status": "open",
       "depends_on": [],

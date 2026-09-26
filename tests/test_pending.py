@@ -65,6 +65,27 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(loaded.travel, state.travel)
         self.assertEqual(loaded.logistics, state.logistics)
 
+    def test_actions_saved_before_traces_existed_still_load(self):
+        from bureau.core.store import load_state
+        path = Path(self._tmp.name) / "hackathon" / "actions.json"
+        path.parent.mkdir(parents=True)
+        path.write_text(json.dumps([{
+            "id": "hackathon:message:m02", "event_id": "hackathon", "issue_id": "message:m02",
+            "action_type": "SEND_MESSAGE", "title": "t", "description": "d",
+            "payload": {"to": "x@example.org", "text": "hi"},
+        }]), encoding="utf-8")
+        self.assertEqual(load_state("hackathon").actions[0].trace, [])
+
+    def test_trace_round_trips_through_the_store(self):
+        from bureau.core.models import ProposedAction
+        from bureau.core.store import load_state, save_state
+        state = load_event("hackathon")
+        trace = [{"step": 1, "tool": "search_rules", "arguments": {"query": "team size"}, "result": "1 result", "ok": True}]
+        state.actions = [ProposedAction(id="hackathon:x", event_id="hackathon", issue_id="x", action_type="ESCALATE",
+                                        title="t", description="d", trace=trace)]
+        save_state(state)
+        self.assertEqual(load_state("hackathon").actions[0].trace, trace)
+
     def test_reset_then_load_state_returns_sample_data(self):
         from bureau.core.store import load_state, reset, save_state
         state = load_event("hackathon")

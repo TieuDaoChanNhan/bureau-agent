@@ -319,5 +319,6 @@
       "Option B (€118/person) only fails \"cost ≤ €90/person\" (€118 (+€28)).",
       "Option D (€141/person) only fails \"cost ≤ €90/person\" (€141 (+€51))."
     ]
-  }
+  },
+  "trace": []
 }

@@ -129,6 +129,59 @@ def _action_from_args(state: EventState, issue: Issue, args: dict) -> ProposedAc
     )
 
 
+TRACE_RESULT_CHARS = 240
+
+
+def _names(items, key="name", limit=3) -> str:
+    shown = ", ".join(str(i.get(key, "?")) for i in items[:limit])
+    return shown + (f" (+{len(items) - limit} more)" if len(items) > limit else "")
+
+
+def _readable(tool: str, result):
+    """One line an organizer can read in the timeline; None falls back to JSON."""
+    if isinstance(result, dict) and "error" in result:
+        return f"error: {result['error']}"
+    if tool == "get_participant":
+        return f"{result['id']} · {result['name']} · {', '.join(result.get('emails', []))}"
+    if tool == "get_payment":
+        owner = result.get("participant_id") or "not linked"
+        return (f"{result['id']} · {result['payer_name']} · {result.get('payer_email') or 'no email'} · "
+                f"{result['amount_cents'] / 100:.2f} {result.get('currency', '')} · {owner}")
+    if tool == "check_eligibility" and isinstance(result, dict):
+        parts = [f"{len(v)} {k.replace('_', ' ')}" + (f": {', '.join(map(str, v))}" if len(v) <= 4 else "")
+                 for k, v in result.items() if isinstance(v, list)]
+        return "; ".join(parts)
+    if tool == "match_person" and isinstance(result, list):
+        return "; ".join(f"{r['name']} ({r['participant_id']}) {r['score']} {r['band']}" for r in result[:3])
+    if tool in ("search_rules", "list_rules") and isinstance(result, list):
+        return f"{len(result)} section{'s' if len(result) != 1 else ''}: " + _names(result, "title")
+    if tool == "check_groups" and isinstance(result, list):
+        return f"{len(result)} violation{'s' if len(result) != 1 else ''}" + (
+            ": " + ", ".join(v["type"] for v in result[:3]) if result else "")
+    if tool == "list_groups" and isinstance(result, list):
+        return f"{len(result)} groups: " + _names(result)
+    if tool == "list_group_candidates" and isinstance(result, list):
+        return f"{len(result)} people looking for a team: " + _names(result)
+    if tool == "propose_groups" and isinstance(result, list):
+        return f"{len(result)} draft group{'s' if len(result) != 1 else ''}: " + " | ".join(", ".join(g) for g in result)
+    return None
+
+
+def _summarize(result, tool: str = "") -> str:
+    """Short view of a tool result for the organizer timeline."""
+    try:
+        text = _readable(tool, result)
+    except (KeyError, TypeError, AttributeError):
+        text = None
+    if text is None:
+        if isinstance(result, list):
+            head = json.dumps(result[:3], default=str, ensure_ascii=False)
+            text = f"{len(result)} result{'s' if len(result) != 1 else ''}: {head}"
+        else:
+            text = json.dumps(result, default=str, ensure_ascii=False)
+    return text if len(text) <= TRACE_RESULT_CHARS else text[:TRACE_RESULT_CHARS - 1] + "…"
+
+
 def _default_client():
     if not config.OPENAI_API_KEY:
         raise RuntimeError("OPENAI_API_KEY is not set (add it to .env).")
@@ -155,6 +208,7 @@ def resolve_issue(state: EventState, issue: Issue, max_steps: int = MAX_STEPS,
          + json.dumps(context, default=str, ensure_ascii=False)},
     ]
 
+    trace: list[dict] = []
     for step in range(max_steps):
         final_turn = step == max_steps - 1
         if final_turn:
@@ -188,20 +242,33 @@ def resolve_issue(state: EventState, issue: Issue, max_steps: int = MAX_STEPS,
         for tc in msg.tool_calls:
             if verbose:
                 print(f"  -> {tc.function.name}({tc.function.arguments or '{}'})")
+            entry = {"step": step + 1, "tool": tc.function.name,
+                     "arguments": tc.function.arguments or "{}", "result": "", "ok": True}
+            trace.append(entry)
             try:
                 args = json.loads(tc.function.arguments or "{}")
                 if not isinstance(args, dict):
                     raise ValueError("Tool arguments must be a JSON object")
+                entry["arguments"] = args
                 if tc.function.name == "propose_action":
                     if len(msg.tool_calls) != 1:
                         raise ValueError("Call propose_action alone after reading tool results")
                     action = _action_from_args(state, issue, args)
+                    entry["arguments"] = {"action_type": action.action_type}
+                    entry["result"] = "proposal recorded for organizer approval"
+                    action.trace = trace
                     issue.status = "needs_human" if action.action_type == "ESCALATE" else "proposed"
                     state.actions.append(action)
                     return action
                 result = handlers[tc.function.name](**args)
             except Exception as exc:
                 result = {"error": str(exc) or type(exc).__name__}
+            if tc.function.name == "propose_action":
+                # Keep the rejected proposal's type, not its whole payload.
+                entry["arguments"] = {"action_type": (entry["arguments"] or {}).get("action_type")
+                                      if isinstance(entry["arguments"], dict) else None}
+            entry["ok"] = not (isinstance(result, dict) and "error" in result)
+            entry["result"] = _summarize(result, tc.function.name)
             messages.append({"role": "tool", "tool_call_id": tc.id,
                              "content": json.dumps(result, default=str, ensure_ascii=False)})
 
