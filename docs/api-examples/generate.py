@@ -17,7 +17,7 @@ from bureau.core.detect import detect_issues  # noqa: E402
 from bureau.core.loader import load_event  # noqa: E402
 from bureau.core.models import Check, Evidence, ProposedAction  # noqa: E402
 from bureau.planner.interface import Constraints, TravelRequest  # noqa: E402
-from bureau.planner.planner import extract_constraints, plan_trip  # noqa: E402
+from bureau.planner.planner import plan_trip  # noqa: E402
 
 OUT = Path(__file__).resolve().parent
 
@@ -69,7 +69,11 @@ def main() -> None:
     from datetime import datetime
     req = TravelRequest(event_id="wei", text=t["request"], participants=t["participants"], origin=t["origin"],
                         destination=t["destination"], depart_after=datetime.fromisoformat(t["depart_after"]))
-    c = extract_constraints(req)
+    # API examples must remain reproducible without a model call or API key.
+    recorded = t["constraints"]
+    c = Constraints(hard=dict(recorded["hard"]), soft=list(recorded["soft"]),
+                    organizer_verified=list(recorded.get("organizer_verified", [])),
+                    clarifications=list(recorded.get("clarifications", [])))
     dump("action_SELECT_TRAVEL_PLAN.json", asdict(plan_trip(req, c)))
     c90 = Constraints(hard={**c.hard, "max_cost_per_person_cents": 9000}, soft=c.soft,
                       organizer_verified=c.organizer_verified)

@@ -35,3 +35,22 @@ class FakeClient:
                      for i, (name, args) in enumerate(step)]
             message = SimpleNamespace(content=None, tool_calls=calls)
         return SimpleNamespace(choices=[SimpleNamespace(message=message)])
+
+
+class FakeStructuredClient:
+    """One structured completion, including refusal/truncation failure modes."""
+
+    def __init__(self, content, *, refusal=None, finish_reason="stop"):
+        self.content = content
+        self.refusal = refusal
+        self.finish_reason = finish_reason
+        self.requests = []
+        self.chat = SimpleNamespace(completions=SimpleNamespace(create=self._create))
+
+    def _create(self, **kwargs):
+        self.requests.append(copy.deepcopy(kwargs))
+        if isinstance(self.content, Exception):
+            raise self.content
+        content = json.dumps(self.content) if isinstance(self.content, dict) else self.content
+        message = SimpleNamespace(content=content, refusal=self.refusal)
+        return SimpleNamespace(choices=[SimpleNamespace(message=message, finish_reason=self.finish_reason)])
