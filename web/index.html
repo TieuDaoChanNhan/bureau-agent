@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/web/vendor/driver.css">
   <link rel="stylesheet" href="/web/style.css">
 </head>
 <body>
@@ -29,7 +30,6 @@
         <p><b>An operations agent for volunteer-run associations.</b> It keeps an event consistent: code detects what needs attention, the agent investigates with tools and proposes one action with its evidence, and an organizer approves, edits or dismisses it. Nothing is sent, changed or booked without approval.</p>
         <ol class="loopsteps"><li><span>1</span>Code detects issues</li><li><span>2</span>The agent investigates and proposes</li><li><span>3</span>You approve, edit or dismiss</li></ol>
       </div>
-      <div class="tour" id="tour" hidden></div>
       <div class="events" id="events" aria-label="Events"></div>
       <div class="run" id="run" role="status" aria-live="polite"><span class="dot"></span><span id="runText">Loading…</span></div>
       <div class="main">
@@ -39,6 +39,8 @@
     </div>
     <p class="note">Nothing is sent, changed, booked or paid before an organizer approves it. Messages drafted by the agent end with: "Drafted with AI assistance, approved by the organizers." All sample data is fictional.</p>
   </div>
+  <script src="/web/vendor/driver.js.iife.js"></script>
   <script src="/web/app.js"></script>
+  <script src="/web/tour.js"></script>
 </body>
 </html>
