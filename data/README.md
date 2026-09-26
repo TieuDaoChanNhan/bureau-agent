@@ -95,6 +95,11 @@ On Windows, use `$env:PYTHONIOENCODING="utf-8"` in PowerShell if accented names 
 
 Create `data/<event_id>/` with at least `event.json` and `participants.json`. It appears automatically in the CLI and the API.
 
+## `wei/transport_options.json` (T14)
+Illustrative Paris → Trouville-Deauville departures on Friday 9 October (price per person in cents),
+recorded because Jinko ground search is not available for our key. Composed with the Jinko hotels.
+`wei/event.json` → `travel.search` holds the hotel search parameters (city, dates, rooms, station).
+
 ## `wei/jinko_cache/` (T11)
 Raw Jinko responses saved by `JINKO_MODE=live` and read in `replay` mode (tests, demo), keyed by a
 hash of the request body. `hotel_search_*.json` is a real response from 2026-09-26: one double room

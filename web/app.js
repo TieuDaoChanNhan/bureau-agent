@@ -377,8 +377,9 @@ function optionRows(action) {
     const cls = !row.valid ? "v-rej" : ranked[0] === o.id ? "v-pick" : "v-alt";
     return `<tr class="${row.valid ? "" : "rejected"}"><td><b>${esc(o.id)}</b></td>
       <td class="${t.overnight ? "bad" : ""}">${esc(t.mode || "")} · ${esc(t.depart || "?")} → ${esc(t.arrive || "?")}
-        · ${t.changes ? `${t.changes} change${t.changes > 1 ? "s" : ""}` : "direct"}${t.overnight ? " · overnight" : ""}</td>
-      <td>${esc(l.name || "")}${l.walk_minutes != null ? ` · ${esc(l.walk_minutes)} min walk` : ""}${l.capacity ? ` · ${esc(l.capacity)} beds` : ""}</td>
+        · ${t.changes ? `${esc(t.changes)} change${t.changes > 1 ? "s" : ""}` : "direct"}${t.overnight ? " · overnight" : ""}</td>
+      <td>${esc(l.name || "")}${l.walk_minutes != null ? ` · ${esc(l.walk_minutes)} min walk` : ""}${l.capacity ? ` · ${esc(l.capacity)} beds` : ""}
+        ${l.group_block_confirmed === false ? '<span class="confirm">Group block to confirm with the hotel</span>' : ""}</td>
       <td class="num ${costBad ? "bad" : ""}">${euro(o.cost_per_person_cents)}</td>
       <td class="num ${timeBad ? "bad" : ""}">${esc(t.arrive || "")}</td>
       <td><span class="verdict ${cls}">${label}</span>
@@ -397,6 +398,15 @@ function planDetail(issue, action, st) {
   if (!action) {
     return head + input + `<div class="actions"><span class="note">No plan yet. The planner checks every package against the hard constraints in code; nothing is booked.</span>
       <button class="btn primary" type="button" data-act="plan">Plan the trip</button></div>`;
+  }
+  const questions = (action.payload && action.payload.clarifications) || [];
+  if (action.action_type === "ESCALATE" && questions.length && !(action.payload.options || []).length) {
+    return head + input + `<div class="block"><span class="lbl">The planner asks before searching</span>
+      <div class="question">${questions.map(q => esc(q)).join("<br>")}</div>
+      <p class="note">Nothing is searched until the request is clear. Your answer is added to the request and the constraints are extracted again.</p></div>
+      <form class="compose" id="answerForm"><label>Your answer <textarea name="answer" required maxlength="1000" rows="3"
+        placeholder="No, the budget covers travel and lodging only."></textarea></label>
+        <div class="actions"><button class="btn primary" type="submit">Answer and plan again</button></div></form>`;
   }
   const c = (action.payload && action.payload.constraints) || { hard: {}, soft: [], organizer_verified: [] };
   const budget = c.hard.max_cost_per_person_cents;
@@ -441,12 +451,26 @@ function planDetail(issue, action, st) {
     <div class="actions">${buttons}</div>`;
 }
 
-async function planTrip(overrideBudget = null) {
-  await busy(overrideBudget ? `Re-checking every package at ${euro(overrideBudget)} per person…` : "Planning the trip…", async () => {
-    const body = overrideBudget ? { overrides: { max_cost_per_person_cents: overrideBudget } } : {};
+// The request text the planner last used (it includes answers to its questions).
+function planRequestText() {
+  const plan = summary().actions.find(a => a.issue_id === "no_logistics_plan");
+  return plan && plan.payload && plan.payload.request_text;
+}
+
+async function planTrip(overrideBudget = null, text = null) {
+  await busy(overrideBudget ? `Re-checking every package at ${euro(overrideBudget)} per person…`
+                            : "Extracting constraints and searching…", async () => {
+    const body = {};
+    const requestText = text || planRequestText();
+    if (requestText) body.text = requestText;
+    if (overrideBudget) body.overrides = { max_cost_per_person_cents: overrideBudget };
     const data = await api(`/api/events/${encodeURIComponent(ui.current)}/plan`, { method: "POST", body: JSON.stringify(body) });
     store(data);
     const action = data.actions.find(a => a.id === data.action_id);
+    if ((action.payload.clarifications || []).length && !(action.payload.options || []).length) {
+      setRun(`Planner: ${action.payload.clarifications.length} question(s) for the organizers before searching.`);
+      return;
+    }
     const valid = (action.payload.ranked_valid || []).length;
     setRun(`Planner: ${valid} of ${(action.payload.options || []).length} packages pass every hard constraint`
       + `${overrideBudget ? ` at ${euro(overrideBudget)}` : ""}.`, valid ? "" : "error");
@@ -699,6 +723,12 @@ $("#composeBtn").addEventListener("click", () => {
   $("#composeForm").sender.focus();
 });
 $("#detail").addEventListener("submit", e => {
+  if (e.target.id === "answerForm") {
+    e.preventDefault();
+    const answer = e.target.answer.value.trim();
+    if (answer && !ui.busy) planTrip(null, `${planRequestText()}\n\nOrganizer answers: ${answer}`);
+    return;
+  }
   if (e.target.id !== "composeForm") return;
   e.preventDefault();
   if (!ui.busy) submitMessage(e.target);

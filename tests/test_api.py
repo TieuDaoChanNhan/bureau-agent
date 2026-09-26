@@ -122,7 +122,7 @@ class ApiTests(unittest.TestCase):
                      "soft": ["fewer_changes", "near_station", "early_return"],
                      "organizer_verified": ["step_free_rooms"], "clarifications": []}
 
-    def plan(self, body=None, clarifications=(), explanation="Option A is the direct train, close to the station."):
+    def plan(self, body=None, clarifications=(), explanation="Option F is the direct train; Option D is cheaper but has one change."):
         """POST /plan with a scripted planner client: extraction JSON, then the explanation."""
         from tests.fake_llm import FakeClient
         extracted = {**self.WEI_EXTRACTED, "clarifications": list(clarifications)}
@@ -141,7 +141,9 @@ class ApiTests(unittest.TestCase):
         self.assertGreaterEqual(len(action["payload"]["ranked_valid"]), 1)
         self.assertEqual(12000, action["payload"]["constraints"]["hard"]["max_cost_per_person_cents"])
         self.assertEqual("llm", action["payload"]["constraints_source"])
-        self.assertTrue(action["description"].startswith("Option A is the direct train"))
+        self.assertEqual("F", action["payload"]["ranked_valid"][0])   # Jinko hotels (replay) x recorded transport
+        self.assertTrue(action["description"].startswith("Option F is the direct train"))
+        self.assertIn("jinko:replay", action["payload"]["options"][0]["option"]["source"])
         self.assertEqual("proposed", next(i for i in response.json()["issues"]
                                           if i["id"] == "no_logistics_plan")["status"])
 

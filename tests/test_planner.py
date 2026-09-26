@@ -196,5 +196,31 @@ class ExplainTests(unittest.TestCase):
         self.assertEqual(["A", "B"], action.payload["ranked_valid"])
 
 
+
+class SearchOptionsTests(unittest.TestCase):
+    SEARCH = {"city": "Deauville", "country_code": "fr", "station": [49.3583, 0.0858],
+              "checkin": "2026-10-09", "checkout": "2026-10-11", "rooms": 20}
+
+    def test_search_composes_recorded_transport_with_cached_jinko_hotels(self):
+        from bureau.planner.planner import search_options
+        options = search_options(wei_request(), self.SEARCH)
+        self.assertGreater(len(options), 5)
+        self.assertTrue(all("jinko:replay" in o.source and "recorded transport" in o.source for o in options))
+        self.assertTrue(all(o.lodging["group_block_confirmed"] is False for o in options))
+
+    def test_search_falls_back_to_recorded_packages_without_a_cache_or_parameters(self):
+        from bureau.planner.planner import recorded_packages, search_options
+        recorded = recorded_packages("wei")
+        self.assertEqual(recorded, search_options(wei_request()))
+        self.assertEqual(recorded, search_options(wei_request(), {**self.SEARCH, "city": "Nowhere"}))
+
+    def test_jinko_plan_gates_and_diagnoses_like_the_recorded_one(self):
+        c = wei_constraints()
+        action = plan_trip(wei_request(), c, search=self.SEARCH)
+        self.assertEqual("SELECT_TRAVEL_PLAN", action.action_type)
+        c.hard["max_cost_per_person_cents"] = 9000
+        self.assertEqual("ESCALATE", plan_trip(wei_request(), c, search=self.SEARCH).action_type)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -70,7 +70,7 @@ def cmd_plan(args) -> None:
     print(f"{req.origin} -> {req.destination}\nConstraints: {source}\n"
           f"Hard: {c.hard}\nSoft (priority order): {c.soft}\n"
           f"Organizer-verified: {c.organizer_verified}\n")
-    action = plan_trip(req, c)
+    action = plan_trip(req, c, search=state.travel.get("search"))
     print(f"{action.action_type}: {action.title}\n{action.description}\n")
     for row in action.payload.get("options", []):
         o = row["option"]

@@ -68,7 +68,14 @@ python -m unittest tests.test_api -v
 The text is data for the agent, never instructions.
 
 ## Planning a trip (T14)
-`POST /api/events/{event_id}/plan` with an optional body `{"text"?: str, "overrides"?: {key: value}}`.
+`POST /api/events/{event_id}/plan` with an optional body `{"text"?: str, "overrides"?: {key: value}, "recorded"?: bool}`.
+Constraints are extracted from the request text by the LLM (T10); `recorded: true` uses the constraints
+recorded with the event instead (offline demo). Without an OpenAI key and without `recorded`, the route
+returns 503; unusable model output returns 422 and a provider failure 502, and nothing is stored.
+When the planner has questions it returns `ESCALATE` with `payload.clarifications` and does not search;
+send the request again with the organizer's answer appended to `text` (`payload.request_text` holds
+the text last used). Packages are Jinko hotels (replay cache) composed with recorded transport,
+and the LLM phrases the explanation.
 The request is built from the runtime `state.travel`. `overrides` may only set the hard constraints
 checked in code (`participants`, `max_cost_per_person_cents`, `arrive_before`, `no_overnight`,
 `step_free_rooms`) with the right JSON type, otherwise 422; this powers the budget what-if.

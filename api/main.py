@@ -185,7 +185,7 @@ def run_planner(event_id: str, body: PlanRequest | None = None):
         except Exception as exc:   # provider failure: never fall back to a sample plan
             raise HTTPException(502, f"constraint extraction failed: {exc}") from exc
     constraints.hard.update(body.overrides or {})
-    action = plan_trip(req, constraints, client=client)
+    action = plan_trip(req, constraints, client=client, search=state.travel.get("search"))
     action.payload["constraints"] = asdict(constraints)
     action.payload["request_text"] = req.text
     action.payload["constraints_source"] = "recorded" if body.recorded else "llm"

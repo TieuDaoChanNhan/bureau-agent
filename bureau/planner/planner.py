@@ -9,11 +9,13 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict
-from datetime import datetime
+from datetime import date, datetime
 
 from ..config import DATA_DIR
 from ..core.models import EventState, Evidence, ProposedAction
 from .constraints import diagnose, eur, evaluate
+from . import jinko
+from .compose import compose_packages
 from .explain import explain, rejection_line
 from .extract import extract_constraints
 from .interface import Constraints, TravelOption, TravelRequest
@@ -46,13 +48,36 @@ def request_from_state(state: EventState, text: str | None = None) -> TravelRequ
                          depart_after=datetime.fromisoformat(t["depart_after"]))
 
 
-def search_options(req: TravelRequest) -> list[TravelOption]:
-    """Return candidate packages. TODO(T11, T12): jinko.* + compose.compose_packages."""
-    raw = json.loads((DATA_DIR / req.event_id / "travel_options.json").read_text(encoding="utf-8"))
+def recorded_packages(event_id: str) -> list[TravelOption]:
+    """Pre-built illustrative packages (data/<event>/travel_options.json): the offline fallback."""
+    raw = json.loads((DATA_DIR / event_id / "travel_options.json").read_text(encoding="utf-8"))
     return [TravelOption(**o) for o in raw]
 
 
-def plan_trip(req: TravelRequest, c: Constraints, client=None) -> ProposedAction:
+def search_options(req: TravelRequest, search: dict | None = None) -> list[TravelOption]:
+    """Return candidate packages: Jinko hotels x transport, composed in code (T11, T12).
+
+    `search` comes from `state.travel["search"]`: city, country_code, station [lat, lon],
+    checkin, checkout, rooms. Hotels come from Jinko (JINKO_MODE, replay by default); transport
+    comes from data/<event>/transport_options.json because Jinko ground search is not available
+    for our key. Without `search`, or when Jinko has nothing cached, the recorded packages are used.
+    """
+    if search:
+        try:
+            hotels = jinko.hotel_search(search["city"], search["checkin"], search["checkout"], req.participants,
+                                        search["rooms"], req.event_id, country_code=search.get("country_code", "fr"),
+                                        station=tuple(search["station"]) if search.get("station") else None)
+            transports = json.loads((DATA_DIR / req.event_id / "transport_options.json").read_text(encoding="utf-8"))
+            nights = (date.fromisoformat(search["checkout"]) - date.fromisoformat(search["checkin"])).days
+            packages = compose_packages(req, transports, hotels, nights)
+            if packages:
+                return packages
+        except (jinko.JinkoUnavailable, FileNotFoundError, KeyError):
+            pass  # fall back to the recorded packages below
+    return recorded_packages(req.event_id)
+
+
+def plan_trip(req: TravelRequest, c: Constraints, client=None, search: dict | None = None) -> ProposedAction:
     """Return exactly one action: SELECT_TRAVEL_PLAN, or ESCALATE when nothing is valid.
 
     `client` (OpenAI-compatible) lets explain() phrase the trade-offs; ranking and checks
@@ -65,7 +90,7 @@ def plan_trip(req: TravelRequest, c: Constraints, client=None) -> ProposedAction
             description="\n".join(c.clarifications), payload={"clarifications": c.clarifications},
         )
 
-    options = search_options(req)
+    options = search_options(req, search)
     valid, results = evaluate(options, c)
     evidence = [Evidence("travel_option", o.id, o.source) for o in options]
     table = [{"option": asdict(o), "checks": [asdict(ch) for ch in results[o.id]], "valid": o in valid}
