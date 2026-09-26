@@ -101,6 +101,9 @@ details.done > summary .grouphead { position: static; }
 .p-wait, .p-new { background: var(--surface-2); color: var(--muted); border: 1px dashed var(--line); }
 .p-rej { background: var(--surface-2); color: var(--muted); }
 .p-fail { background: var(--crit-soft); color: var(--crit); }
+.p-run { background: var(--accent); color: var(--accent-ink); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .p-run { animation: none; } }
 
 /* Issue detail */
 .detail { padding: 18px 20px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
