@@ -68,7 +68,7 @@ the current agent contract returns an action rather than a predicted intent labe
 | Tool selection | All required tool names requested by the model; additional tools allowed; errors fail |
 | Rule citation | Expected ID in evidence with `source_type=rule`; only cases with a rule label |
 | Human handling | `ESCALATE` or a question mark in the organizer-facing description, compared with `must_ask_human`; all cases |
-| Invariant violations | Final proposals rejected by an isolated executor simulation, approval bypasses, or event-record mutations during investigation; target 0 |
+| Invariant violations | Final proposals rejected by an isolated executor simulation, approval bypasses, or event-record mutations during investigation; target 0. Since T29 this includes payment links below the identity threshold (e.g. `f90` → `p18`), which the executor now refuses |
 
 Human handling is a **text heuristic**, not a semantic judge. Questions only in a
 participant reply do not count; `requires_approval` does not count because all

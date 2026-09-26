@@ -175,6 +175,37 @@ class AgentLoopTests(unittest.TestCase):
                 self.assertEqual(action.payload, PROPOSAL["payload"])
                 self.assertEqual(issue.status, "proposed")
 
+    def test_link_below_identity_threshold_is_rejected_and_can_be_escalated(self):
+        state = load_event("hackathon")
+        client = FakeClient([
+            [("propose_action", {**PROPOSAL, "payload": {"payment_id": "f90", "participant_id": "p18"}})],
+            [("propose_action", {**PROPOSAL, "action_type": "ESCALATE",
+                                 "payload": {"note": "No payment found for Victor; ask for details?"}})],
+        ])
+        action = resolve_issue(state, message_issue(state, "m14"), client=client, verbose=False)
+        replies = [m for m in client.requests[-1]["messages"] if m["role"] == "tool"]
+        error = json.loads(replies[-1]["content"])["error"]
+        self.assertIn("different people", error)
+        self.assertEqual(action.action_type, "ESCALATE")
+        self.assertEqual(state.actions, [action])
+
+    def test_link_in_the_ask_human_band_is_accepted(self):
+        state = load_event("hackathon")   # f90 -> p01 scores 0.91
+        client = FakeClient([[("propose_action", PROPOSAL)]])
+        action = resolve_issue(state, message_issue(state), client=client, verbose=False)
+        self.assertEqual(action.action_type, "LINK_PAYMENT")
+
+    def test_link_to_unknown_records_is_rejected(self):
+        state = load_event("hackathon")
+        client = FakeClient([
+            [("propose_action", {**PROPOSAL, "payload": {"payment_id": "f999", "participant_id": "p01"}})],
+            [("propose_action", {**PROPOSAL, "action_type": "ESCALATE", "payload": {}})],
+        ])
+        action = resolve_issue(state, message_issue(state), client=client, verbose=False)
+        replies = [m for m in client.requests[-1]["messages"] if m["role"] == "tool"]
+        self.assertIn("unknown payment_id", json.loads(replies[-1]["content"])["error"])
+        self.assertEqual(action.action_type, "ESCALATE")
+
     def test_invalid_group_replacement_is_rejected_without_mutating_state(self):
         state = load_event("hackathon")
         original = deepcopy(state.groups)

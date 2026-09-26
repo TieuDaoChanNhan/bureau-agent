@@ -108,6 +108,18 @@ def score(payment: Payment, person: Participant) -> MatchResult:
     return MatchResult(person.id, round(got / available, 2), signals)
 
 
+def link_band(payment: Payment, person: Participant) -> tuple[str, float]:
+    """Band and score for linking this payment to this person.
+
+    A payer email registered by the person is an exact match. Otherwise the
+    deterministic score decides; "different" (below ASK_HUMAN) must never be linked.
+    """
+    if payment.payer_email and payment.payer_email.lower() in {e.lower() for e in person.emails}:
+        return "propose_link", 1.0
+    result = score(payment, person)
+    return result.band, result.score
+
+
 def match_person(state: EventState, payment_id: str, top_k: int = 3) -> list[MatchResult]:
     payment = next(p for p in state.payments if p.id == payment_id)
     results = [score(payment, person) for person in state.participants]

@@ -16,7 +16,8 @@ The event state and everything that reads or changes it.
 - Changing `models.py` changes the contract for everyone: announce it before merging.
 
 `executor.apply` rejects invalid travel options and payment links to unknown
-participants or another owner (explicit ID, otherwise a case-insensitive email
+participants, to a participant whose identity score is below 0.70 (unless the
+payer email is one they registered), or to another owner (explicit ID, otherwise a case-insensitive email
 match). Rejected actions leave the input state, outbox and audit log unchanged.
 `LINK_PAYMENT` can include `to` and `message` to append one simulated reply after
 validation; `edited_description` overrides that reply, as for `SEND_MESSAGE`.
