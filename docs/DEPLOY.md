@@ -3,7 +3,7 @@
 Primary: native Python on **one free Render web service**. Backup:
 [Hugging Face Static Space](https://huggingface.co/spaces/bachbeo2007/bureau).
 The Render URL is not assigned yet; replace the pending README entry after
-deployment. The prepared static revision also needs uploading and public testing.
+deployment. The static revision has passed its public tour and isolation checks; see demo/VERIFICATION.md.
 
 ## Free-tier terms checked 26 September 2026
 
@@ -86,7 +86,7 @@ When no key is configured or a limit blocks a call, known sample issues use the
 shared `demo/replay.py` examples and recorded planner packages. Responses and
 stored proposals carry `replay: true`; the console labels the source. Unknown
 messages and custom planning text return 429 with an explanation and can be
-skipped in the tour. Replay accepts the exact provided meal-budget answer and
+skipped in the tour. Replay accepts the exact provided coach-budget answer and
 explicit constraint overrides; it never pretends to interpret arbitrary text.
 All approvals affect sample records and a simulated outbox; no real sends/bookings.
 

@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import functools
+import json
 import os
 import threading
+import time
 import unittest
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -27,11 +29,14 @@ class DemoTests(unittest.TestCase):
         cls.thread.start()
         cls.url = os.environ.get("DEMO_BASE_URL", f"http://127.0.0.1:{cls.server.server_port}").rstrip("/")
         cls.pw = sync_playwright().start()
+        cls.load_times = []
         cls.browser = cls.pw.chromium.launch(headless=True, executable_path=os.environ.get("DEMO_CHROME_PATH") or None)
         ARTIFACTS.mkdir(exist_ok=True)
 
     @classmethod
     def tearDownClass(cls):
+        (ARTIFACTS / "static-load-times.json").write_text(json.dumps({"url": cls.url,
+            "ready_seconds": cls.load_times, "kind": "fresh browser contexts; not a Render cold start"}, indent=2))
         cls.browser.close()
         cls.pw.stop()
         cls.server.shutdown()
@@ -45,8 +50,10 @@ class DemoTests(unittest.TestCase):
         self.requests = []
         self.page.on("pageerror", lambda error: self.errors.append(str(error)))
         self.page.on("request", lambda request: self.requests.append(request.url))
+        start = time.perf_counter()
         self.page.goto(self.url)
         self.page.wait_for_function("Object.keys(ui.summaries).length === 2 && !ui.busy")
+        self.load_times.append(round(time.perf_counter() - start, 3))
 
     def tearDown(self):
         self.page.screenshot(path=str(ARTIFACTS / f"{self._testMethodName}-last.png"))
