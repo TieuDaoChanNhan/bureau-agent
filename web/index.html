@@ -4,25 +4,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bureau Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="/web/style.css">
 </head>
 <body>
-  <!--
-    Skeleton only (TASK T06). The target layout is web/reference/mockup.html:
-    event cards -> issue list (blocking first) -> issue detail (input, decision trace,
-    checks, editable proposed action, approve / edit / dismiss) -> option table for trips.
-  -->
-  <header class="top">
-    <h1>Bureau Agent</h1>
-    <p class="muted">Organizers supervise; the agent does the legwork.</p>
-  </header>
-  <main>
-    <section id="events" aria-label="Events"></section>
-    <div class="layout">
-      <section id="issues" aria-label="Issues"></section>
-      <section id="detail" aria-label="Issue detail"><p class="muted">Select an issue.</p></section>
+  <div class="wrap">
+    <div class="app">
+      <div class="bar">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">B</div>
+          <div><b>Bureau Agent</b><div class="note">Organizers supervise; the agent does the legwork.</div></div>
+        </div>
+        <div class="tools">
+          <button class="btn" id="outboxBtn" type="button">Outbox</button>
+          <button class="btn" id="resetBtn" type="button">Reset demo</button>
+          <button class="btn primary" id="runBtn" type="button">Run agent</button>
+        </div>
+      </div>
+      <div class="events" id="events" aria-label="Events"></div>
+      <div class="run" id="run" role="status" aria-live="polite"><span class="dot"></span><span id="runText">Loading…</span></div>
+      <div class="main">
+        <div class="issues" id="issues" aria-label="Issues"></div>
+        <div class="detail" id="detail" aria-live="polite"></div>
+      </div>
     </div>
-  </main>
+    <p class="note">Nothing is sent, changed, booked or paid before an organizer approves it. Messages drafted by the agent end with: "Drafted with AI assistance, approved by the organizers." All sample data is fictional.</p>
+  </div>
   <script src="/web/app.js"></script>
 </body>
 </html>
