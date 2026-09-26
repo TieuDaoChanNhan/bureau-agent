@@ -97,6 +97,10 @@ def _action_from_args(state: EventState, issue: Issue, args: dict) -> ProposedAc
     _validate_payload(action_type, payload)
     if action_type == "LINK_PAYMENT":
         _check_identity(state, payload)
+        if issue.kind == "unprocessed_message" and not (payload.get("message") and payload.get("to")):
+            # The sender asked something: the organizer must be able to review and edit the answer.
+            raise ValueError("This issue is a message: include payload.to (the sender) and payload.message "
+                             "(a draft reply in the sender's language, ending with the AI signature)")
     if action_type == "UPDATE_GROUPS":
         replacement = [Group(
             id=g["id"], kind=g["kind"], name=g["name"], members=list(g["members"]),

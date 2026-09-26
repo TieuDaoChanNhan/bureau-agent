@@ -49,6 +49,8 @@ Group requests:
 - Use list_group_candidates for participants seeking a group. Being ungrouped alone is not
   consent: never include someone with looking_for_group=false unless their message asks to join.
 - Use actual participant names in drafted replies, not internal ids.
+- In title, description and notes for organizers, name people, teams and payments ("Antoine Nguyen",
+  "payment from A. Nguyen, 10 EUR"); ids belong in evidence and payload only.
 
 Proposal format:
 - Executor fields MUST be nested inside the "payload" object, never at the top level.
@@ -57,7 +59,8 @@ Proposal format:
   "payload": {{"payment_id": "actual-payment-id", "participant_id": "actual-participant-id"}}}}.
 Payload fields by action:
 - SEND_MESSAGE: to (recipient or list), text (complete draft).
-- LINK_PAYMENT: payment_id, participant_id; an optional reply uses to and message.
+- LINK_PAYMENT: payment_id, participant_id. When the issue is a message, also to (the sender) and
+  message: the draft reply to send once organizers confirm the link, in the sender's language.
 - MOVE_MEMBER: participant_id, from_group and/or to_group. Inspect list_groups first.
 - UPDATE_GROUPS: groups, the complete replacement for affected kinds, including groups to keep.
   Each group has id, kind, name, members, capacity_min, capacity_max. Check group invariants

@@ -21,7 +21,8 @@ PROPOSAL = {
     "evidence": [{"source_type": "payment", "source_id": "f90", "description": "A. Nguyen, nguyen.a@gmail.com"}],
     "checks": [{"name": "identity score >= 0.98", "passed": False, "detail": "0.91"}],
     "confidence": 0.91,
-    "payload": {"payment_id": "f90", "participant_id": "p01"},
+    "payload": {"payment_id": "f90", "participant_id": "p01", "to": "a.nguyen@polytechnique.edu",
+                "message": "Bonjour Antoine, votre paiement est bien associé à votre inscription."},
 }
 
 
@@ -132,7 +133,7 @@ class AgentLoopTests(unittest.TestCase):
             ("missing participant", {**PROPOSAL, "payload": {"payment_id": "f90"}}),
             ("missing payment", {**PROPOSAL, "payload": {"participant_id": "p01"}}),
             ("link reply without recipient", {
-                **PROPOSAL, "payload": {**PROPOSAL["payload"], "message": "Thank you"},
+                **PROPOSAL, "payload": {"payment_id": "f90", "participant_id": "p01", "message": "Thank you"},
             }),
             ("move without participant", {
                 **PROPOSAL, "action_type": "MOVE_MEMBER", "payload": {"from_group": "t-orbit"},
@@ -188,6 +189,23 @@ class AgentLoopTests(unittest.TestCase):
         self.assertIn("different people", error)
         self.assertEqual(action.action_type, "ESCALATE")
         self.assertEqual(state.actions, [action])
+
+    def test_link_from_a_message_must_carry_a_reply_and_can_be_repaired(self):
+        state = load_event("hackathon")
+        bare = {**PROPOSAL, "payload": {"payment_id": "f90", "participant_id": "p01"}}
+        client = FakeClient([[("propose_action", bare)], [("propose_action", PROPOSAL)]])
+        action = resolve_issue(state, message_issue(state), client=client, verbose=False)
+        replies = [m for m in client.requests[-1]["messages"] if m["role"] == "tool"]
+        self.assertIn("payload.message", json.loads(replies[-1]["content"])["error"])
+        self.assertEqual("a.nguyen@polytechnique.edu", action.payload["to"])
+        self.assertTrue(action.payload["message"])
+
+    def test_link_for_a_payment_issue_needs_no_reply(self):
+        state = load_event("hackathon")
+        issue = next(i for i in detect_issues(state) if i.id == "unmatched_payment:f90")
+        bare = {**PROPOSAL, "payload": {"payment_id": "f90", "participant_id": "p01"}}
+        action = resolve_issue(state, issue, client=FakeClient([[("propose_action", bare)]]), verbose=False)
+        self.assertEqual("LINK_PAYMENT", action.action_type)
 
     def test_link_in_the_ask_human_band_is_accepted(self):
         state = load_event("hackathon")   # f90 -> p01 scores 0.91
