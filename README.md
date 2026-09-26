@@ -53,8 +53,9 @@ pip install -r requirements.txt
 cp .env.example .env                      # add OPENAI_API_KEY (default model: gpt-4.1)
 
 python -m bureau detect hackathon         # issues found by fixed code (no LLM)
-python -m bureau plan wei                 # trip planner on recorded options (no LLM)
-python -m bureau plan wei --budget 90     # no valid option: diagnosis, no relaxation
+python -m bureau plan wei                 # LLM extraction, then recorded options (needs a key)
+python -m bureau plan wei --recorded-constraints  # offline demo, recorded constraints and options
+python -m bureau plan wei --recorded-constraints --budget 90  # diagnosis, no relaxation
 python -m bureau run hackathon --issue message:m01   # the agent (needs a key)
 python -m eval.run_eval                  # labeled corpus evaluation (needs a key)
 
@@ -62,6 +63,12 @@ uvicorn api.main:app --reload             # API + web UI on http://127.0.0.1:800
 python -m unittest discover -s tests -t . # tests
 ```
 On Windows, set `PYTHONIOENCODING=utf-8` if accented names print incorrectly.
+
+The planner reads the organizer's request with the configured LLM. Ambiguous
+requests produce clarification questions before any travel-option search. Use
+`--recorded-constraints` explicitly to demonstrate the deterministic planner
+without an API key. `--budget` overrides the per-person budget; other unresolved
+questions still require an organizer's answer.
 
 ## Status
 
@@ -72,9 +79,10 @@ On Windows, set `PYTHONIOENCODING=utf-8` if accented names print incorrectly.
 | Planner: hard-constraint gate, ranking, diagnosis | ✅ done, tested |
 | Agent loop (OpenAI tool calling) | ✅ live acceptance verified with `gpt-4.1`; 3 labeled cases and full hackathon batch (see [agent checks](bureau/agent/README.md#live-acceptance-checks-t04)) |
 | Store, executor, API routes except `/plan` | ✅ done, tested; messages use a simulated outbox |
-| Evaluation | ✅ 50 labeled message cases, real agent metrics and saved reports; [definitions and limits](eval/README.md) |
+| Evaluation | ✅ 50 labeled message cases and 8 planning requests, live LLM metrics and saved reports; [definitions and limits](eval/README.md) |
 | Web UI | ✅ organizer console wired to the runtime API; [usage](web/README.md) |
-| Constraint extraction (LLM), Jinko client, package composition | ⬜ skeletons, see [TASKS.md](TASKS.md) |
+| Constraint extraction (LLM) | ✅ structured constraints from organizer text, with clarification and accessibility verification flags; [planner details](bureau/planner/README.md) |
+| Jinko client, package composition | ⬜ skeletons, see [TASKS.md](TASKS.md) |
 
 ## What is real and what is simulated
 
@@ -82,6 +90,7 @@ On Windows, set `PYTHONIOENCODING=utf-8` if accented names print incorrectly.
 |---|---|
 | Event state, detection, rule checks, identity scoring, constraint gate | Real (Python) |
 | Agent investigation and proposals | Real (OpenAI) |
+| Travel constraint extraction | Real (configured LLM); `--recorded-constraints` selects the offline fixture explicitly |
 | Registrations, payments, messages | Simulated sample data with planted inconsistencies; no real personal data |
 | Travel options | Recorded illustrative data until the Jinko client lands |
 | Sending messages, booking, payments | Not performed; actions are proposals for organizers |

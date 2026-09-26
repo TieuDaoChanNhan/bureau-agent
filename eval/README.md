@@ -1,14 +1,15 @@
 # eval
 
-Evaluation against labeled synthetic fixtures (T08). Here **offline** means a fixed
-corpus with expected answers, independent of an organizer session. Message runs
-still call OpenAI and incur API usage; unit tests use scripted clients without a key.
+Evaluation against labeled synthetic fixtures (T08/T10). Here **offline** means a
+fixed corpus with expected answers, independent of an organizer session. Message
+and planning runs call the configured LLM and incur API usage; unit tests inject
+scripted clients or extractors without a key.
 
 | File | Content |
 |---|---|
 | `cases/messages.jsonl` | 50 labeled cases: all 25 fixture messages plus 25 independently written paraphrases |
-| `cases/planning.jsonl` | One labelled trip request per line: expected hard constraints, clarifications, feasibility |
-| `run_eval.py` | Runs the real agent and recorded planner baseline, prints metrics, writes timestamped JSON to ignored `eval/results/` |
+| `cases/planning.jsonl` | Eight labeled trip requests in English and French: hard constraints, clarifications, feasibility, and optional preference/verification labels |
+| `run_eval.py` | Runs the real agent and LLM constraint extraction with recorded travel options, prints metrics, writes timestamped JSON to ignored `eval/results/` |
 
 ## Run
 
@@ -16,9 +17,9 @@ Install the repository requirements and configure `OPENAI_API_KEY` and
 `OPENAI_MODEL` in your local `.env`. `gpt-4.1` is the model used for T04 acceptance.
 
 ```bash
-python -m eval.run_eval                         # all 50 messages plus planner baseline
+python -m eval.run_eval                         # all 50 messages plus eight planning requests
 python -m eval.run_eval --suite messages --limit 3
-python -m eval.run_eval --suite planning         # recorded inputs, no API calls
+python -m eval.run_eval --suite planning         # live extraction, recorded travel options
 python -m unittest tests.test_eval -v            # scripted clients, no API calls
 ```
 
@@ -60,6 +61,15 @@ Schema, IDs, tool names, actions and rule references are checked before API call
 `expected_kind` is retained for analysis, but intent accuracy is not fabricated:
 the current agent contract returns an action rather than a predicted intent label.
 
+Planning rows retain `id`, `event`, `text`, `expected_hard`,
+`expected_clarifications`, and `feasible`. Optional `expected_soft` labels preserve
+preference order; `expected_organizer_verified` labels mark requirements needing
+organizer confirmation. The evaluator passes only the request text and the sample
+event's travel context to the extractor, never any expected values. All requests
+use the WEI context of 40 participants. The original `p001` label is unchanged;
+new requests cover decimal euro amounts, French wording, infeasible budgets,
+accessibility, ambiguous budget scope and a missing budget.
+
 ## Metrics
 
 | Metric | Definition and denominator |
@@ -83,10 +93,24 @@ implemented checks, not every possible semantic error. Rejected intermediate too
 arguments are retained in the trace but are not final-proposal violations. Reports
 show both checked and unchecked cases; an API failure is never counted as a safe proposal.
 
-The planning section compares the existing recorded baseline with the one supplied
-planning label: exact hard constraints (plus per-key results), clarification strings,
-and feasibility against recorded travel options. `extract_constraints` still ignores
-the request text until T10, so these numbers are **not LLM extraction accuracy**.
+The planning section reports `mode=llm_extraction_recorded_options`:
+
+| Planning metric | Definition and denominator |
+|---|---|
+| Hard constraints | Exact dictionary, including missing and extra fields; all cases, with extraction errors failing |
+| Clarifications | At least one clarification when the label is non-empty, otherwise none; all cases, with extraction errors failing |
+| Soft preferences | Exact ordered preference list; only cases with `expected_soft` |
+| Organizer verification | Exact set of keys; only cases with `expected_organizer_verified` |
+| Feasibility | Any recorded package passes the planner's verified hard checks; only cases that reach option checking |
+
+Clarification wording is retained for human review but is not compared verbatim.
+This measures whether the model asks, not whether the question resolves the right
+ambiguity. A clarification stops the planner before any option search; feasibility
+then remains `null` and is excluded from that metric's denominator. Errors also
+leave feasibility unassessed. The `feasible` label describes the recorded options
+under the labeled hard constraints, even when the request needs clarification.
+Accessibility flags still require organizer confirmation; the feasibility result is
+not an accessibility guarantee or a claim about live travel availability.
 
 ## Report
 
@@ -118,9 +142,10 @@ claims. Required tools were missing in `c010`, `c012`, `c035`, `c036`, `c037`, a
 flagged two missed and six unnecessary interventions, including confirmation
 questions added to otherwise correct replies. These failures remain in the totals.
 
-The recorded planner baseline matched hard constraints and feasibility (1/1 each),
-but missed the labeled budget clarification (0/1). This reflects the pending T10
-extractor, not a successful language-understanding evaluation.
+That historical recorded planner baseline matched hard constraints and feasibility
+(1/1 each), but missed the labeled budget clarification (0/1). It predates T10's LLM
+extraction and does not measure language-understanding quality. New planning runs
+use the live extraction metrics above.
 
 The full local report is `eval/results/20260926T091933.899736Z.json` (Git-ignored).
 

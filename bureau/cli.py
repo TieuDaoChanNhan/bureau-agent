@@ -2,20 +2,20 @@
 
   python -m bureau detect hackathon          # issues found by fixed code (no LLM)
   python -m bureau run hackathon [--issue ID] # agent proposes actions (needs OPENAI_API_KEY)
-  python -m bureau plan wei [--budget 90]     # travel planner on recorded options (no LLM)
+  python -m bureau plan wei                  # LLM extraction, then recorded travel options
+  python -m bureau plan wei --recorded-constraints [--budget 90]  # offline demo
 """
 from __future__ import annotations
 
 import argparse
 import json
 import sys
-from dataclasses import asdict
 
 from .agent.loop import run_pending
 from .core.detect import detect_issues
 from .core.loader import load_event
 from .core.store import load_state
-from .planner.interface import TravelRequest
+from .planner.interface import Constraints, TravelRequest
 from .planner.planner import extract_constraints, plan_trip
 
 
@@ -63,10 +63,19 @@ def cmd_plan(args) -> None:
     req = TravelRequest(event_id=state.id, text=t["request"], participants=t["participants"],
                         origin=t["origin"], destination=t["destination"],
                         depart_after=datetime.fromisoformat(t["depart_after"]))
-    c = extract_constraints(req)
+    if args.recorded_constraints:
+        recorded = t["constraints"]
+        c = Constraints(hard=dict(recorded["hard"]), soft=list(recorded["soft"]),
+                        organizer_verified=list(recorded.get("organizer_verified", [])),
+                        clarifications=list(recorded.get("clarifications", [])))
+        source = "recorded fixture (offline demo)"
+    else:
+        c = extract_constraints(req)
+        source = "LLM extraction"
     if args.budget is not None:
         c.hard["max_cost_per_person_cents"] = int(round(args.budget * 100))
-    print(f"{req.origin} -> {req.destination}\nHard: {c.hard}\nSoft (priority order): {c.soft}\n"
+    print(f"{req.origin} -> {req.destination}\nConstraints: {source}\n"
+          f"Hard: {c.hard}\nSoft (priority order): {c.soft}\n"
           f"Organizer-verified: {c.organizer_verified}\n")
     action = plan_trip(req, c)
     print(f"{action.action_type}: {action.title}\n{action.description}\n")
@@ -85,7 +94,12 @@ def main(argv=None) -> None:
     sub = parser.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("detect"); p.add_argument("event"); p.set_defaults(fn=cmd_detect)
     p = sub.add_parser("run"); p.add_argument("event"); p.add_argument("--issue"); p.set_defaults(fn=cmd_run)
-    p = sub.add_parser("plan"); p.add_argument("event"); p.add_argument("--budget", type=float); p.set_defaults(fn=cmd_plan)
+    p = sub.add_parser("plan")
+    p.add_argument("event")
+    p.add_argument("--budget", type=float, help="Override the extracted budget in euros per person")
+    p.add_argument("--recorded-constraints", action="store_true",
+                   help="Use recorded fixture constraints for an offline demo instead of calling the LLM")
+    p.set_defaults(fn=cmd_plan)
     args = parser.parse_args(argv)
     args.fn(args)
 

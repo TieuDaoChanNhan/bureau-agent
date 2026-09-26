@@ -12,6 +12,7 @@ from unittest import mock
 
 from bureau.core.loader import load_event
 from bureau.core.models import Evidence, ProposedAction
+from bureau.planner.interface import Constraints
 from eval import run_eval
 from tests.fake_llm import FakeClient
 
@@ -270,6 +271,126 @@ class EvaluationIsolationTests(unittest.TestCase):
         self.assertTrue(violations)
         self.assertIn("type", violations[0])
         self.assertIn("detail", violations[0])
+
+
+class PlanningEvaluationTests(unittest.TestCase):
+    def case(self, **overrides):
+        return {
+            "id": "planning-test", "event": "wei",
+            "text": "Travel for 40 people; at most EUR 120 each, excluding meals.",
+            "expected_hard": {"participants": 40, "max_cost_per_person_cents": 12000},
+            "expected_clarifications": [], "feasible": True, **overrides,
+        }
+
+    def test_corpus_has_at_least_six_distinct_labeled_requests(self):
+        cases = run_eval.load_cases("planning.jsonl")
+        self.assertGreaterEqual(len(cases), 6)
+        self.assertEqual(len({case["id"] for case in cases}), len(cases))
+        self.assertEqual(len({case["text"] for case in cases}), len(cases))
+        for case in cases:
+            with self.subTest(case=case["id"]):
+                self.assertIsInstance(case["expected_hard"], dict)
+                self.assertIsInstance(case["expected_clarifications"], list)
+                self.assertIs(type(case["feasible"]), bool)
+                self.assertEqual(case["expected_hard"]["participants"], 40)
+        self.assertTrue(any(case["expected_clarifications"] for case in cases))
+        self.assertTrue(any(not case["expected_clarifications"] for case in cases))
+
+    def test_extractor_receives_request_context_without_gold_labels(self):
+        requests = []
+
+        def extract(request):
+            requests.append(asdict(request))
+            return Constraints(hard={"participants": 40, "max_cost_per_person_cents": 12000})
+
+        report = run_eval.evaluate_planning([self.case()], extractor=extract)
+        self.assertEqual(report["mode"], "llm_extraction_recorded_options")
+        row = report["cases"][0]
+        self.assertIsNone(row["error"])
+        self.assertTrue(row["hard_correct"])
+        self.assertTrue(row["clarifications_correct"])
+        self.assertTrue(row["feasibility_correct"])
+        self.assertEqual(requests[0]["text"], self.case()["text"])
+        self.assertEqual(requests[0]["participants"], 40)
+        self.assertFalse(any(key.startswith("expected_") for key in requests[0]))
+        self.assertNotIn("feasible", requests[0])
+
+    def test_extra_hard_constraint_fails_and_is_visible_in_field_scores(self):
+        constraints = Constraints(hard={
+            "participants": 40, "max_cost_per_person_cents": 12000, "no_overnight": True,
+        })
+        report = run_eval.evaluate_planning([self.case()], extractor=lambda request: constraints)
+        row = report["cases"][0]
+        self.assertFalse(row["hard_correct"])
+        self.assertFalse(row["hard_fields"]["no_overnight"])
+        self.assertEqual(report["metrics"]["hard_constraints"]["correct"], 0)
+
+    def test_different_question_wording_passes_and_clarification_blocks_search(self):
+        case = self.case(expected_clarifications=["meals included in budget?"])
+        constraints = Constraints(
+            hard=case["expected_hard"], clarifications=["Should the cap cover food as well?"],
+        )
+        with mock.patch("bureau.planner.planner.search_options") as search, \
+             mock.patch("bureau.planner.planner.evaluate") as evaluate:
+            report = run_eval.evaluate_planning([case], extractor=lambda request: constraints)
+        search.assert_not_called()
+        evaluate.assert_not_called()
+        row = report["cases"][0]
+        self.assertEqual(row["action"]["action_type"], "ESCALATE")
+        self.assertTrue(row["clarifications_correct"])
+        self.assertIsNone(row["feasible"])
+        self.assertIsNone(row["feasibility_correct"])
+        self.assertEqual(report["metrics"]["feasibility"], {"correct": 0, "total": 0, "accuracy": None})
+
+    def test_unnecessary_clarification_fails_even_though_it_safely_blocks_search(self):
+        constraints = Constraints(hard=self.case()["expected_hard"], clarifications=["Are you sure?"])
+        report = run_eval.evaluate_planning([self.case()], extractor=lambda request: constraints)
+        self.assertFalse(report["cases"][0]["clarifications_correct"])
+        self.assertIsNone(report["cases"][0]["feasibility_correct"])
+
+    def test_optional_preferences_preserve_priority_and_verification_is_a_set(self):
+        case = self.case(
+            expected_soft=["fewer_changes", "lower_cost"],
+            expected_organizer_verified=["step_free_rooms"],
+        )
+        constraints = Constraints(hard=case["expected_hard"],
+                                  soft=["lower_cost", "fewer_changes"],
+                                  organizer_verified=["step_free_rooms"])
+        report = run_eval.evaluate_planning([case, self.case(id="unlabeled")],
+                                            extractor=lambda request: constraints)
+        self.assertEqual(report["metrics"]["soft_preferences"], {"correct": 0, "total": 1, "accuracy": 0.0})
+        self.assertEqual(report["metrics"]["organizer_verification"], {"correct": 1, "total": 1, "accuracy": 1.0})
+
+    def test_extraction_errors_count_as_failures_and_later_cases_continue(self):
+        case = self.case(expected_soft=[], expected_organizer_verified=[])
+        extract = mock.Mock(side_effect=[
+            RuntimeError("Synthetic extraction failure."),
+            Constraints(hard=case["expected_hard"]),
+        ])
+        report = run_eval.evaluate_planning([case, self.case(id="later")], extractor=extract)
+        first, second = report["cases"]
+        self.assertEqual(first["error"]["type"], "RuntimeError")
+        self.assertIsNone(first["constraints"])
+        self.assertIsNone(first["action"])
+        self.assertFalse(first["soft_correct"])
+        self.assertFalse(first["organizer_verified_correct"])
+        self.assertIsNone(first["feasibility_correct"])
+        self.assertIsNone(second["error"])
+        self.assertEqual(report["metrics"]["hard_constraints"], {"correct": 1, "total": 2, "accuracy": 0.5})
+        self.assertEqual(report["metrics"]["clarifications"]["total"], 2)
+        self.assertEqual(report["metrics"]["feasibility"]["total"], 1)
+
+    def test_correct_infeasible_request_is_scored_without_relaxing_constraints(self):
+        case = self.case(
+            expected_hard={"participants": 40, "max_cost_per_person_cents": 100}, feasible=False,
+        )
+        constraints = Constraints(hard=case["expected_hard"])
+        report = run_eval.evaluate_planning([case], extractor=lambda request: constraints)
+        row = report["cases"][0]
+        self.assertFalse(row["feasible"])
+        self.assertTrue(row["feasibility_correct"])
+        self.assertEqual(row["action"]["action_type"], "ESCALATE")
+        self.assertEqual(row["constraints"]["hard"]["max_cost_per_person_cents"], 100)
 
 
 class EvaluationCliTests(unittest.TestCase):

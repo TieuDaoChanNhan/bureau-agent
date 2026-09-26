@@ -14,6 +14,7 @@ import json
 from pathlib import Path
 import subprocess
 from types import SimpleNamespace
+from typing import Callable
 from unittest.mock import patch
 
 from bureau import config
@@ -23,9 +24,8 @@ from bureau.core import executor
 from bureau.core.detect import detect_issues
 from bureau.core.loader import load_event
 from bureau.core.models import EventState, Issue, ProposedAction
-from bureau.planner.constraints import evaluate
-from bureau.planner.interface import TravelRequest
-from bureau.planner.planner import extract_constraints, plan_trip, search_options
+from bureau.planner.interface import Constraints, TravelRequest
+from bureau.planner.planner import extract_constraints, plan_trip
 
 CASES = Path(__file__).resolve().parent / "cases"
 RESULTS = CASES.parent / "results"
@@ -39,6 +39,13 @@ METRIC_DEFINITIONS = {
     "rule_citation": "Expected rule id in rule evidence; only cases with a non-null rule label.",
     "human_handling": "ESCALATE or a question mark in organizer-facing description, compared with must_ask_human; errors fail.",
     "invariants": "Violations in final proposals: isolated executor rejection, approval bypass, or mutation during investigation. Failed runs remain unchecked.",
+}
+PLANNING_METRIC_DEFINITIONS = {
+    "hard_constraints": "Exact hard dictionary match, including absent and extra fields; extraction errors fail.",
+    "clarifications": "At least one question when the label is non-empty, otherwise none; wording is not scored and extraction errors fail.",
+    "soft_preferences": "Exact ordered preference list; only cases with expected_soft labels; extraction errors fail.",
+    "organizer_verification": "Exact set of organizer-verified keys; only labeled cases; extraction errors fail.",
+    "feasibility": "Any valid recorded option after the clarification gate; clarification stops and errors are unassessed and excluded.",
 }
 
 
@@ -241,11 +248,21 @@ def summarize_messages(rows: list[dict]) -> dict:
     return result
 
 
-def evaluate_planning(cases: list[dict]) -> dict:
-    """Report the existing recorded planner baseline separately from live messages."""
+def evaluate_planning(
+    cases: list[dict], *, extractor: Callable[[TravelRequest], Constraints] | None = None,
+) -> dict:
+    """Score live extraction, then recorded options only when no clarification is needed."""
+    extract = extract_constraints if extractor is None else extractor
     rows = []
     for case in cases:
-        row = {"id": case["id"], "expected": case, "error": None}
+        row = {
+            "id": case["id"], "expected": case, "error": None,
+            "constraints": None, "action": None, "feasible": None,
+            "hard_correct": False, "hard_fields": {}, "clarifications_correct": False,
+            "soft_correct": False if "expected_soft" in case else None,
+            "organizer_verified_correct": False if "expected_organizer_verified" in case else None,
+            "feasibility_correct": None,
+        }
         try:
             state = load_event(case["event"])
             travel = state.travel
@@ -254,27 +271,39 @@ def evaluate_planning(cases: list[dict]) -> dict:
                 origin=travel["origin"], destination=travel["destination"],
                 depart_after=datetime.fromisoformat(travel["depart_after"]),
             )
-            constraints = extract_constraints(request)
-            action = plan_trip(request, constraints)
-            valid, _ = evaluate(search_options(request), constraints)
+            row["input"] = asdict(request)
+            constraints = extract(request)
             row.update(
-                constraints=asdict(constraints), action=asdict(action), feasible=bool(valid),
+                constraints=asdict(constraints),
                 hard_correct=constraints.hard == case["expected_hard"],
-                hard_fields={key: constraints.hard.get(key) == value
-                             for key, value in case["expected_hard"].items()},
-                clarifications_correct=set(constraints.clarifications) == set(case["expected_clarifications"]),
-                feasibility_correct=bool(valid) == case["feasible"],
+                hard_fields={key: key in constraints.hard and key in case["expected_hard"]
+                             and constraints.hard[key] == case["expected_hard"][key]
+                             for key in sorted(constraints.hard.keys() | case["expected_hard"].keys())},
+                clarifications_correct=bool(constraints.clarifications) == bool(case["expected_clarifications"]),
+                soft_correct=(constraints.soft == case["expected_soft"]
+                              if "expected_soft" in case else None),
+                organizer_verified_correct=(set(constraints.organizer_verified)
+                                             == set(case["expected_organizer_verified"])
+                                             if "expected_organizer_verified" in case else None),
             )
+            action = plan_trip(request, constraints)
+            row["action"] = asdict(action)
+            # plan_trip owns the clarification gate and the recorded-option checks.
+            # Do not search again here: that would bypass the organizer's answer.
+            if not constraints.clarifications:
+                row["feasible"] = action.action_type == "SELECT_TRAVEL_PLAN"
+                row["feasibility_correct"] = row["feasible"] == case["feasible"]
         except Exception as exc:
-            row.update(error=_error(exc), hard_correct=False, clarifications_correct=False,
-                       feasibility_correct=False)
+            row["error"] = _error(exc)
         rows.append(row)
     return {
-        "mode": "recorded_baseline",
-        "limitation": "T10 extractor currently reads recorded constraints and ignores request text; these are baseline checks, not LLM extraction quality.",
+        "mode": "llm_extraction_recorded_options",
+        "limitation": "Extraction uses the configured LLM; options are recorded packages, not live availability. Clarification presence is scored, not question meaning.",
+        "metric_definitions": PLANNING_METRIC_DEFINITIONS,
         "cases": rows,
         "metrics": {name: _accuracy([r[key] for r in rows]) for name, key in (
             ("hard_constraints", "hard_correct"), ("clarifications", "clarifications_correct"),
+            ("soft_preferences", "soft_correct"), ("organizer_verification", "organizer_verified_correct"),
             ("feasibility", "feasibility_correct"),
         )},
     }
@@ -346,7 +375,7 @@ def main(argv=None) -> int:
         _print_table("Messages (labeled corpus; real configured agent)", report["messages"]["metrics"])
     if planning_cases:
         report["planning"] = evaluate_planning(planning_cases)
-        _print_table("Planning (recorded baseline; T10 extraction pending)", report["planning"]["metrics"])
+        _print_table("Planning (LLM extraction; recorded options)", report["planning"]["metrics"])
     report["finished_at"] = datetime.now(timezone.utc).isoformat()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     output = args.output_dir / (started.strftime("%Y%m%dT%H%M%S.%fZ") + ".json")
