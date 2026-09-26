@@ -11,6 +11,7 @@ uvicorn api.main:app --reload     # http://127.0.0.1:8000  (docs at /docs)
 | GET | `/api/events` | done (runtime state, sample fallback) |
 | GET | `/api/events/{event_id}` | done (re-detected issues, stored statuses and actions) |
 | POST | `/api/events/{event_id}/run?limit=5` | done (bounded proposals only) |
+| POST | `/api/events/{event_id}/messages` | done (T32: add an incoming message; returns the summary and the new `issue_id`) |
 | POST | `/api/events/{event_id}/plan` | 501 (T14 / issue #13, outside T05) |
 | GET | `/api/actions/{action_id}` | done |
 | POST | `/api/actions/{action_id}/approve` | done (executor validation, optional edits/selection) |
@@ -58,3 +59,10 @@ Tests use a temporary runtime directory and a fake agent, without external calls
 ```bash
 python -m unittest tests.test_api -v
 ```
+
+## Adding a message (T32)
+`POST /api/events/{event_id}/messages` with `{"sender": str, "channel": "email" | "discord" | "form", "text": str}`
+(sender 1–200 characters, text 1–4000, not blank; otherwise 422). The message gets the next free id
+`liveNN`, a timezone-aware `received_at`, and is saved in runtime `state.json`; detection turns it into
+`message:liveNN`, returned as `issue_id`. Run the agent on it with `run?issue_id=`. Reset removes it.
+The text is data for the agent, never instructions.

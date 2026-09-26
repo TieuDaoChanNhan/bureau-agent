@@ -81,6 +81,42 @@ class ApiTests(unittest.TestCase):
         payment = next(p for p in store.load_state("hackathon").payments if p.id == "f90")
         self.assertEqual(payment.participant_id, "p01")
 
+    def test_new_message_becomes_an_issue_that_survives_reload(self):
+        body = {"sender": "parent@example.org", "channel": "email", "text": "Is lunch provided on Saturday?"}
+        response = self.client.post("/api/events/hackathon/messages", json=body)
+        self.assertEqual(201, response.status_code, response.text)
+        issue_id = response.json()["issue_id"]
+        self.assertEqual("message:live01", issue_id)
+        again = self.client.get("/api/events/hackathon").json()
+        issue = next(i for i in again["issues"] if i["id"] == issue_id)
+        self.assertEqual("Is lunch provided on Saturday?", issue["details"]["text"])
+        self.assertEqual("open", issue["status"])
+        second = self.client.post("/api/events/hackathon/messages", json=body).json()
+        self.assertEqual("message:live02", second["issue_id"])
+
+    def test_new_message_is_removed_by_reset(self):
+        self.client.post("/api/events/hackathon/messages", json={"sender": "a@example.org", "text": "Hello"})
+        self.client.post("/api/events/hackathon/reset")
+        ids = [i["id"] for i in self.client.get("/api/events/hackathon").json()["issues"]]
+        self.assertNotIn("message:live01", ids)
+
+    def test_new_message_rejects_invalid_input(self):
+        for body in ({"sender": "a@example.org", "text": ""}, {"sender": "a@example.org", "text": "   "},
+                     {"sender": "", "text": "Hi"}, {"sender": "a@example.org", "text": "x" * 4001},
+                     {"sender": "a@example.org", "text": "Hi", "channel": "sms"}):
+            with self.subTest(body=body):
+                self.assertEqual(422, self.client.post("/api/events/hackathon/messages", json=body).status_code)
+        self.assertEqual(404, self.client.post("/api/events/nope/messages",
+                                               json={"sender": "a", "text": "b"}).status_code)
+
+    def test_new_message_can_be_run_by_the_agent(self):
+        issue_id = self.client.post("/api/events/hackathon/messages",
+                                    json={"sender": "a@example.org", "text": "Can we use Python?"}).json()["issue_id"]
+        with mock.patch("bureau.config.OPENAI_API_KEY", "fake-test-key"):
+            response = self.client.post(f"/api/events/hackathon/run?issue_id={issue_id}")
+        self.assertEqual(200, response.status_code, response.text)
+        self.assertEqual([issue_id], [a["issue_id"] for a in response.json()["actions"]])
+
     def test_reset_restores_sample_data_and_clears_actions_outbox_and_log(self):
         baseline = self.client.get("/api/events/hackathon").json()
         action = self.seed_action(payload={"payment_id": "f90", "participant_id": "p01",

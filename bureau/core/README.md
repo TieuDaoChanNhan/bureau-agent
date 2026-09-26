@@ -23,6 +23,9 @@ match). Rejected actions leave the input state, outbox and audit log unchanged.
 validation; `edited_description` overrides that reply, as for `SEND_MESSAGE`.
 Group validation remains scoped to the groups and members affected by the action.
 
+`save_state` also stores messages, so messages added at runtime (T32) survive reloads; an older
+`state.json` without them keeps the sample messages.
+
 `store.load_outbox(event_id)` returns simulated messages, or an empty list before
 any are sent. `append_outbox` stamps each entry with a timezone-aware ISO `sent_at`.
 `save_state` replaces the complete actions list: callers must mutate one loaded

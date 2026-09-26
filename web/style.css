@@ -152,6 +152,14 @@ details.done > summary .grouphead { position: static; }
 .groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .groups div { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
 
+/* New message form */
+.compose { display: flex; flex-direction: column; gap: 12px; }
+.compose label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.compose input, .compose select, .compose textarea { font: inherit; font-size: 14px; color: var(--ink); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
+.compose textarea { resize: vertical; }
+.compose input:focus-visible, .compose select:focus-visible, .compose textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 /* Outbox */
 .outbox { display: flex; flex-direction: column; gap: 10px; }
 .outbox .mail .from { font-family: var(--mono); }

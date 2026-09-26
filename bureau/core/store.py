@@ -23,7 +23,7 @@ from typing import Any
 
 from ..config import RUNTIME_DIR
 from .loader import load_event
-from .models import Check, EventState, Evidence, Group, Issue, Participant, Payment, ProposedAction
+from .models import Check, EventState, Evidence, Group, Issue, Message, Participant, Payment, ProposedAction
 
 
 class _DateTimeEncoder(json.JSONEncoder):
@@ -98,6 +98,12 @@ def load_state(event_id: str) -> EventState:
             )
             for g in stored["groups"]
         ]
+        if "messages" in stored:
+            state.messages = [
+                Message(id=m["id"], channel=m["channel"], sender=m["sender"], text=m["text"],
+                        received_at=_dt(m["received_at"]))
+                for m in stored["messages"]
+            ]
         state.travel = stored.get("travel")
         state.logistics = stored.get("logistics")
 
@@ -107,12 +113,13 @@ def load_state(event_id: str) -> EventState:
 
 
 def save_state(state: EventState) -> None:
-    """Write participants, payments, groups, logistics, issues and actions to runtime/ (T02)."""
+    """Write participants, payments, groups, messages, logistics, issues and actions to runtime/ (T02)."""
     d = _event_dir(state.id)
     _write_json(d / "state.json", {
         "participants": [asdict(p) for p in state.participants],
         "payments": [asdict(p) for p in state.payments],
         "groups": [asdict(g) for g in state.groups],
+        "messages": [asdict(m) for m in state.messages],
         "travel": state.travel,
         "logistics": state.logistics,
     })
