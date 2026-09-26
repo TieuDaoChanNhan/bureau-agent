@@ -4,7 +4,7 @@
 
 > LLM for ambiguity · Code for invariants · Humans for accountability
 
-**▶ Try it online:** TODO (link to the Hugging Face Space, T20) · **🎬 Demo video (2 min):** TODO · **🧭 Guided demo:** open the app and click **Start the guided demo**
+**▶ Try it online:** TODO (public demo link, T20) · **🎬 Demo video (2 min):** TODO · **🧭 Guided demo:** open the app and click **Start the guided demo**
 
 Built during the X-IA Hackathon #1 "Rise of Agents X" (25–27 September 2026). All code in this repository was written during the hackathon.
 
@@ -40,7 +40,7 @@ flowchart LR
 2. **Investigate.** An AI agent (OpenAI `gpt-4.1`, tool calling) picks its own tools: look up a participant, read payments, score an identity match, search the rules, check teams. It proposes **one** action: link a payment, send a reply, move a member, or ask the organizers. Every tool call is recorded and shown.
 3. **Decide.** The organizer sees the proposal first, with the agent's question, the evidence and an editable draft reply. Approving is what changes data or "sends" the reply (to a simulated outbox), and it is logged.
 
-The same loop plans trips. The organizer's request ("40 students, leave after class, max €… per person, arrive before 21:00, no overnight travel, two step-free rooms") becomes structured constraints. The planner **asks before searching** when something is ambiguous. It builds packages from **real hotel offers (Jinko)** and checks every package in code. It **never relaxes a constraint by itself**: when nothing fits, it says which single change would unlock an option.
+The same loop plans trips. The organizer's request for a student integration weekend ("100 students, leave the campus Friday after 17:00, €150 each with meals included, arrive before 21:00, no overnight travel, two step-free rooms, two coaches") becomes structured constraints. The request does not say whether the €150 covers the coaches, so the planner **asks before searching**. It builds packages from **real hotel offers (Jinko)**, adds the meal budget once, and checks every package in code: **3 of 8 are valid** at €150, ranked by the organizers' preferences. At €120, **none is**, and it **never relaxes a constraint by itself**: it says which single change would unlock each option. Choosing a package unlocks six waiting issues (reminders, rooms, four student questions).
 
 ## Why it is safe to use
 
@@ -67,14 +67,14 @@ Offline evaluation on **50 labeled messages** (the 25 sample messages plus 25 pa
 
 Constraint extraction on 8 labeled trip requests: hard constraints 8/8, clarification presence 8/8.
 
-**171 automated tests** (no API calls: a scripted fake model) run on every push.
+**192 automated tests** (no API calls: a scripted fake model) run on every push.
 
 Real-user feedback: TODO (T18).
 
 ## Try it
 
 ### Online
-TODO: the Hugging Face Space link (T20). Open it and click **Start the guided demo**, a 5-minute, 30-step tour that highlights each button.
+TODO: the public demo link (T20). Open it and click **Start the guided demo**: a 3-minute, 15-step tour that highlights each button. **See every feature** under it opens the full 30-step tour.
 
 ### Locally
 Requires Python 3.11+ and an OpenAI API key for the live agent. Everything else works without a key.
@@ -101,25 +101,26 @@ Then open http://127.0.0.1:8000 and click **Start the guided demo**. **Reset dem
 
 **Tests and evaluation**
 ```bash
-python -m unittest discover -s tests -t .     # 171 tests, no API key needed
+python -m unittest discover -s tests -t .     # 192 tests, no API key needed
 python -m eval.run_eval                       # 50-case evaluation (needs a key)
-python -m bureau plan wei --recorded-constraints   # trip planner offline
+python -m bureau plan wei --recorded-constraints   # trip planner offline: 3 of 8 packages valid at €150
+python -m bureau plan wei --recorded-constraints --budget 120   # none valid: diagnosis, no relaxation
 ```
 
 ## Features at a glance
 
 | | |
 |---|---|
-| **Guided demo** | 30 steps, each highlighting one element, with explanations; it moves on by itself after each action |
+| **Guided demo** | A 3-minute quick tour (15 steps, chapters, key numbers at the end) and a full 30-step tour; each step highlights one element and moves on by itself after each action |
 | **Agent steps** | Every tool the model chose, with arguments and results, replayed step by step after a run |
 | **Proposal first** | Action, the agent's question, what will change, and the editable draft reply, then the evidence |
 | **Live messages** | Type any message (English or French) and watch the agent handle it |
 | **Batch run** | Run the agent on every open issue with progress and Stop |
-| **Trip planner** | Asks before searching, real hotel offers, packages checked in code, a what-if budget, and a diagnosis without relaxing constraints |
-| **Dependencies** | Choosing a travel plan unlocks the issues waiting for it (reminders, rooms, meeting time) |
+| **Trip planner** | Asks before searching, real hotel offers, meal budgets itemized per person, return times, packages checked in code, a what-if budget (20% below the request), and a diagnosis without relaxing constraints |
+| **Dependencies** | Choosing a travel plan unlocks the six issues waiting for it (reminders, rooms, four student questions) |
 
 ![Proposal first](docs/screenshots/t35-proposal-card.jpg)
-![Trip packages](docs/screenshots/t35-trip-cards.jpg)
+![Trip packages](docs/screenshots/t37-trip-options.jpg)
 
 ## Architecture
 
@@ -150,20 +151,20 @@ Design choices: **one agent, not several** (the loop is the product); invariants
 | Issue detection, rule checks, identity scoring, constraint gate, executor | Real (Python), tested |
 | Agent investigation, constraint extraction, explanations | Real (OpenAI `gpt-4.1`) |
 | Hotel offers | Real Jinko responses, cached |
-| Transport options | Recorded illustrative fares (Jinko ground search unavailable for our key) |
-| Registrations, payments, messages | Fictional sample data with planted inconsistencies; no real personal data |
+| Transport options | Illustrative coach charter prices (Jinko ground search unavailable for our key) |
+| Registrations, payments, messages | Fictional sample data with planted inconsistencies; no real personal data. The trip scenario was modelled on a student integration weekend and reviewed by a team member who took part in one |
 | Sending, booking, paying | Not performed: approved replies go to a simulated outbox, and organizers book themselves |
 
 ## Limitations
 
 - Sample data only; not yet connected to a real inbox, Discord, Luma or HelloAsso export.
 - The local JSON store assumes one writer at a time. The deployed demo isolates each browser (T20).
-- Trip transport uses recorded fares, and group hotel blocks must be confirmed with the venue.
+- Coach prices are illustrative, and group hotel blocks, kitchen use and accessibility must be confirmed with the venue.
 - The agent's steps are shown after a run (replayed), not streamed live.
 
 ## Team
 
-TODO: full names (X-IA Hackathon #1). GitHub: [@TieuDaoChanNhan](https://github.com/TieuDaoChanNhan), [@0x2ee08](https://github.com/0x2ee08), [@pectpait](https://github.com/pectpait), [@hoanxuanbach](https://github.com/hoanxuanbach).
+Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH and Huy PHAN (X-IA Hackathon #1). GitHub: [@TieuDaoChanNhan](https://github.com/TieuDaoChanNhan), [@0x2ee08](https://github.com/0x2ee08), [@pectpait](https://github.com/pectpait), [@hoanxuanbach](https://github.com/hoanxuanbach).
 
 How we worked: issues, pull requests and reviews ([CONTRIBUTING.md](CONTRIBUTING.md), [TASKS.md](TASKS.md)). Internal planning documents under `docs/` are in Vietnamese.
 

@@ -3,7 +3,7 @@
 The script for the submission video. It follows the guided demo, so the same clicks can be rehearsed with **Start the guided demo**.
 
 ## Before recording
-- Run the latest `main` locally with `OPENAI_MODEL=gpt-4.1`, or use the deployed Space. Hard-reload the page (Ctrl+Shift+R).
+- Run the latest `main` locally with `OPENAI_MODEL=gpt-4.1`, or use the deployed demo (T20). Hard-reload the page (Ctrl+Shift+R).
 - **Light theme**, browser zoom 110–125%, window 1440×900 or larger, no bookmarks bar, notifications off.
 - **Reset demo** (click twice) on both events.
 - The live agent takes 10–20 s per issue. Record in one take and **cut the waits** in editing; do not speed-ramp the agent steps, since the viewer should see them appear. Alternatively, pre-run the agent on `message:m01` and on the trip, then Reset only what you replay.
@@ -20,13 +20,13 @@ The script for the submission video. It follows the guided demo, so the same cli
 | 0:45–1:00 | Proposal card | **Edit** the reply, add a word, **Save**, **Confirm and link**; open **Outbox** | "It drafted the reply in French. I edit it and approve. Only now is the payment linked, and the reply I approved goes out. The payment issue disappears." |
 | 1:00–1:12 | New message | Personal-data example → **Send to the agent** | "A sponsor asks for everyone's phone numbers. The agent checks the rules, finds the personal-data section, and escalates. It refuses to share." |
 | 1:12–1:22 | Short cut to the evaluation table in the README, or say it over the console | — | "Rules that must hold are enforced in code. When a weaker model tried to link a payment to the wrong person, the code refused it. On 50 labeled messages, the agent picks the right action 90% of the time." |
-| 1:22–1:48 | WEI tab → trip | **Plan the trip** → (answer the question if one is asked) → package cards → **what-if budget** → diagnosis | "Same loop, harder problem: a trip for [N] students. It turns the organizers' words into constraints, [asks before searching,] builds packages from real hotel offers, and checks every one in code. Lower the budget and nothing fits. It says what would have to change, and never relaxes a constraint by itself." |
-| 1:48–2:00 | **Choose option** → issues unlock; end card | Choose; show Waiting → Not analysed; end card with name and links | "I choose, and the reminders, rooms and meeting time unlock. Bureau Agent: the agent investigates, you decide." |
+| 1:22–1:48 | WEI tab → trip | **Plan the trip** → answer "the €150 covers the complete package" → **Answer and plan again** → package cards (3 of 8 valid) → **€120 (what if)** → diagnosis | "Same loop, harder problem: a weekend trip for 100 students, €150 each with meals. It turns the organizers' words into constraints, and asks first: does the €150 cover the coaches? It builds packages from real hotel offers and checks every one in code: 3 of 8 pass. At €120 nothing fits. It says what would have to change, and never relaxes a constraint by itself." |
+| 1:48–2:00 | **€150 (as requested)** → **Choose option F** → issues unlock; end card | Choose; show Waiting → Not analysed; end card with name and links | "Back to €150, I choose the first option, and six waiting issues unlock: reminders, rooms, students' questions. Bureau Agent: the agent investigates, you decide." |
 
-Bracketed parts depend on the final WEI scenario (#15): headcount, whether the planner asks a question, and the requested and what-if budgets. Update them once #15 is merged.
+The WEI numbers come from the scenario merged in #62 (T16): 100 students, a €150 request, the coach question, options F / C / E valid (€142.59 / €135.59 / €140.59), none at €120. If the live model does not ask the coach question, go straight to the package cards and drop that sentence.
 
 ## End card (3 s)
-**Bureau Agent** · An operations agent for volunteer-run associations · repository and live demo links · team names.
+**Bureau Agent** · An operations agent for volunteer-run associations · repository and live demo links · Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH, Huy PHAN.
 
 ## Checklist before upload
 - [ ] Length ≤ 2:00 (check the exported file, not the timeline).

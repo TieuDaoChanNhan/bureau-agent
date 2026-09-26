@@ -13,11 +13,11 @@ Volunteer boards run events on top of their studies, and most of the work is fra
 
 ## Links
 - Repository: https://github.com/TieuDaoChanNhan/bureau-agent
-- Live demo: TODO (Hugging Face Space, T20)
+- Live demo: TODO (T20, Render)
 - Video: TODO
 
 ## Team
-TODO: full names of the four members.
+Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH, Huy PHAN.
 
 ## Sponsor tools used
 OpenAI (agent, structured extraction, explanations), Jinko (hotel search), Pipelex (evaluated for constraint extraction).
