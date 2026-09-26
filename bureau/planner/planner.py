@@ -13,7 +13,7 @@ from dataclasses import asdict
 from ..config import DATA_DIR
 from ..core.models import Evidence, ProposedAction
 from .constraints import diagnose, eur, evaluate
-from .explain import explain
+from .explain import explain, rejection_line
 from .extract import extract_constraints
 from .interface import Constraints, TravelOption, TravelRequest
 
@@ -26,8 +26,12 @@ def search_options(req: TravelRequest) -> list[TravelOption]:
     return [TravelOption(**o) for o in raw]
 
 
-def plan_trip(req: TravelRequest, c: Constraints) -> ProposedAction:
-    """Return exactly one action: SELECT_TRAVEL_PLAN, or ESCALATE when nothing is valid."""
+def plan_trip(req: TravelRequest, c: Constraints, client=None) -> ProposedAction:
+    """Return exactly one action: SELECT_TRAVEL_PLAN, or ESCALATE when nothing is valid.
+
+    `client` (OpenAI-compatible) lets explain() phrase the trade-offs; ranking and checks
+    are computed in code either way.
+    """
     if c.clarifications:
         return ProposedAction(
             id=f"{req.event_id}:clarify_travel", event_id=req.event_id, issue_id="no_logistics_plan",
@@ -47,7 +51,7 @@ def plan_trip(req: TravelRequest, c: Constraints) -> ProposedAction:
             id=f"{req.event_id}:select_travel_plan", event_id=req.event_id,
             issue_id="no_logistics_plan", action_type="SELECT_TRAVEL_PLAN",
             title=f"{len(valid)} of {len(options)} options pass every verified hard constraint",
-            description=(f"{explain(valid, results, c)} Best: {eur(best.cost_per_person_cents)}/person. "
+            description=(f"{explain(valid, results, c, client=client)} "
                          f"Organizers choose; nothing is booked automatically."),
             evidence=evidence, checks=results[best.id],
             payload={"ranked_valid": [o.id for o in valid], "options": table},
@@ -57,6 +61,6 @@ def plan_trip(req: TravelRequest, c: Constraints) -> ProposedAction:
         id=f"{req.event_id}:no_valid_plan", event_id=req.event_id,
         issue_id="no_logistics_plan", action_type="ESCALATE",
         title="No option satisfies every hard constraint",
-        description="I did not relax any constraint. " + " ".join(suggestions),
+        description=" ".join(["I did not relax any constraint.", *suggestions, rejection_line(results, [])]),
         evidence=evidence, payload={"options": table, "suggestions": suggestions},
     )
