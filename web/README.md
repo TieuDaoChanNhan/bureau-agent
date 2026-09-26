@@ -30,7 +30,9 @@ uvicorn api.main:app --reload     # then open http://127.0.0.1:8000
 
 The decision trace is derived from `ProposedAction.evidence`: every evidence item is listed
 under *Checked*, non-rule items under *Found*, rule sections under *Applied*, and the action
-title under *Proposed*. Everything user-supplied is HTML-escaped before rendering.
+title under *Proposed*. Everything user-supplied is HTML-escaped before rendering. Ids are shown as names with the id
+in brackets (`nameOf()`, from the summary's `records`): "Antoine Nguyen (p01)"; the issue list
+shows the subjects' names under each non-message issue.
 
 ## Extending it
 - **Trip view:** `planDetail()` renders the `no_logistics_plan` issue; the planner response shape is documented in `api/README.md` (Planning a trip).

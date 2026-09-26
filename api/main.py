@@ -74,11 +74,20 @@ def _refresh(state: EventState) -> None:
                                 if i.id not in current_ids and i.status in ("resolved", "dismissed")]
     
 
+def _records(state: EventState) -> dict:
+    """Display names by id, so the UI can show "Antoine Nguyen (p01)" instead of "p01" (T23)."""
+    return {
+        "participants": {p.id: p.name for p in state.participants},
+        "groups": {g.id: g.name for g in state.groups},
+        "payments": {p.id: f"{p.payer_name} · {p.amount_cents / 100:.2f} {p.currency}" for p in state.payments},
+    }
+
+
 def _event_summary(state: EventState) -> dict:
     issues = store.merge_issue_status(detect_issues(state), state.issues)
     return {"id": state.id, "name": state.name, "counts": _counts(issues),
             "issues": [asdict(i) for i in issues], "actions": [asdict(a) for a in state.actions],
-            "travel": state.travel, "logistics": state.logistics}
+            "travel": state.travel, "logistics": state.logistics, "records": _records(state)}
 
 
 def _event_id_of_action(action_id: str) -> str:
