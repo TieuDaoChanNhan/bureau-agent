@@ -85,6 +85,17 @@ class ExecutorHardeningTests(unittest.TestCase):
                 self.assertEqual(next(p for p in result.payments if p.id == "f90").participant_id, "p01")
                 self.assertFalse((self.runtime / "hackathon" / "outbox.json").exists())
 
+    def test_link_payment_rejects_a_participant_below_the_identity_threshold(self):
+        # m14 with gpt-4o-mini: Antoine's payment f90 proposed for Victor (p18), score 0.1.
+        self.action.payload["participant_id"] = "p18"
+        self.assert_rejected(InvariantViolation)
+
+    def test_link_payment_accepts_a_payer_email_registered_by_the_participant(self):
+        # f30 was paid from Malik's second registered email: exact match, no score needed.
+        self.action.payload = {"payment_id": "f30", "participant_id": "p30"}
+        result = apply(self.state, self.action)
+        self.assertEqual(next(p for p in result.payments if p.id == "f30").participant_id, "p30")
+
     def assert_reply(self, edited_description=None):
         self.action.payload.update(to=["p01"], message="Payment confirmed")
         before = copy.deepcopy(self.state)

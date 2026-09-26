@@ -12,7 +12,8 @@ Effects by action_type (payload keys in brackets):
     ESCALATE            [note?]                             -> no data change; issue marked handled
 
 Payments may only be linked to existing participants and cannot change owners
-(explicit participant_id, otherwise an exact email match). Travel selections
+(explicit participant_id, otherwise an exact email match). A new link also needs
+an identity score of at least ASK_HUMAN, or a payer email registered by the person. Travel selections
 must have valid=True. Group checks are scoped to the affected groups/members.
 Invalid actions leave the input state, outbox and audit log unchanged.
 edited_description replaces SEND_MESSAGE text or an optional LINK_PAYMENT reply.
@@ -25,6 +26,7 @@ from typing import Optional
 from . import store
 from .models import EventState, Group, ProposedAction
 from ..tools.groups import check_groups
+from ..tools.identity import ASK_HUMAN, link_band
 
 
 class InvariantViolation(Exception):
@@ -55,6 +57,11 @@ def _apply_link_payment(state: EventState, action: ProposedAction) -> None:
     }
     if owners - {pid}:
         raise InvariantViolation(f"Payment {payment.id} already belongs to another participant")
+    if payment.participant_id != pid:
+        band, value = link_band(payment, state.participant(pid))
+        if band == "different":
+            raise InvariantViolation(
+                f"Payment {payment.id} does not match participant {pid}: identity score {value} < {ASK_HUMAN}")
     if action.payload.get("message") is not None and not action.payload.get("to"):
         raise ValueError("LINK_PAYMENT with a message requires a recipient (to)")
     payment.participant_id = pid
