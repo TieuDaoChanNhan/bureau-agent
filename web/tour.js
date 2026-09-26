@@ -262,6 +262,13 @@ async function tourAdvance() {
     try { await nxt.prepare(); } catch (err) { setRun(err.message, "error"); }
   }
   d.moveNext();
+  // If the console re-renders while Driver animates to the next step (for example the Edit click
+  // swaps the draft), the animation can stop before the popover is shown: highlight the step again.
+  const shown = d.getActiveIndex();
+  setTimeout(() => {
+    const pop = document.querySelector(".driver-popover");
+    if (tourState.driver === d && d.getActiveIndex() === shown && (!pop || pop.style.display === "none")) d.moveTo(shown);
+  }, 1000);
 }
 
 // Poll for the expected result of an action step, and move on when it appears.
