@@ -35,6 +35,7 @@
         Nothing is sent, changed or booked until an organizer approves it.</p>
       <div class="hero-cta">
         <button class="btn primary big" id="heroTourBtn" type="button">Start the guided demo</button>
+        <a class="btn big" id="videoBtn" href="#" target="_blank" rel="noopener" hidden>Watch the 2-min video</a>
         <a class="btn big" href="#console">Explore on my own</a>
       </div>
       <p class="hero-note">The guided demo takes about 5 minutes and uses the live agent on fictional sample data.</p>
@@ -48,6 +49,16 @@
         <li><span class="how-n">2</span><div><b>Investigate</b><p>An AI agent chooses tools, looks up records and rules, and proposes one action with evidence. Rules that must hold are enforced in code.</p></div></li>
         <li><span class="how-n">3</span><div><b>You decide</b><p>Approve, edit or dismiss. The approval is what changes data or sends a reply, and it is logged.</p></div></li>
       </ol>
+    </section>
+
+    <section class="band" id="problem" aria-labelledby="problem-title">
+      <p class="eyebrow">The problem</p>
+      <h2 id="problem-title">Student boards run real operations with no operations team.</h2>
+      <div class="cards">
+        <div class="card-s"><b>Scattered records</b><p>Registrations in a form, fees in a bank export, teams in a spreadsheet, questions in the inbox. Nobody sees the whole event.</p></div>
+        <div class="card-s"><b>Mistakes found too late</b><p>An unpaid fee, a member in two teams or a missing room shows up on the day, when fixing it costs the most.</p></div>
+        <div class="card-s"><b>Every answer needs a lookup</b><p>"Can my friend from another school join?" means reading the rules and the records before replying, dozens of times a week.</p></div>
+      </div>
     </section>
 
     <section class="console" id="console" aria-label="Operations console">
@@ -73,8 +84,31 @@
       </div>
     </section>
 
-    <p class="foot">All names, emails and payments are fictional sample data. Drafted replies end with "Drafted with AI assistance, approved by the organizers."</p>
+    <section class="band" id="trust" aria-labelledby="trust-title">
+      <p class="eyebrow">Why you can trust it</p>
+      <h2 id="trust-title">The AI investigates. Code enforces the rules. People decide.</h2>
+      <div class="cards">
+        <div class="card-s"><span class="card-ic" aria-hidden="true">✓</span><b>Nothing happens without approval</b><p>The agent only proposes. Every data change, reply and payment link waits for an organizer, and each approval is logged.</p></div>
+        <div class="card-s"><span class="card-ic" aria-hidden="true">§</span><b>Rules checked in code</b><p>Eligibility, team sizes and budgets are verified by code, not by the model. Below a 0.70 identity match the agent must ask instead of acting.</p></div>
+        <div class="card-s"><span class="card-ic" aria-hidden="true">i</span><b>Transparent by default</b><p>Each proposal shows the tools used and the evidence found. Drafted replies say they were written with AI assistance (EU AI Act, Art. 50).</p></div>
+      </div>
+    </section>
+
   </main>
+  <footer class="sitefoot">
+    <div class="sitefoot-in">
+      <div>
+        <span class="brand"><span class="logo" aria-hidden="true">B</span><b>Bureau Agent</b></span>
+        <p>Built in 48 hours at X-IA Hackathon #1 "Rise of Agents X" by 0x2ee08, hoanxuanbach, pectpait and TieuDaoChanNhan.</p>
+      </div>
+      <nav class="footlinks" aria-label="Project links">
+        <a href="https://github.com/TieuDaoChanNhan/bureau-agent" target="_blank" rel="noopener">Source code</a>
+        <a id="videoLink" href="#" target="_blank" rel="noopener" hidden>Demo video</a>
+        <a href="#console">Console</a>
+      </nav>
+    </div>
+    <p class="foot">All names, emails and payments are fictional sample data. Drafted replies end with "Drafted with AI assistance, approved by the organizers."</p>
+  </footer>
   <script src="/web/vendor/driver.js.iife.js"></script>
   <script src="/web/app.js"></script>
   <script src="/web/tour.js"></script>
