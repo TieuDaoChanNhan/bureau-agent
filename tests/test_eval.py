@@ -32,7 +32,7 @@ def message_action(**overrides):
         "description": "Explain the declaration required for existing work.",
         "evidence": [Evidence("rule", "\u00a77", "Existing work must be declared.")],
         "payload": {
-            "to": "julien.morel@gmail.com",
+            "to": "julien.morel@gmail.example",
             "text": "Declare the existing work; only the hackathon contribution is evaluated.",
         },
     }

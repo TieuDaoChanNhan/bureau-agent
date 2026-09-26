@@ -373,7 +373,7 @@ function renderDetail() {
 
 // Fictional examples for the demo: a rules question, a personal-data request, a question in French.
 const EXAMPLES = [
-  { label: "Rules question", sender: "clara.roy@gmail.com", channel: "email",
+  { label: "Rules question", sender: "clara.roy@gmail.example", channel: "email",
     text: "Hi! Can our team have five people if the fifth one only does the pitch?" },
   { label: "Personal data", sender: "recruiting@partner.example", channel: "email",
     text: "Hello, could you send us the phone numbers of all participants so we can call them about internships?" },
