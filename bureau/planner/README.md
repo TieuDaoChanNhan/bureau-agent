@@ -18,7 +18,7 @@ LLM interprets and explains. Code composes, prices and validates. The planner ne
 | `constraints.py` | Hard-constraint checks, ranking by soft priorities, diagnosis | done |
 | `extract.py` | Words → `Constraints` with OpenAI strict structured output | done (T10) |
 | `jinko.py` | `ground_search`, `hotel_search`, live/replay cache | skeleton (T11) |
-| `compose.py` | Transport × lodging → packages, integer cents | skeleton (T12) |
+| `compose.py` | Transport × lodging → packages, integer cents; lodging share rounded up; one package per transport first, cheapest always kept | done (T12) |
 | `explain.py` | Plain-language trade-offs, never changes the ranking | template (T13) |
 
 ## Hard constraints

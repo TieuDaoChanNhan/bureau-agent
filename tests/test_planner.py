@@ -71,5 +71,67 @@ class PlannerCliTests(unittest.TestCase):
         self.assertEqual(wei_constraints(), before)
 
 
+def _transport(price_cents, depart="18:10", **extra):
+    return {"mode": "train", "depart": depart, "arrive": "20:15", "changes": 0, "overnight": False,
+            "price_cents": price_cents, "source": "jinko:replay", **extra}
+
+
+def _lodging(name, price_per_night_cents, capacity=40, **extra):
+    return {"name": name, "rooms": 10, "capacity": capacity, "walk_minutes": 6,
+            "price_per_night_cents": price_per_night_cents, "step_free_hint": True, **extra}
+
+
+class ComposeTests(unittest.TestCase):
+    def test_cost_per_person_is_transport_plus_lodging_share_in_integer_cents(self):
+        from bureau.planner.compose import compose_packages
+        # 5000 + 40000 * 2 nights / 40 people = 5000 + 2000
+        [option] = compose_packages(wei_request(), [_transport(5000)], [_lodging("Hostel", 40000)], nights=2)
+        self.assertEqual(7000, option.cost_per_person_cents)
+        self.assertIsInstance(option.cost_per_person_cents, int)
+        self.assertNotIn("price_cents", option.transport)
+        self.assertNotIn("price_per_night_cents", option.lodging)
+        self.assertEqual("jinko:replay", option.source)
+
+    def test_lodging_share_is_rounded_up_never_down(self):
+        from bureau.planner.compose import compose_packages
+        # 40001 * 1 / 40 = 1000.025 -> 1001
+        [option] = compose_packages(wei_request(), [_transport(0)], [_lodging("Hostel", 40001)], nights=1)
+        self.assertEqual(1001, option.cost_per_person_cents)
+
+    def test_cheapest_package_is_kept_even_beyond_the_limit(self):
+        from bureau.planner.compose import compose_packages
+        transports = [_transport(p, depart=f"1{k}:00") for k, p in enumerate([9000, 8000, 7000, 1000])]
+        lodgings = [_lodging(f"L{k}", 40000 + 4000 * k) for k in range(3)]
+        options = compose_packages(wei_request(), transports, lodgings, nights=2, limit=2)
+        self.assertEqual(2, len(options))
+        self.assertEqual(1000 + 2000, min(o.cost_per_person_cents for o in options))
+        self.assertEqual(["A", "B"], [o.id for o in options])
+        self.assertLessEqual(options[0].cost_per_person_cents, options[1].cost_per_person_cents)
+
+    def test_lodging_without_enough_capacity_is_dropped(self):
+        from bureau.planner.compose import compose_packages
+        options = compose_packages(wei_request(), [_transport(5000)],
+                                   [_lodging("Too small", 10000, capacity=30), _lodging("Fits", 50000)], nights=2)
+        self.assertEqual(["Fits"], [o.lodging["name"] for o in options])
+        self.assertEqual([], compose_packages(wei_request(), [_transport(5000)],
+                                              [_lodging("Too small", 10000, capacity=30)], nights=2))
+
+    def test_each_transport_is_represented_before_filling_by_cost(self):
+        from bureau.planner.compose import compose_packages
+        transports = [_transport(1000, depart="17:00"), _transport(6000, depart="18:00")]
+        lodgings = [_lodging(f"L{k}", 40000 + 400 * k) for k in range(5)]
+        options = compose_packages(wei_request(), transports, lodgings, nights=1, limit=3)
+        self.assertEqual({"17:00", "18:00"}, {o.transport["depart"] for o in options})
+
+    def test_composed_packages_go_through_the_same_checks(self):
+        from bureau.planner.compose import compose_packages
+        from bureau.planner.constraints import evaluate
+        req = wei_request()
+        options = compose_packages(req, [_transport(10000), _transport(3000, overnight=True)],
+                                   [_lodging("Hostel", 40000)], nights=2)
+        valid, _ = evaluate(options, wei_constraints())
+        self.assertEqual([12000], [o.cost_per_person_cents for o in valid])
+
+
 if __name__ == "__main__":
     unittest.main()
