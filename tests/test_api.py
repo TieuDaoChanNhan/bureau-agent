@@ -200,6 +200,12 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(409, self.client.post("/api/events/hackathon/plan").status_code)
         self.assertEqual(404, self.client.post("/api/events/nope/plan").status_code)
 
+    def test_summary_carries_display_names_for_ids(self):
+        records = self.client.get("/api/events/hackathon").json()["records"]
+        self.assertEqual("Antoine Nguyen", records["participants"]["p01"])
+        self.assertEqual("NeuralNomads", records["groups"]["t-nomads"])
+        self.assertEqual("A. Nguyen · 10.00 EUR", records["payments"]["f90"])
+
     def test_reset_restores_sample_data_and_clears_actions_outbox_and_log(self):
         baseline = self.client.get("/api/events/hackathon").json()
         action = self.seed_action(payload={"payment_id": "f90", "participant_id": "p01",

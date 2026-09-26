@@ -110,6 +110,9 @@ function issueMeta(issue) {
     const t = issue.details.text;
     return t.length > 70 ? `${t.slice(0, 70)}…` : t;
   }
+  const r = (summary() && summary().records) || {};
+  const names = (issue.subject_ids || []).map(id => (r.participants || {})[id] || (r.groups || {})[id]).filter(Boolean);
+  if (names.length) return names.slice(0, 3).join(", ") + (names.length > 3 ? ` +${names.length - 3}` : "");
   return issue.id;
 }
 
@@ -145,6 +148,15 @@ function renderIssues() {
       ${vanished.map(doneRow).join("")}${doneIssues.map(row).join("")}</details>` : "");
 }
 
+// "Antoine Nguyen (p01)" for a known participant, group or payment id; the id otherwise (T23).
+function nameOf(id) {
+  if (id == null || id === "") return id;
+  const r = (summary() && summary().records) || {};
+  const name = (r.participants || {})[id] || (r.groups || {})[id] || (r.payments || {})[id];
+  return name ? `${name} (${id})` : String(id);
+}
+const namesOf = ids => (ids || []).map(nameOf);
+
 function kv(pairs) {
   const rows = pairs.filter(([, v]) => v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && !v.length));
   return rows.length ? `<dl class="kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(Array.isArray(v) ? v.join(", ") : v)}</dd>`).join("")}</dl>` : "";
@@ -165,14 +177,14 @@ function inputBlock(issue) {
     body = `<div class="mail"><span class="from">${esc(issue.title)}</span>${esc(d.text)}</div>`;
   } else if (issue.kind === "unmatched_payment") {
     const signals = (d.signals || []).map(([name, passed, detail]) => ({ name, passed, detail }));
-    body = kv([["Payment", d.payment_id], ["Best candidate", d.candidate], ["Identity score", d.score], ["Band", d.band]]) +
+    body = kv([["Payment", nameOf(d.payment_id)], ["Best candidate", nameOf(d.candidate)], ["Identity score", d.score], ["Band", d.band]]) +
       (signals.length ? checksList(signals) : "");
   } else if (issue.kind === "multiple_group_membership") {
-    body = kv([["Participant", d.participant_id], ["Groups", d.group_ids]]);
+    body = kv([["Participant", nameOf(d.participant_id)], ["Groups", namesOf(d.group_ids)]]);
   } else if (issue.kind === "group_over_capacity") {
-    body = kv([["Group", d.group_id], ["Members", d.size], ["Maximum", d.max]]);
+    body = kv([["Group", nameOf(d.group_id)], ["Members", d.size], ["Maximum", d.max]]);
   } else {
-    body = kv([["Subjects", issue.subject_ids], ...Object.entries(d).map(([k, v]) => [k.replace(/_/g, " "), typeof v === "object" && !Array.isArray(v) ? JSON.stringify(v) : v])]);
+    body = kv([["Subjects", namesOf(issue.subject_ids)], ...Object.entries(d).map(([k, v]) => [k.replace(/_/g, " "), typeof v === "object" && !Array.isArray(v) ? JSON.stringify(v) : v])]);
   }
   return `<div class="block"><span class="lbl">Input · detected by fixed checks</span>${body || '<p class="note">No further details.</p>'}</div>`;
 }
@@ -203,7 +215,7 @@ function stepsBlock(action) {
 // The agent's evidence, grouped as checked / found / applied / proposed.
 function traceBlock(action) {
   const ev = action.evidence || [];
-  const checked = [...new Set(ev.map(e => `${e.source_type} ${e.source_id}`))];
+  const checked = [...new Set(ev.map(e => `${e.source_type} ${e.source_type === "rule" ? e.source_id : nameOf(e.source_id)}`))];
   const found = ev.filter(e => e.source_type !== "rule");
   const applied = ev.filter(e => e.source_type === "rule");
   const li = items => items.length ? `<ul>${items.join("")}</ul>` : '<span class="note">None cited.</span>';
@@ -225,11 +237,12 @@ function payloadBlock(action) {
   const p = action.payload || {};
   const to = Array.isArray(p.to) ? p.to.join(", ") : p.to;
   switch (action.action_type) {
-    case "LINK_PAYMENT": return kv([["Link payment", p.payment_id], ["To participant", p.participant_id], ["Reply to", to]]);
+    case "LINK_PAYMENT": return kv([["Link payment", nameOf(p.payment_id)], ["To participant", nameOf(p.participant_id)], ["Reply to", to]]);
     case "SEND_MESSAGE": return kv([["To", to]]);
-    case "MOVE_MEMBER": return kv([["Participant", p.participant_id], ["From group", p.from_group || "none"], ["To group", p.to_group || "none"]]);
+    case "MOVE_MEMBER": return kv([["Participant", nameOf(p.participant_id)], ["From group", p.from_group ? nameOf(p.from_group) : "none"],
+                                   ["To group", p.to_group ? nameOf(p.to_group) : "none"]]);
     case "UPDATE_GROUPS": return `<div class="groups">${(p.groups || []).map(g =>
-      `<div><b>${esc(g.name)}</b> <span class="src">${esc(g.id)}</span><br>${esc(g.members.join(", "))}</div>`).join("")}</div>`;
+      `<div><b>${esc(g.name)}</b> <span class="src">${esc(g.id)}</span><br>${esc(g.members.map(id => (summary().records.participants || {})[id] || id).join(", "))}</div>`).join("")}</div>`;
     case "ESCALATE": return p.note ? `<div class="question">${esc(p.note)}</div>` : "";
     case "SELECT_TRAVEL_PLAN": {
       const chosen = summary().logistics;
@@ -522,7 +535,8 @@ function keepSelection() {
 
 function store(data) {
   ui.summaries[data.id] = { id: data.id, name: data.name, counts: data.counts, issues: data.issues, actions: data.actions,
-                            travel: data.travel || null, logistics: data.logistics || null };
+                            travel: data.travel || null, logistics: data.logistics || null,
+                            records: data.records || { participants: {}, groups: {}, payments: {} } };
 }
 
 async function selectEvent(id) {
