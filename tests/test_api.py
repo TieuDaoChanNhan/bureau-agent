@@ -200,6 +200,11 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(409, self.client.post("/api/events/hackathon/plan").status_code)
         self.assertEqual(404, self.client.post("/api/events/nope/plan").status_code)
 
+    def test_summary_carries_event_context_for_the_cards(self):
+        meta = self.client.get("/api/events/wei").json()["meta"]
+        self.assertEqual("Integration weekend", meta["type"])
+        self.assertEqual(8, meta["participants"])
+
     def test_summary_carries_display_names_for_ids(self):
         records = self.client.get("/api/events/hackathon").json()["records"]
         self.assertEqual("Antoine Nguyen", records["participants"]["p01"])

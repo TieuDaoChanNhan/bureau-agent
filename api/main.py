@@ -87,7 +87,8 @@ def _event_summary(state: EventState) -> dict:
     issues = store.merge_issue_status(detect_issues(state), state.issues)
     return {"id": state.id, "name": state.name, "counts": _counts(issues),
             "issues": [asdict(i) for i in issues], "actions": [asdict(a) for a in state.actions],
-            "travel": state.travel, "logistics": state.logistics, "records": _records(state)}
+            "travel": state.travel, "logistics": state.logistics, "records": _records(state),
+            "meta": {**state.settings.get("display", {}), "participants": len(state.participants)}}
 
 
 def _event_id_of_action(action_id: str) -> str:
