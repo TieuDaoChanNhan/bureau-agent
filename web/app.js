@@ -231,6 +231,11 @@ function payloadBlock(action) {
     case "UPDATE_GROUPS": return `<div class="groups">${(p.groups || []).map(g =>
       `<div><b>${esc(g.name)}</b> <span class="src">${esc(g.id)}</span><br>${esc(g.members.join(", "))}</div>`).join("")}</div>`;
     case "ESCALATE": return p.note ? `<div class="question">${esc(p.note)}</div>` : "";
+    case "SELECT_TRAVEL_PLAN": {
+      const chosen = summary().logistics;
+      return kv([["Valid options", (p.ranked_valid || []).join(", ")],
+                 ["Chosen", chosen ? `${chosen.id} · ${euro(chosen.cost_per_person_cents)} per person` : ""]]);
+    }
     default: return kv(Object.entries(p).map(([k, v]) => [k, typeof v === "object" ? JSON.stringify(v) : v]));
   }
 }
@@ -279,6 +284,7 @@ function renderDetail() {
   const byIssue = actionsByIssue(s);
   const action = byIssue[issue.id];
   const st = viewStatus(issue, s, byIssue);
+  if (issue.kind === "no_logistics_plan") { el.innerHTML = planDetail(issue, action, st); return; }
   const editable = st === "proposed" || st === "human";
   let actions;
   if (st === "resolved" || st === "dismissed") {
@@ -286,8 +292,6 @@ function renderDetail() {
   } else if (st === "waiting") {
     const deps = issue.depends_on.map(dep => (s.issues.find(i => i.id === dep) || { title: dep }).title);
     actions = `<span class="note">Waiting for "${esc(deps.join('", "'))}". Resolve that issue first.</span>`;
-  } else if (issue.kind === "no_logistics_plan") {
-    actions = `<span class="note">Travel planning (option comparison, budget what-if) is handled by the trip view.</span>`;
   } else if (st === "failed") {
     actions = `<span class="note">The agent failed on this issue; see the audit log.</span>
       <button class="btn" type="button" data-act="retry">Retry agent</button>`;
@@ -342,6 +346,126 @@ async function submitMessage(form) {
   if (issueId) await runAgent(issueId);
 }
 
+// ---------- trip planning (T15) ----------
+
+const euro = cents => `€${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
+const HARD_LABEL = {
+  participants: v => `${v} participants`,
+  max_cost_per_person_cents: v => `≤ ${euro(v)} per person (travel + lodging)`,
+  arrive_before: v => `Arrive before ${v}`,
+  no_overnight: v => (v ? "No overnight travel" : "Overnight travel allowed"),
+  step_free_rooms: v => `≥ ${v} step-free rooms`,
+};
+const SOFT_LABEL = { fewer_changes: "Fewer changes", near_station: "Lodging near the station",
+                     early_return: "Early return on Sunday", lower_cost: "Lower cost" };
+
+function requestedBudget(s) {
+  const c = s.travel && s.travel.constraints;
+  return c && c.hard ? c.hard.max_cost_per_person_cents : null;
+}
+
+function optionRows(action) {
+  const rows = (action.payload && action.payload.options) || [];
+  const ranked = (action.payload && action.payload.ranked_valid) || [];
+  return rows.map(row => {
+    const o = row.option, t = o.transport || {}, l = o.lodging || {};
+    const failed = (row.checks || []).filter(c => c.verified !== false && !c.passed);
+    const confirm = (row.checks || []).filter(c => c.verified === false).map(c => c.name);
+    const costBad = failed.some(c => /cost/i.test(c.name));
+    const timeBad = failed.some(c => /arriv/i.test(c.name));
+    const label = !row.valid ? "Rejected" : ranked[0] === o.id ? "Ranked 1st" : "Valid";
+    const cls = !row.valid ? "v-rej" : ranked[0] === o.id ? "v-pick" : "v-alt";
+    return `<tr class="${row.valid ? "" : "rejected"}"><td><b>${esc(o.id)}</b></td>
+      <td class="${t.overnight ? "bad" : ""}">${esc(t.mode || "")} · ${esc(t.depart || "?")} → ${esc(t.arrive || "?")}
+        · ${t.changes ? `${t.changes} change${t.changes > 1 ? "s" : ""}` : "direct"}${t.overnight ? " · overnight" : ""}</td>
+      <td>${esc(l.name || "")}${l.walk_minutes != null ? ` · ${esc(l.walk_minutes)} min walk` : ""}${l.capacity ? ` · ${esc(l.capacity)} beds` : ""}</td>
+      <td class="num ${costBad ? "bad" : ""}">${euro(o.cost_per_person_cents)}</td>
+      <td class="num ${timeBad ? "bad" : ""}">${esc(t.arrive || "")}</td>
+      <td><span class="verdict ${cls}">${label}</span>
+        ${failed.length ? `<span class="why">${esc(failed.map(c => `${c.name}${c.detail ? ` (${c.detail})` : ""}`).join("; "))}</span>` : ""}
+        ${row.valid && confirm.length ? `<span class="confirm">Organizers confirm: ${esc(confirm.join(", "))}</span>` : ""}</td></tr>`;
+  }).join("");
+}
+
+function planDetail(issue, action, st) {
+  const s = summary();
+  const t = s.travel || {};
+  const head = header(issue, null);
+  const input = `<div class="block"><span class="lbl">Planning request · ${esc(t.origin || "")} → ${esc(t.destination || "")}</span>
+    <div class="mail"><span class="from">From the organizers · ${esc(t.participants || "?")} participants</span>${esc(t.request || "")}</div></div>`;
+  if (st === "waiting") return head + input;
+  if (!action) {
+    return head + input + `<div class="actions"><span class="note">No plan yet. The planner checks every package against the hard constraints in code; nothing is booked.</span>
+      <button class="btn primary" type="button" data-act="plan">Plan the trip</button></div>`;
+  }
+  const c = (action.payload && action.payload.constraints) || { hard: {}, soft: [], organizer_verified: [] };
+  const budget = c.hard.max_cost_per_person_cents;
+  const requested = requestedBudget(s);
+  const whatIf = requested && requested > 9000 ? 9000 : null;
+  const hard = Object.entries(c.hard).map(([k, v]) =>
+    `<li>${esc(HARD_LABEL[k] ? HARD_LABEL[k](v) : `${k}: ${v}`)}${(c.organizer_verified || []).includes(k) ? ' <span class="confirm">organizers confirm</span>' : ""}</li>`).join("");
+  const soft = (c.soft || []).map(k => `<li>${esc(SOFT_LABEL[k] || k)}</li>`).join("");
+  const rows = (action.payload.options || []);
+  const valid = (action.payload.ranked_valid || []);
+  const suggestions = action.payload.suggestions || [];
+  const diag = action.action_type === "ESCALATE" && rows.length ? `<div class="diag"><b>No valid option at ${euro(budget)} per person.</b>
+      <span>I did not relax any constraint. Options for the organizers:</span>
+      <ul>${suggestions.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : "";
+  const seg = requested ? `<div class="block"><span class="lbl">Try it: budget per person</span><div class="seg" role="group" aria-label="Budget">
+      <button type="button" data-budget="" aria-pressed="${budget === requested}">${euro(requested)} (as requested)</button>
+      ${whatIf ? `<button type="button" data-budget="${whatIf}" aria-pressed="${budget === whatIf}">${euro(whatIf)} (what if)</button>` : ""}</div></div>` : "";
+  const trace = `<div class="block"><span class="lbl">Decision trace</span><dl class="trace">
+      <dt>Checked</dt><dd><ul><li>Planning request and ${rows.length} travel + lodging packages <span class="src">${esc((rows[0] && rows[0].option.source) || "")}</span></li></ul></dd>
+      <dt>Found</dt><dd>${valid.length} of ${rows.length} packages pass every verified hard constraint</dd>
+      <dt>Applied</dt><dd>Hard constraints checked in code; soft preferences only rank valid options; unverifiable ones go to organizers</dd>
+      <dt>Proposed</dt><dd>${esc(action.title)}</dd></dl></div>`;
+  let buttons;
+  if (st === "resolved" || st === "dismissed") buttons = `<span class="note">Decided.</span>`;
+  else if (valid.length) buttons = valid.map((id, k) => {
+    const o = rows.find(r => r.option.id === id).option;
+    return `<button class="btn ${k === 0 ? "ok" : ""}" type="button" data-act="choose" data-opt="${esc(id)}">Choose option ${esc(id)} · ${euro(o.cost_per_person_cents)}</button>`;
+  }).join("") + `<span class="note">Organizers book the chosen option; nothing is booked automatically.</span>`;
+  else buttons = `<span class="note">Nothing to approve: change a constraint (for example the budget) and plan again.</span>`;
+  return head + input + `
+    <div class="block"><span class="lbl">Constraints</span><div class="cons">
+      <div class="hard"><h4>Hard · reject if broken</h4><ul>${hard}</ul></div>
+      <div class="soft"><h4>Soft · rank valid options</h4><ul>${soft || "<li>Lower cost</li>"}</ul></div></div></div>
+    ${seg}
+    ${trace}
+    <div class="block"><span class="lbl">Options compared</span><div class="optwrap"><table class="opts">
+      <thead><tr><th>Option</th><th>Travel</th><th>Lodging</th><th>Per person</th><th>Arrives</th><th>Result</th></tr></thead>
+      <tbody>${optionRows(action)}</tbody></table></div></div>
+    ${diag}
+    <div class="block"><span class="lbl">Planner's note to organizers · <span class="atype">${esc(action.action_type)}</span></span>
+      <div class="question">${esc(action.description)}</div></div>
+    <div class="actions">${buttons}</div>`;
+}
+
+async function planTrip(overrideBudget = null) {
+  await busy(overrideBudget ? `Re-checking every package at ${euro(overrideBudget)} per person…` : "Planning the trip…", async () => {
+    const body = overrideBudget ? { overrides: { max_cost_per_person_cents: overrideBudget } } : {};
+    const data = await api(`/api/events/${encodeURIComponent(ui.current)}/plan`, { method: "POST", body: JSON.stringify(body) });
+    store(data);
+    const action = data.actions.find(a => a.id === data.action_id);
+    const valid = (action.payload.ranked_valid || []).length;
+    setRun(`Planner: ${valid} of ${(action.payload.options || []).length} packages pass every hard constraint`
+      + `${overrideBudget ? ` at ${euro(overrideBudget)}` : ""}.`, valid ? "" : "error");
+  });
+}
+
+async function chooseOption(optionId) {
+  const { action } = currentAction();
+  // Count before approving: once the plan exists, detection drops the dependency.
+  const unlocked = summary().issues.filter(i => i.depends_on.includes("no_logistics_plan")).length;
+  await busy(`Selecting option ${optionId}…`, async () => {
+    const data = await api(`/api/actions/${encodeURIComponent(action.id)}/approve`,
+                           { method: "POST", body: JSON.stringify({ option_id: optionId }) });
+    store(data);
+    keepSelection();
+    setRun(`Travel plan chosen: option ${optionId}. ${unlocked} dependent issue${unlocked === 1 ? "" : "s"} unlocked.`);
+  });
+}
+
 function outboxHTML() {
   const items = ui.outbox.slice().reverse();
   return `<div class="dhead"><div class="badges"><span class="badge b-kind">outbox</span></div>
@@ -373,7 +497,8 @@ function keepSelection() {
 }
 
 function store(data) {
-  ui.summaries[data.id] = { id: data.id, name: data.name, counts: data.counts, issues: data.issues, actions: data.actions };
+  ui.summaries[data.id] = { id: data.id, name: data.name, counts: data.counts, issues: data.issues, actions: data.actions,
+                            travel: data.travel || null, logistics: data.logistics || null };
 }
 
 async function selectEvent(id) {
@@ -533,6 +658,8 @@ $("#issues").addEventListener("click", e => {
 $("#issues").addEventListener("toggle", e => { if (e.target.matches("details.done")) ui.doneOpen = e.target.open; }, true);
 
 $("#detail").addEventListener("click", e => {
+  const bud = e.target.closest("[data-budget]");
+  if (bud && !ui.busy) { planTrip(bud.dataset.budget ? +bud.dataset.budget : null); return; }
   const btn = e.target.closest("[data-act], [data-example]");
   if (!btn || ui.busy) return;
   const act = btn.dataset.act;
@@ -549,6 +676,10 @@ $("#detail").addEventListener("click", e => {
     }
   } else if (act === "approve" || act === "dismiss") {
     decide(act);
+  } else if (act === "plan") {
+    planTrip();
+  } else if (act === "choose") {
+    chooseOption(btn.dataset.opt);
   } else if (act === "retry") {
     runAgent(currentAction().issueId);
   } else if (btn.dataset.example !== undefined) {
