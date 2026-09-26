@@ -41,3 +41,16 @@ state and save it once, rather than saving a new action then writing an old stat
 | `no_logistics_plan`, `rooms_unassigned` | yes | `<kind>` |
 | `solo_participants` | no | `solo_participants` |
 | `unprocessed_message` | no | `message:<message_id>` |
+
+## Browser sandboxes and model budgets
+
+`session.py` carries a request-local context variable. In public demo mode,
+`store._event_dir` uses `runtime/<session>/<event>/`; other callers retain
+`runtime/<event>/`. Never mutate the global runtime root for individual requests.
+
+`llm_usage.py` reserves model attempts atomically in SQLite before every provider
+call. Agent turns and both planner steps share global UTC-day and 24-hour-session
+caps. Failed attempts count, output tokens are bounded, and session-tagged logs
+contain no prompts or keys. Accounting failures refuse live calls. SQLite is
+outside session directories and Reset never clears it, but a Render disk reset
+does. The independent provider project hard limit is required; see deployment docs.

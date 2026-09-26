@@ -86,3 +86,17 @@ replaces any earlier planner proposal and carries the constraints used in `paylo
 The response is the event summary plus `action_id`. Approving `SELECT_TRAVEL_PLAN` needs
 `{"option_id": ...}` and only accepts a valid option; it sets `logistics` and unlocks dependent
 issues. 409 when the event has no open travel issue. Nothing is booked.
+
+## Public hosted mode
+
+Render sets `DEMO_MODE=1`. `sessions.py` gives each browser an HttpOnly/SameSite
+cookie, scopes runtime files under `runtime/<session>/<event>/`, serializes each
+session's requests and cleans expired sandboxes. HTTPS cookies are Secure.
+`/health` checks readiness without creating a session. Without demo mode, the
+existing CLI/development behavior above is retained.
+
+In demo mode, `run` and `plan` enforce shared daily/session budgets. No key or an
+exhausted limit returns exact saved examples with `replay: true`, `replay_reason`
+and the same markers in action payloads. Unknown examples return 429 before any
+model call. Mid-run caps propagate here; custom planner text never silently
+becomes a sample request. All sends remain simulated. See [deployment](../docs/DEPLOY.md).

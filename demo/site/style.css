@@ -17,7 +17,6 @@
 }
 
 * { box-sizing: border-box; }
-[hidden] { display: none !important; }
 /* No CSS smooth scrolling: the tour measures elements right after scrolling them into view. */
 html { scroll-padding-top: 72px; }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
@@ -240,7 +239,6 @@ details.sec > .sec-body { padding: 0 16px 16px; display: flex; flex-direction: c
 .optcard .price { font-size: 26px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .optcard .price small { font-size: 13px; font-weight: 500; color: var(--muted); }
 .optcard .line { font-size: 13.5px; color: var(--ink-2); }
-.optcard .line.cost { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: -4px; }
 .verdict { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; display: inline-block; }
 .v-pick { background: var(--ok-soft); color: var(--ok); } .v-alt { background: var(--accent-soft); color: var(--accent); }
 .v-rej { background: var(--crit-soft); color: var(--crit); }
@@ -266,26 +264,7 @@ details.sec > .sec-body { padding: 0 16px 16px; display: flex; flex-direction: c
 .examples { display: flex; flex-wrap: wrap; gap: 8px; }
 .outbox { display: flex; flex-direction: column; gap: 10px; }
 
-/* Problem and trust bands, footer (T36) */
-.band { padding: 36px 0 8px; display: flex; flex-direction: column; gap: 10px; }
-.band h2 { font-size: clamp(22px, 2.6vw, 30px); font-weight: 800; letter-spacing: -.02em; max-width: 34ch; }
-.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 8px; }
-.card-s { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; box-shadow: var(--shadow);
-          display: flex; flex-direction: column; gap: 6px; }
-.card-s b { font-size: 16px; }
-.card-s p { font-size: 14px; color: var(--ink-2); }
-.card-ic { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 700;
-           background: var(--accent-soft); color: var(--accent); }
-#problem { padding-bottom: 40px; }
-#trust { padding-top: 48px; }
-.sitefoot { border-top: 1px solid var(--line); background: var(--surface); margin-top: 8px; padding: 28px 0 24px; }
-.sitefoot-in { max-width: 1240px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: flex-start;
-               gap: 24px; flex-wrap: wrap; }
-.sitefoot-in p { font-size: 14px; color: var(--muted); margin-top: 8px; max-width: 60ch; }
-.footlinks { display: flex; gap: 18px; flex-wrap: wrap; font-weight: 600; font-size: 14px; }
-.footlinks a { text-decoration: none; }
-.footlinks a:hover { text-decoration: underline; }
-.foot { font-size: 13px; color: var(--muted); text-align: center; margin-top: 20px; padding: 0 16px; }
+.foot { font-size: 13px; color: var(--muted); text-align: center; margin-top: 20px; }
 
 /* Product tour (T34), on top of web/vendor/driver.css */
 .driver-popover.tour-popover { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px;
@@ -298,30 +277,23 @@ details.sec > .sec-body { padding: 0 16px 16px; display: flex; flex-direction: c
   font: 600 13.5px var(--sans); border-radius: 9px; padding: 7px 14px; }
 .tour-popover .driver-popover-close-btn { color: var(--muted); }
 .tour-do { font-weight: 700; color: var(--accent); }
-.tour-ch { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-           color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 8px; margin-right: 6px; }
-.tour-ch:empty { display: none; }
-.tour-nums { list-style: none; padding: 0; margin: 0 0 10px; display: grid; gap: 6px; }
-.tour-nums b { display: inline-block; min-width: 52px; font-size: 18px; color: var(--accent); font-variant-numeric: tabular-nums; }
 .tour-wait { font-size: 12.5px; color: var(--muted); }
 .tour-extra { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--line); }
 .tour-status { font-size: 12.5px; color: var(--warn); font-weight: 600; }
 .tour-act { font: 600 13px var(--sans); background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 9px;
   padding: 6px 12px; cursor: pointer; margin-left: auto; }
-.tour-act.ghost { background: none; color: var(--accent); border: 1px solid var(--line); }
 .tour-skip { font: 600 12px var(--sans); background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 7px; padding: 3px 8px; cursor: pointer; }
 
 /* Responsive */
 @media (max-width: 980px) {
   .main { grid-template-columns: 1fr; }
   .issues { border-right: 0; border-bottom: 1px solid var(--line); max-height: 440px; }
-  .metrics, .how, .cards { grid-template-columns: 1fr; }
+  .metrics, .how { grid-template-columns: 1fr; }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
   main { padding: 0 12px 40px; }
   .topbar-in { padding: 10px 12px; }
-  .sitefoot-in { padding: 0 12px; }
   .topnav a { display: none; }
   .hero { padding: 36px 0 28px; }
   .lede { font-size: 16px; }
@@ -332,3 +304,7 @@ details.sec > .sec-body { padding: 0 16px 16px; display: flex; flex-direction: c
   .mv { font-size: 34px; }
 }
 .demo-status{margin:16px auto;padding:10px 16px;max-width:1200px;border:1px solid var(--line);border-radius:10px;background:var(--accent-soft);font-size:13px}.demo-status[hidden]{display:none}
+
+/* Static customer demo notice. */
+.demo-banner{max-width:1200px;margin:20px auto 0;padding:12px 20px;border:1px solid var(--line);border-radius:12px;background:var(--accent-soft);color:var(--ink-2);font-size:13px}
+@media(max-width:600px){.demo-banner{margin:12px 14px 0}.toolbar{flex-wrap:wrap}.console-title{flex-wrap:wrap}}

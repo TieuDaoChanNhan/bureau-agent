@@ -12,6 +12,7 @@ from dataclasses import asdict
 from typing import Any
 
 from .. import config
+from ..core.llm_usage import create_completion
 from .interface import Constraints, TravelRequest
 
 SOFT_KEYS = ("fewer_changes", "near_station", "early_return", "lower_cost")
@@ -146,9 +147,9 @@ def extract_constraints(req: TravelRequest, *, client: Any = None) -> Constraint
         if not config.OPENAI_API_KEY:
             raise RuntimeError("Set OPENAI_API_KEY to extract travel constraints.")
         from openai import OpenAI
-        with OpenAI(api_key=config.OPENAI_API_KEY, timeout=45, max_retries=2) as live_client:
+        with OpenAI(api_key=config.OPENAI_API_KEY, timeout=45, max_retries=0 if config.DEMO_MODE else 2) as live_client:
             return extract_constraints(req, client=live_client)
-    response = client.chat.completions.create(
+    response = create_completion(client, purpose=f"extract:{req.event_id}",
         model=config.OPENAI_MODEL,
         messages=[{"role": "system", "content": SYSTEM_PROMPT},
                   {"role": "user", "content": json.dumps(asdict(req), ensure_ascii=False, default=str)}],

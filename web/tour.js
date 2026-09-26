@@ -49,8 +49,9 @@ const STEPS = [
     text: `<p>Volunteer boards run events on top of their studies: registrations, fees, teams, rooms, trips and dozens of messages.
       Bureau Agent keeps an event consistent. <b>Code</b> detects what needs attention, an <b>AI agent</b> investigates with tools and
       proposes one action with its evidence, and <b>you</b> approve, edit or dismiss it.</p>
-      <p>This tour takes about 5 minutes and shows every feature on two sample events. It uses the live agent (a few cents of API
-      credit). <b>Clicking Next resets the sample data</b> so the tour starts clean. Press Esc at any time to leave.</p>`,
+      <p>This tour takes about 5 minutes and shows every feature on two sample events. The public demo uses the live agent within
+      a shared call allowance, then clearly labeled saved examples. Nothing is sent or booked.
+      <b>Clicking Next resets your sample data</b> so the tour starts clean. Press Esc at any time to leave.</p>`,
     next: tourResetAll,
   },
   {
@@ -394,6 +395,7 @@ function startTour(mode = "quick") {
   const steps = tourState.steps = mode === "full" ? STEPS : QUICK;
   const d = window.driver.js.driver({
     showProgress: true,
+    animate: false,
     progressText: "Step {{current}} of {{total}}",
     allowClose: true,
     overlayOpacity: 0.62,

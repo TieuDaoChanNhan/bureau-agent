@@ -26,20 +26,9 @@ const PILL = {
   waiting: ["p-wait", "Waiting"], running: ["p-run", "Running…"], failed: ["p-fail", "Agent failed"], resolved: ["p-res", "Resolved"], dismissed: ["p-rej", "Dismissed"],
 };
 
-async function api(path, options = {}) {
-  const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options });
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    const detail = body && body.detail ? (typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail)) : res.statusText;
-    throw new Error(`${res.status}: ${detail}`);
-  }
-  if (typeof body?.replay === "boolean") {
-    const notice = $("#demoModeNotice");
-    notice.hidden = !body.replay;
-    notice.textContent = body.replay ? replayLabel(body.replay_reason) + ". This proposal uses saved sample data." : "";
-  }
-  return body;
-}
+const demoStore = createDemoStore(window.DEMO_FIXTURES);
+ui.drafts = demoStore.drafts();
+async function api(path, options = {}) { const sessionId = demoStore.sessionInfo().id; try { return demoStore.request(path, options); } finally { if (demoStore.sessionInfo().id !== sessionId) restoreSessionUI(); refreshSessionNotice(); } }
 
 function replayLabel(reason) {
   return reason === "live limit reached" ? "Saved example (live limit reached)" : "Saved example (" + (reason || "replay") + ")";
@@ -318,13 +307,14 @@ const THINKING = ["Reading the issue and the message", "Choosing which tools to 
 function thinkingCard() {
   const secs = Math.max(0, Math.round((Date.now() - (ui.runStart || Date.now())) / 1000));
   return `<div class="card"><div class="thinking"><span class="spinner" aria-hidden="true"></span>
-    <div><b>The agent is investigating… <span id="thinkSecs">${secs}s</span></b>
+    <div><b>Loading the saved example… <span id="thinkSecs">${secs}s</span></b>
     <span id="thinkPhase">${THINKING[Math.min(THINKING.length - 1, Math.floor(secs / 3))]}</span></div></div>
-    <p class="note">It chooses its own tools; each step it took will appear below when it has finished.</p></div>`;
+    <p class="note">This replays a curated example. No model or external service is called.</p></div>`;
 }
 
 function renderDetail() {
   const el = $("#detail");
+  if (ui.view === "audit") { el.innerHTML = auditHTML(); return; }
   if (ui.view === "outbox") { el.innerHTML = outboxHTML(); return; }
   if (ui.view === "compose") { el.innerHTML = composeHTML(); return; }
   const s = summary();
@@ -373,12 +363,12 @@ function renderDetail() {
     top = `<div class="card"><p class="note">${st === "resolved" ? "Resolved." : "Dismissed. Nothing was sent or changed."}</p></div>`;
   } else {
     top = `<div class="card cta-card"><b>Let the agent investigate</b>
-      <p>It will read this issue, choose tools (records, payments, rules, teams) and propose one action with its evidence. Nothing changes until you approve.</p>
+      <p>Load a saved sample proposal and inspect its evidence. Cases without a specific example are handed to the organizers; no live AI runs here.</p>
       <div class="actions"><button class="btn primary" type="button" data-act="retry">Run agent on this issue</button></div></div>`;
   }
   const hasSteps = action && (action.trace || []).length;
   el.innerHTML = replayBadge(action) + header(issue, action) + top
-    + (hasSteps && ui.running !== issue.id ? section("steps", "Agent steps", `${action.trace.length} tool calls, chosen by the model`, stepsList(action), true) : "")
+    + (hasSteps && ui.running !== issue.id ? section("steps", "Agent steps", `${action.trace.length} illustrative tool calls from the saved example`, stepsList(action), true) : "")
     + (action && ui.running !== issue.id ? section("evidence", "Evidence", "decision trace and checks", evidenceBody(action), false) : "")
     + section("input", "Input", "what the fixed checks detected", inputBody(issue), !action);
   if (ui.reveal && action && ui.reveal === action.id) ui.reveal = null;   // animate only once
@@ -386,7 +376,7 @@ function renderDetail() {
 
 // Fictional examples for the demo: a rules question, a personal-data request, a question in French.
 const EXAMPLES = [
-  { label: "Rules question", sender: "clara.roy@gmail.example", channel: "email",
+  { label: "Rules question", sender: "clara.roy@gmail.com", channel: "email",
     text: "Hi! Can our team have five people if the fifth one only does the pitch?" },
   { label: "Personal data", sender: "recruiting@partner.example", channel: "email",
     text: "Hello, could you send us the phone numbers of all participants so we can call them about internships?" },
@@ -397,7 +387,7 @@ const EXAMPLES = [
 function composeHTML() {
   return `<div class="dhead"><div class="badges"><span class="badge b-kind">New message</span></div>
       <h3>Simulate an incoming message</h3>
-      <p class="note">Paste an email or a Discord message. It is added to the event, detected as an issue, and the agent investigates it right away. The text is treated as data, never as instructions.</p></div>
+      <p class="note">Try one of the three saved examples below. Other messages are saved locally for organizer review; this demo does not analyze new text with AI.</p></div>
     <div class="block"><span class="lbl">Try an example</span><div class="examples">${EXAMPLES.map((ex, k) =>
       `<button class="btn" type="button" data-example="${k}">${esc(ex.label)}</button>`).join("")}</div></div>
     <form class="compose card" id="composeForm">
@@ -470,7 +460,7 @@ async function submitMessage(form) {
 const euro = cents => `€${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
 const HARD_LABEL = {
   participants: v => `${v} participants`,
-  max_cost_per_person_cents: v => `≤ ${euro(v)} per person (whole package)`,
+  max_cost_per_person_cents: v => `≤ ${euro(v)} per person (travel + lodging)`,
   arrive_before: v => `Arrive before ${v}`,
   no_overnight: v => (v ? "No overnight travel" : "Overnight travel allowed"),
   step_free_rooms: v => `≥ ${v} step-free rooms`,
@@ -484,21 +474,7 @@ function requestedBudget(s) {
 }
 
 const travelLine = t => `${esc(t.mode || "")} · ${esc(t.depart || "?")} → ${esc(t.arrive || "?")} · `
-  + `${t.changes ? `${esc(t.changes)} change${t.changes > 1 ? "s" : ""}` : "direct"}${t.overnight ? " · overnight" : ""}`
-  + `${t.return_arrive ? ` · back Sunday ${esc(t.return_arrive)}` : ""}`;
-// Per-person cost split (T16 data), meal items grouped: "Coach €42 · Lodging €78.59 · Meals €22".
-const COST_LABEL = { coach: "Coach", transport: "Travel", lodging: "Lodging" };
-function costLine(o) {
-  const parts = o.cost_breakdown_per_person_cents || {};
-  if (!Object.keys(parts).length) return "";
-  let meals = 0;
-  const shown = [];
-  for (const [k, v] of Object.entries(parts)) {
-    if (COST_LABEL[k]) shown.push(`${COST_LABEL[k]} ${euro(v)}`); else meals += v;
-  }
-  if (meals) shown.push(`Meals ${euro(meals)}`);
-  return `<div class="line cost">${esc(shown.join(" · "))}</div>`;
-}
+  + `${t.changes ? `${esc(t.changes)} change${t.changes > 1 ? "s" : ""}` : "direct"}${t.overnight ? " · overnight" : ""}`;
 const lodgingLine = l => `${esc(l.name || "")}${l.walk_minutes != null ? ` · ${esc(l.walk_minutes)} min walk` : ""}`
   + `${l.capacity ? ` · ${esc(l.capacity)} beds` : ""}`;
 
@@ -514,7 +490,6 @@ function optionsBlock(action, decided) {
     return `<div class="optcard ${k === 0 ? "first" : ""}">
       <div class="top"><b>Option ${esc(o.id)}</b><span class="verdict ${k === 0 ? "v-pick" : "v-alt"}">${k === 0 ? "Ranked 1st" : "Valid"}</span></div>
       <div class="price">${euro(o.cost_per_person_cents)} <small>per person</small></div>
-      ${costLine(o)}
       <div class="line">🚆 ${travelLine(t)}</div>
       <div class="line">🏨 ${lodgingLine(l)}</div>
       ${confirm.length ? `<span class="confirm">Organizers confirm: ${esc(confirm.join(", "))}</span>` : ""}
@@ -547,24 +522,21 @@ function planDetail(issue, action, st) {
   if (st === "waiting") return head + input;
   if (!action) {
     return head + input + `<div class="card cta-card"><b>Plan the trip</b>
-      <p>An AI model turns the request into structured constraints; code then builds travel + lodging packages from real hotel
-      offers and checks every one of them. Nothing is booked.</p>
+      <p>Replay the saved planning example, clarify the meal budget, and compare five illustrative packages. Prices are sample data, not live offers. Nothing is booked.</p>
       <div class="actions"><button class="btn primary" type="button" data-act="plan">Plan the trip</button></div></div>`;
   }
   const questions = (action.payload && action.payload.clarifications) || [];
   if (action.action_type === "ESCALATE" && questions.length && !(action.payload.options || []).length) {
     return head + input + `<div id="clarify" class="card proposal-card"><span class="card-kicker">The planner asks before searching</span>
       <div class="question"><span class="qlabel">Question for the organizers</span>${questions.map(q => esc(q)).join("<br>")}</div>
-      <p class="note">Nothing is searched until the request is clear. Your answer is added to the request and the constraints are extracted again.</p>
-      <form class="compose" id="answerForm"><label>Your answer <textarea name="answer" required maxlength="1000" rows="3"
-        placeholder="No, the budget covers travel and lodging only."></textarea></label>
+      <p class="note">This saved scenario assumes meals are paid separately. Confirm that answer to compare illustrative packages; no live search or text extraction occurs.</p>
+      <form class="compose" id="answerForm"><label>Your answer <textarea name="answer" required readonly rows="3">No, the budget covers travel and lodging only. Meals are paid separately.</textarea></label>
         <div class="actions"><button class="btn primary" type="submit">Answer and plan again</button></div></form></div>`;
   }
   const c = (action.payload && action.payload.constraints) || { hard: {}, soft: [], organizer_verified: [] };
   const budget = c.hard.max_cost_per_person_cents;
   const requested = requestedBudget(s);
-  // What-if: 20% below the requested budget, rounded to €10 (€150 -> €120).
-  const whatIf = requested ? Math.round(requested * 0.8 / 1000) * 1000 : null;
+  const whatIf = requested && requested > 9000 ? 9000 : null;
   const hard = Object.entries(c.hard).map(([k, v]) =>
     `<li>${esc(HARD_LABEL[k] ? HARD_LABEL[k](v) : `${k}: ${v}`)}${(c.organizer_verified || []).includes(k) ? ' <span class="confirm">organizers confirm</span>' : ""}</li>`).join("");
   const soft = (c.soft || []).map(k => `<li>${esc(SOFT_LABEL[k] || k)}</li>`).join("");
@@ -588,6 +560,7 @@ function planDetail(issue, action, st) {
       <div class="question"><span class="qlabel">${valid.length ? "Trade-offs" : "Diagnosis"}</span>${esc(action.description)}</div>
       ${diag}
       ${seg}
+      ${plannerControls(action, decided)}
       <span class="lbl">Options compared</span>
       ${optionsBlock(action, decided)}
       <p class="note">${decided ? "Decided." : "Organizers book the chosen option; nothing is booked automatically."}</p>
@@ -607,11 +580,11 @@ function planRequestText() {
 
 async function planTrip(overrideBudget = null, text = null) {
   await busy(overrideBudget ? `Re-checking every package at ${euro(overrideBudget)} per person…`
-                            : "Extracting constraints and searching…", async () => {
+                            : "Loading the saved planning example…", async () => {
     const body = {};
     const requestText = text || planRequestText();
     if (requestText) body.text = requestText;
-    if (overrideBudget) body.overrides = { max_cost_per_person_cents: overrideBudget };
+    body.overrides = { max_cost_per_person_cents: overrideBudget ?? requestedBudget(summary()) };
     const data = await api(`/api/events/${encodeURIComponent(ui.current)}/plan`, { method: "POST", body: JSON.stringify(body) });
     store(data);
     const action = data.actions.find(a => a.id === data.action_id);
@@ -700,6 +673,8 @@ function captureDraft(action) {
   if (!box || box.getAttribute("contenteditable") !== "true") return;
   const text = box.innerText.replace(/\n$/, "");
   if (text !== draftOf(action)) ui.drafts[action.id] = text; else delete ui.drafts[action.id];
+  demoStore.saveDrafts(ui.drafts);
+  refreshSessionNotice();
 }
 
 async function busy(label, fn) {
@@ -815,7 +790,7 @@ async function resetDemo() {
   clearTimeout(resetArmed); resetArmed = null; btn.textContent = "Reset demo";
   await busy("Resetting to the sample data…", async () => {
     store(await api(`/api/events/${encodeURIComponent(ui.current)}/reset`, { method: "POST" }));
-    ui.drafts = {}; ui.outbox = []; ui.view = "issue";
+    ui.drafts = demoStore.drafts(); ui.outbox = []; ui.view = "issue";
     ui.sel[ui.current] = firstKey(summary());
     setRun("Reset: runtime data cleared, sample data restored.");
   });
@@ -848,13 +823,6 @@ setInterval(() => {
   secs.textContent = `${n}s`;
   $("#thinkPhase").textContent = THINKING[Math.min(THINKING.length - 1, Math.floor(n / 3))];
 }, 500);
-
-// Demo video (T17): the hero button and footer link stay hidden until a URL is set here.
-const DEMO_VIDEO_URL = "";
-for (const id of ["#videoBtn", "#videoLink"]) {
-  const a = $(id);
-  if (DEMO_VIDEO_URL) { a.href = DEMO_VIDEO_URL; a.hidden = false; }
-}
 
 // Theme: light by default; the choice is remembered per browser when storage is available.
 function applyTheme(theme) {
@@ -948,3 +916,12 @@ $("#outboxBtn").addEventListener("click", async () => {
     setRun(`API not reachable: ${err.message}`, "error");
   }
 })();
+
+function auditHTML() {
+  const rows = demoStore.request(`/api/events/${encodeURIComponent(ui.current)}/audit`);
+  return `<div class="dhead"><h3>Activity in this tab</h3><p class="note">Local decisions on fictional data. Reset clears this event's activity.</p></div>`
+    + rows.slice().reverse().map(row => `<div class="mail"><span class="from">${esc(row.at)}</span>${esc(row.message)}</div>`).join("")
+    + (!rows.length ? '<p class="note">No decisions yet. Review and approve a sample proposal.</p>' : "")
+    + '<button class="btn" data-act="back" type="button">Back to issues</button>';
+}
+$("#auditBtn").addEventListener("click", () => { if (!ui.busy) { ui.view = "audit"; renderDetail(); } });
