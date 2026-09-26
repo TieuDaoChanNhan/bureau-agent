@@ -96,3 +96,33 @@ labels, tool calls, proposals, errors and invariant findings. Empty denominators
 reported as `N/A` rather than 100%. Inspect the per-case evidence when a metric fails.
 
 These are offline metrics. "Approved unchanged", time saved and feedback come only from a real organizer session (T18) and are reported separately.
+
+## Recorded baseline
+
+One complete run on 2026-09-26, 09:19:33–09:22:07 UTC, using `gpt-4.1`, Python
+3.11.15 and the agent at commit `034fd96a764886558abb8829c00ad85dabe4880d`:
+
+| Message metric | Observed result |
+|---|---|
+| Action accuracy | 45/50 (90.0%) |
+| Required tool selection | 44/50 (88.0%) |
+| Rule citation | 29/30 (96.7%) |
+| Human handling heuristic | 42/50 (84.0%) |
+| Invariant violations | 0; all 50 proposals checked |
+| Agent errors | 0 |
+
+The action disagreements were `c008`, `c009`, `c014`, `c034`, and `c039`: the agent
+disagreed with the labeled treatment of team exceptions and unsupported payment
+claims. Required tools were missing in `c010`, `c012`, `c035`, `c036`, `c037`, and
+`c043`; `c043` also omitted the expected rule citation. The human-question heuristic
+flagged two missed and six unnecessary interventions, including confirmation
+questions added to otherwise correct replies. These failures remain in the totals.
+
+The recorded planner baseline matched hard constraints and feasibility (1/1 each),
+but missed the labeled budget clarification (0/1). This reflects the pending T10
+extractor, not a successful language-understanding evaluation.
+
+The full local report is `eval/results/20260926T091933.899736Z.json` (Git-ignored).
+Dataset SHA-256: `1a2f1192229cc3d8ebfc9fa3debd80b661b007ffdf8230cedfee3eb5bed317eb`.
+Fixture and runtime file hashes were unchanged after the run. Results can vary
+between model calls; rerun this baseline when changing the agent, model or corpus.
