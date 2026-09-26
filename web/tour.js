@@ -161,7 +161,7 @@ const STEPS = [
   {
     el: "#runBtn", title: "Run the agent on everything",
     text: `<p>${b("Run agent")} processes every issue that is ready, one at a time: the row being investigated shows ${b("Running…")},
-      the status line shows "Investigating 7/30", and the button becomes ${b("Stop")}. The agent only proposes; you still review each
+      the status line shows the progress ("Investigating 7/27…"), and the button becomes ${b("Stop")}. The agent only proposes; you still review each
       proposal. (Not run in this tour, to save time and credit.)</p>`,
   },
   {
@@ -202,11 +202,12 @@ const STEPS = [
   },
   {
     el: ".optwrap", title: "Packages built from real hotel offers",
-    text: `<p>Each package is one coach departure plus one hotel, priced per person in code with the meal budget added once. Hotels come from ${b("Jinko")} (real offers in
-      Deauville, cached); departures are recorded fares. The valid packages are the cards, ranked first highlighted; the table lists
-      the rejected ones with the broken constraint in red (arrives after 21:00, overnight travel, over budget). Here 3 of 8 pass.</p>
-      <p>Jinko only quotes small bookings, so every hotel says ${b("Group block to confirm with the hotel")}: the agent is explicit about
-      what it could not verify.</p>`,
+    text: `<p>Each package is a round-trip coach charter plus one hotel for two nights, priced per person in code. Every card shows
+      the return time and the split (${b("coach · lodging · meals")}); the meal budget is added once. Hotels come from ${b("Jinko")}
+      (real offers in Deauville, cached); coach prices are illustrative. The ranked-first card is highlighted; the table lists the
+      rejected packages with the broken constraint in red (arrives after 21:00, overnight travel, over budget). Here 3 of 8 pass.</p>
+      <p>Jinko only quotes small bookings, so every hotel says ${b("Group block to confirm with the hotel")}: the planner is explicit
+      about what it could not verify.</p>`,
   },
   {
     el: '[data-budget]:not([data-budget=""])', title: "What if the budget were lower?", action: true,
