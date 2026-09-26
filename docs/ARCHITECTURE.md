@@ -233,7 +233,7 @@ plan_trip(req, constraints) -> ProposedAction      # SELECT_TRAVEL_PLAN hoặc E
 ```
 **Khóa ràng buộc cứng được hỗ trợ:** `participants`, `max_cost_per_person_cents`, `arrive_before` (HH:MM), `no_overnight`, `step_free_rooms` (luôn thuộc `organizer_verified`).
 
-Giá và trần ngân sách áp dụng cho toàn bộ gói được yêu cầu. Với WEI, tổng đã gồm xe, lưu trú, thực phẩm và vận chuyển thực phẩm do kès lo. `TravelRequest.catering` mang ngân sách nhóm từ `travel.catering`: demo 2000€ thực phẩm và 200€ vận chuyển cho 100 người, được cộng đúng một lần khi ghép gói. Gói dự phòng đã gồm các khoản này. Nếu có bảng chi phí thành phần, code kiểm tra từng khoản là số cent nguyên không âm và cộng đúng tổng; không cộng bảng này thêm lần nữa.
+Giá và trần ngân sách áp dụng cho toàn bộ gói được yêu cầu. Với WEI, ràng buộc ghi sẵn dùng trần 150€/người cho xe, lưu trú, thực phẩm và vận chuyển thực phẩm do hội sinh viên lo; phí tạm thu trong cả 97 khoản thanh toán cũng là 150€. `TravelRequest.catering` là trường tùy chọn, mặc định rỗng, mang phân bổ theo người từ `travel.catering`: demo 20€ thực phẩm và 2€ vận chuyển mỗi người (2000€ + 200€ cho 100 người), được cộng đúng một lần khi ghép gói. Gói dự phòng đã gồm các khoản này. `TravelOption.cost_breakdown_per_person_cents` là bảng chi phí tùy chọn, mặc định rỗng; nếu có, code kiểm tra từng khoản là số cent nguyên không âm và cộng đúng tổng, không cộng bảng này thêm lần nữa. Giá và lịch trình chưa được xác nhận; bản công khai dùng tên hội trung tính và vẫn chờ thành viên từng tham gia hoặc tổ chức WEI duyệt trước khi merge.
 
 **Hai loại ràng buộc cứng:**
 | Loại | Ví dụ | Dùng để loại phương án? |
@@ -245,6 +245,7 @@ Giá và trần ngân sách áp dụng cho toàn bộ gói được yêu cầu. 
 ### 6.3. Tách ràng buộc bằng LLM [đã có]
 - Dùng đầu ra có cấu trúc (JSON schema khớp `Constraints`).
 - Quy tắc cho mô hình: chỉ tách điều người dùng nói; chỗ mơ hồ ghi vào `clarifications` thay vì tự đoán (ví dụ ngân sách có gồm ăn uống không).
+- Yêu cầu WEI ngắn bằng giọng ban điều hành đã nêu rõ ăn uống, nhưng cố ý để ngỏ tiền thuê xe có nằm trong trần 150€ không. Luồng live cần hỏi lại phạm vi này, nhận câu trả lời toàn bộ gói rồi mới tìm phương án; `--recorded-constraints` dùng phạm vi toàn bộ gói đã ghi sẵn để chạy offline.
 - **Được đánh giá riêng** trên ~10 yêu cầu có đáp án (mục 8), vì tách sai thì cổng ràng buộc cũng vô dụng.
 
 ### 6.4. Kết nối Jinko [đã có, giới hạn nhà cung cấp]
@@ -264,7 +265,7 @@ Giá và trần ngân sách áp dụng cho toàn bộ gói được yêu cầu. 
 - Ghép đi lại × chỗ ở đủ sức chứa; giữ một gói cho mỗi phương án đi lại trước để bảng so sánh có lựa chọn đa dạng.
 - **Hoàn toàn bằng code, không dùng LLM.** Giá/người gồm đi lại, phần lưu trú chia cho nhóm (làm tròn lên) và ngân sách thực phẩm/vận chuyển thực phẩm nếu có; mọi khoản dùng số nguyên cent.
 - Giữ lại **cả phương án rẻ nhất vi phạm ràng buộc** để bảng so sánh cho thấy vì sao bị loại. Nếu tìm khách sạn không khả dụng, đọc các gói minh họa trọn gói trong `travel_options.json`.
-- Với cache hiện tại, phương án đáp ứng giờ đi lại rẻ nhất gồm ăn uống là 135,59€/người. Trần demo 120€ vẫn giữ nguyên và trả `ESCALATE`; giá phòng nhân theo nhóm không xác nhận còn đủ phòng, bếp hay quyền tổ chức hoạt động.
+- Với cache hiện tại và trần demo 150€, C/E/F đạt các kiểm tra hỗ trợ ở 135,59€/140,59€/142,59€; F đứng đầu do về sớm hơn, C rẻ nhất trong các gói hợp lệ. Thử trần 120€ hoặc 90€ trả `ESCALATE`. Riêng bộ gói dự phòng, A/B/D đạt trần 150€ (D đứng đầu do về sớm), A/B đạt trần 120€. Giá phòng nhân theo nhóm không xác nhận còn đủ phòng, bếp hay quyền tổ chức hoạt động.
 
 ---
 
@@ -384,7 +385,7 @@ Danh sách task, phụ thuộc và tiêu chí hoàn thành nằm trong [`TASKS.m
 |---|---|---|
 | Thứ Sáu 25/09, tối | Duyệt kiến trúc; tạo repo; CI; mỗi người clone và chạy được kiểm thử | `python -m unittest discover -s tests -t .` qua trên máy mọi người |
 | Thứ Bảy 26/09, 12:00 | **P0 chạy trọn luồng**: agent thật + store + executor + API + giao diện cho hackathon | Duyệt một đề xuất trên giao diện làm vấn đề biến mất |
-| Thứ Bảy 26/09, 18:00 | P1: planner với Jinko (replay), bảng so sánh trên giao diện | Chạy được cả hai ngân sách 120€ và 90€ |
+| Thứ Bảy 26/09, 18:00 | P1: planner với Jinko (replay), bảng so sánh trên giao diện | Chạy được lựa chọn ở trần 150€ và chẩn đoán không khả thi ở trần 120€ |
 | Thứ Bảy 26/09, 23:00 | Bộ đánh giá chạy được; **ngừng thêm tính năng** | Có bảng chỉ số |
 | Chủ Nhật 27/09 | Sửa lỗi, README, video; nộp trước 22:00 | Chạy README trên máy khác |
 

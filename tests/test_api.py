@@ -117,32 +117,41 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code, response.text)
         self.assertEqual([issue_id], [a["issue_id"] for a in response.json()["actions"]])
 
-    WEI_EXTRACTED = {"hard": {"participants": 100, "max_cost_per_person_cents": 12000, "arrive_before": "21:00",
+    WEI_EXTRACTED = {"hard": {"participants": 100, "max_cost_per_person_cents": 15000, "arrive_before": "21:00",
                               "no_overnight": True, "step_free_rooms": 2},
                      "soft": ["fewer_changes", "early_return", "lower_cost"],
                      "organizer_verified": ["step_free_rooms"], "clarifications": []}
+    WEI_ANSWER = ("The EUR150 ceiling includes round-trip coach hire, lodging, groceries "
+                  "and food transport.")
 
-    def plan(self, body=None, clarifications=(), explanation="Option C includes two coaches, lodging, groceries and food transport."):
-        """POST /plan with a scripted planner client: extraction JSON, then the explanation."""
+    def plan(self, body=None, clarifications=(), explanation="Option F includes two coaches, lodging, groceries and food transport."):
+        """Script extraction after the budget answer, or a clarification for the original brief."""
         from tests.fake_llm import FakeClient
-        extracted = {**self.WEI_EXTRACTED, "clarifications": list(clarifications)}
+        extracted = copy.deepcopy(self.WEI_EXTRACTED)
+        extracted["clarifications"] = list(clarifications)
+        body = dict(body or {})
+        if clarifications:
+            extracted["hard"]["max_cost_per_person_cents"] = None
+        else:
+            body.setdefault("text", load_event("wei").travel["request"] +
+                            "\n\nOrganizer answers: " + self.WEI_ANSWER)
         self.planner_client = FakeClient([json.dumps(extracted), explanation])
         with mock.patch("api.main._planner_client", return_value=self.planner_client):
-            return self.client.post("/api/events/wei/plan", json=body or {})
+            return self.client.post("/api/events/wei/plan", json=body)
 
     def plan_action(self, response):
         return next(a for a in response.json()["actions"] if a["id"] == response.json()["action_id"])
 
     def test_plan_with_requested_budget_proposes_valid_options(self):
-        response = self.plan({"overrides": {"max_cost_per_person_cents": 14000}})
+        response = self.plan()
         self.assertEqual(200, response.status_code, response.text)
         action = self.plan_action(response)
         self.assertEqual("SELECT_TRAVEL_PLAN", action["action_type"])
-        self.assertGreaterEqual(len(action["payload"]["ranked_valid"]), 1)
-        self.assertEqual(14000, action["payload"]["constraints"]["hard"]["max_cost_per_person_cents"])
+        self.assertEqual(["F", "C", "E"], action["payload"]["ranked_valid"])
+        self.assertEqual(15000, action["payload"]["constraints"]["hard"]["max_cost_per_person_cents"])
         self.assertEqual("llm", action["payload"]["constraints_source"])
-        self.assertEqual("C", action["payload"]["ranked_valid"][0])   # Jinko hotels (replay) x recorded coaches
-        self.assertTrue(action["description"].startswith("Option C includes two coaches"))
+        self.assertEqual("F", action["payload"]["ranked_valid"][0])   # Jinko hotels (replay) x recorded coaches
+        self.assertTrue(action["description"].startswith("Option F includes two coaches"))
         self.assertIn("jinko:replay", action["payload"]["options"][0]["option"]["source"])
         for row in action["payload"]["options"]:
             option = row["option"]
@@ -154,8 +163,8 @@ class ApiTests(unittest.TestCase):
         self.assertEqual("proposed", next(i for i in response.json()["issues"]
                                           if i["id"] == "no_logistics_plan")["status"])
 
-    def test_default_budget_rejects_jinko_packages_with_meals_included(self):
-        response = self.plan()
+    def test_lower_120_budget_rejects_jinko_packages_with_meals_included(self):
+        response = self.plan({"overrides": {"max_cost_per_person_cents": 12000}})
         self.assertEqual(200, response.status_code, response.text)
         action = self.plan_action(response)
         self.assertEqual("ESCALATE", action["action_type"])
@@ -176,7 +185,7 @@ class ApiTests(unittest.TestCase):
         search.assert_not_called()
 
     def test_plan_what_if_budget_escalates_with_suggestions_and_replaces_the_proposal(self):
-        self.plan({"overrides": {"max_cost_per_person_cents": 14000}})
+        self.plan()
         response = self.plan({"overrides": {"max_cost_per_person_cents": 9000}})
         self.assertEqual(200, response.status_code, response.text)
         plans = [a for a in response.json()["actions"] if a["issue_id"] == "no_logistics_plan"]
@@ -184,17 +193,24 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(plans[0]["payload"]["suggestions"])
 
     def test_plan_asks_clarifications_before_searching_and_accepts_answers(self):
-        question = "Does the €120 budget include meals?"
-        response = self.plan(clarifications=[question])
+        question = "Does the EUR150 ceiling include the coach hire?"
+        with mock.patch("bureau.planner.planner.search_options") as search:
+            response = self.plan(clarifications=[question])
+        search.assert_not_called()
         action = self.plan_action(response)
         self.assertEqual("ESCALATE", action["action_type"])
         self.assertEqual([question], action["payload"]["clarifications"])
         self.assertNotIn("options", action["payload"])           # nothing searched yet
-        answered = action["payload"]["request_text"] + "\n\nOrganizer answers: Yes, including groceries and food transport."
-        response = self.plan({"text": answered, "overrides": {"max_cost_per_person_cents": 14000}})
-        self.assertEqual("SELECT_TRAVEL_PLAN", self.plan_action(response)["action_type"])
+        self.assertEqual(load_event("wei").travel["request"], action["payload"]["request_text"])
+        self.assertNotIn("max_cost_per_person_cents", action["payload"]["constraints"]["hard"])
+        answered = action["payload"]["request_text"] + "\n\nOrganizer answers: " + self.WEI_ANSWER
+        response = self.plan({"text": answered})
+        selected = self.plan_action(response)
+        self.assertEqual("SELECT_TRAVEL_PLAN", selected["action_type"])
+        self.assertEqual(["F", "C", "E"], selected["payload"]["ranked_valid"])
+        self.assertEqual(15000, selected["payload"]["constraints"]["hard"]["max_cost_per_person_cents"])
         sent = json.loads(self.planner_client.requests[0]["messages"][1]["content"])
-        self.assertTrue(sent["text"].endswith("including groceries and food transport."))
+        self.assertTrue(sent["text"].endswith(self.WEI_ANSWER))
 
     def test_plan_without_a_key_is_503_unless_recorded_constraints_are_requested(self):
         with mock.patch("api.main._planner_client", return_value=None):
@@ -211,7 +227,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual([], [a for a in self.client.get("/api/events/wei").json()["actions"]])
 
     def test_choosing_a_valid_option_unlocks_dependent_issues(self):
-        plan = self.plan({"overrides": {"max_cost_per_person_cents": 14000}}).json()
+        plan = self.plan().json()
         before = {i["id"]: i for i in plan["issues"]}
         self.assertEqual(["no_logistics_plan"], before["unpaid_participation"]["depends_on"])
         best = next(a for a in plan["actions"] if a["id"] == plan["action_id"])["payload"]["ranked_valid"][0]

@@ -19,7 +19,7 @@ class PlannerTests(unittest.TestCase):
         req = wei_request()
         action = plan_trip(req, wei_constraints())
         self.assertEqual(action.action_type, "SELECT_TRAVEL_PLAN")
-        self.assertEqual(action.payload["ranked_valid"], ["A", "B"])
+        self.assertEqual(action.payload["ranked_valid"], ["D", "A", "B"])
 
     def test_never_relaxes_constraints(self):
         req = wei_request()
@@ -37,7 +37,9 @@ class PlannerTests(unittest.TestCase):
         option = replace(option, cost_breakdown_per_person_cents=breakdown,
                          cost_per_person_cents=sum(breakdown.values()))
 
-        valid, checks = evaluate([option], wei_constraints())
+        constraints = wei_constraints()
+        constraints.hard["max_cost_per_person_cents"] = 12000
+        valid, checks = evaluate([option], constraints)
 
         self.assertLess(breakdown["coach"] + breakdown["lodging"], 12000)
         self.assertEqual(option.cost_per_person_cents, 12200)
@@ -54,7 +56,9 @@ class PlannerTests(unittest.TestCase):
         self.assertEqual(3000, changed.cost_breakdown_per_person_cents["groceries"])
         self.assertEqual(changed.cost_per_person_cents, sum(changed.cost_breakdown_per_person_cents.values()))
         self.assertEqual(original, search_options(wei_request())[0])
-        self.assertEqual([], evaluate([changed], wei_constraints())[0])
+        constraints = wei_constraints()
+        constraints.hard["max_cost_per_person_cents"] = 12000
+        self.assertEqual([], evaluate([changed], constraints)[0])
 
     def test_invalid_itemization_cannot_pass_the_gate(self):
         original = search_options(wei_request())[0]
@@ -77,8 +81,10 @@ class PlannerTests(unittest.TestCase):
     def test_clarifications_stop_before_search(self):
         req = wei_request()
         c = wei_constraints()
-        c.clarifications = ["Does the budget include meals?"]
-        self.assertEqual(plan_trip(req, c).action_type, "ESCALATE")
+        c.clarifications = ["Does the EUR150 ceiling include the coach hire?"]
+        with mock.patch("bureau.planner.planner.search_options") as search:
+            self.assertEqual(plan_trip(req, c).action_type, "ESCALATE")
+        search.assert_not_called()
 
     def test_missing_or_invalid_meal_allocations_stop_before_search(self):
         req = wei_request()
@@ -111,7 +117,7 @@ class PlannerCliTests(unittest.TestCase):
             cli.main(["plan", "wei", "--recorded-constraints"])
         extract.assert_not_called()
         self.assertIn("recorded fixture (offline demo)", output.getvalue())
-        self.assertIn("ESCALATE", output.getvalue())
+        self.assertIn("SELECT_TRAVEL_PLAN", output.getvalue())
 
     def test_recorded_budget_demo_remains_infeasible_and_leaves_fixture_unchanged(self):
         before = wei_constraints()
@@ -200,13 +206,15 @@ class ComposeTests(unittest.TestCase):
         self.assertEqual(11700, option.cost_per_person_cents)
         self.assertEqual({"coach": 3500, "lodging": 6000, "groceries": 2000, "food_transport": 200},
                          option.cost_breakdown_per_person_cents)
-        valid, _ = evaluate([option], wei_constraints())
+        constraints = wei_constraints()
+        constraints.hard["max_cost_per_person_cents"] = 12000
+        valid, _ = evaluate([option], constraints)
         self.assertEqual([option], valid)
         req = replace(req, catering={**req.catering, "groceries_per_person_cents": 3000})
         [expensive] = compose_packages(req, [_transport(3500, mode="coach", capacity=106)],
                                        [_lodging("Group venue", 300000, capacity=100)], nights=2)
         self.assertEqual(12700, expensive.cost_per_person_cents)
-        self.assertEqual([], evaluate([expensive], wei_constraints())[0])
+        self.assertEqual([], evaluate([expensive], constraints)[0])
 
     def test_coach_capacity_must_fit_all_registered_students(self):
         from bureau.planner.compose import compose_packages
@@ -240,13 +248,12 @@ class ExplainTests(unittest.TestCase):
     def test_llm_prose_is_used_and_the_rejection_list_is_still_exact(self):
         from bureau.planner.explain import explain
         from tests.fake_llm import FakeClient
-        client = FakeClient(["Option A is direct and 6 minutes from the station; Option B costs more "
-                             "and has one change."])
+        client = FakeClient(["Option D returns earliest; Option A costs less and returns later."])
         text = explain(self.valid, self.checks, self.c, client=client)
-        self.assertTrue(text.startswith("Option A is direct"))
+        self.assertTrue(text.startswith("Option D returns earliest"))
         self.assert_names_present(text)
         facts = json.loads(client.requests[0]["messages"][1]["content"])
-        self.assertEqual(["A", "B"], [o["option"] for o in facts["valid_options_ranked"]])
+        self.assertEqual(["D", "A", "B"], [o["option"] for o in facts["valid_options_ranked"]])
 
     def test_llm_text_without_the_top_option_falls_back_to_the_template(self):
         from bureau.planner.explain import explain
@@ -271,9 +278,9 @@ class ExplainTests(unittest.TestCase):
 
     def test_plan_trip_passes_the_client_to_explain(self):
         from tests.fake_llm import FakeClient
-        action = plan_trip(self.req, self.c, client=FakeClient(["Option A is the direct train."]))
-        self.assertTrue(action.description.startswith("Option A is the direct train."))
-        self.assertEqual(["A", "B"], action.payload["ranked_valid"])
+        action = plan_trip(self.req, self.c, client=FakeClient(["Option D returns earliest by coach."]))
+        self.assertTrue(action.description.startswith("Option D returns earliest by coach."))
+        self.assertEqual(["D", "A", "B"], action.payload["ranked_valid"])
 
 
 
@@ -302,11 +309,18 @@ class SearchOptionsTests(unittest.TestCase):
     def test_jinko_plan_gates_and_diagnoses_like_the_recorded_one(self):
         c = wei_constraints()
         action = plan_trip(wei_request(), c, search=self.SEARCH)
-        self.assertEqual("ESCALATE", action.action_type)
-        c.hard["max_cost_per_person_cents"] = 14000
-        self.assertEqual("SELECT_TRAVEL_PLAN", plan_trip(wei_request(), c, search=self.SEARCH).action_type)
-        c.hard["max_cost_per_person_cents"] = 9000
-        self.assertEqual("ESCALATE", plan_trip(wei_request(), c, search=self.SEARCH).action_type)
+        self.assertEqual(15000, c.hard["max_cost_per_person_cents"])
+        self.assertEqual("SELECT_TRAVEL_PLAN", action.action_type)
+        self.assertEqual(["F", "C", "E"], action.payload["ranked_valid"])
+        valid_prices = [row["option"]["cost_per_person_cents"] for row in action.payload["options"]
+                        if row["valid"]]
+        self.assertEqual([13559, 14059, 14259], valid_prices)
+        for budget in (12000, 9000):
+            with self.subTest(budget=budget):
+                c.hard["max_cost_per_person_cents"] = budget
+                rejected = plan_trip(wei_request(), c, search=self.SEARCH)
+                self.assertEqual("ESCALATE", rejected.action_type)
+                self.assertTrue(all(not row["valid"] for row in rejected.payload["options"]))
 
 
 if __name__ == "__main__":

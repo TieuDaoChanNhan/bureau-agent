@@ -4,7 +4,7 @@
   "issue_id": "no_logistics_plan",
   "action_type": "ESCALATE",
   "title": "No option satisfies every hard constraint",
-  "description": "I did not relax any constraint. Option C (€135.59/person) only fails \"cost ≤ €90/person\" (€135.59 (+€45.59)). Option E (€140.59/person) only fails \"cost ≤ €90/person\" (€140.59 (+€50.59)). Option F (€142.59/person) only fails \"cost ≤ €90/person\" (€142.59 (+€52.59)). Option H (€152.46/person) only fails \"cost ≤ €90/person\" (€152.46 (+€62.46)). Rejected: Option A (cost ≤ €90/person, arrive before 21:00, no overnight travel); Option B (cost ≤ €90/person, arrive before 21:00); Option C (cost ≤ €90/person); Option D (cost ≤ €90/person, arrive before 21:00, no overnight travel); Option E (cost ≤ €90/person); Option F (cost ≤ €90/person); Option G (cost ≤ €90/person, arrive before 21:00); Option H (cost ≤ €90/person).",
+  "description": "I did not relax any constraint. Option C (€135.59/person) only fails \"cost ≤ €120/person\" (€135.59 (+€15.59)). Option E (€140.59/person) only fails \"cost ≤ €120/person\" (€140.59 (+€20.59)). Option F (€142.59/person) only fails \"cost ≤ €120/person\" (€142.59 (+€22.59)). Option H (€152.46/person) only fails \"cost ≤ €120/person\" (€152.46 (+€32.46)). Rejected: Option A (cost ≤ €120/person, arrive before 21:00, no overnight travel); Option B (cost ≤ €120/person, arrive before 21:00); Option C (cost ≤ €120/person); Option D (cost ≤ €120/person, arrive before 21:00, no overnight travel); Option E (cost ≤ €120/person); Option F (cost ≤ €120/person); Option G (cost ≤ €120/person, arrive before 21:00); Option H (cost ≤ €120/person).",
   "evidence": [
     {
       "source_type": "travel_option",
@@ -96,9 +96,9 @@
             "verified": true
           },
           {
-            "name": "cost ≤ €90/person",
+            "name": "cost ≤ €120/person",
             "passed": false,
-            "detail": "€122.59 (+€32.59)",
+            "detail": "€122.59 (+€2.59)",
             "verified": true
           },
           {
@@ -171,9 +171,9 @@
             "verified": true
           },
           {
-            "name": "cost ≤ €90/person",
+            "name": "cost ≤ €120/person",
             "passed": false,
-            "detail": "€130.59 (+€40.59)",
+            "detail": "€130.59 (+€10.59)",
             "verified": true
           },
           {
@@ -246,9 +246,9 @@
             "verified": true
           },
           {
-            "name": "cost ≤ €90/person",
+            "name": "cost ≤ €120/person",
             "passed": false,
-            "detail": "€135.59 (+€45.59)",
+            "detail": "€135.59 (+€15.59)",
             "verified": true
           },
           {
@@ -322,9 +322,9 @@
             "verified": true
           },
           {
-            "name": "cost ≤ €90/person",
+            "name": "cost ≤ €120/person",
             "passed": false,
-            "detail": "€139.46 (+€49.46)",
+            "detail": "€139.46 (+€19.46)",
             "verified": true
           },
           {
@@ -397,9 +397,9 @@
             "verified": true
           },
           {
-            "name": "cost ≤ €90/person",
+            "name": "cost ≤ €120/person",
             "passed": false,
-            "detail": "€140.59 (+€50.59)",
+            "detail": "€140.59 (+€20.59)",
             "verified": true
           },
           {
@@ -472,9 +472,9 @@
             "verified": true
           },
           {
-            "name": "cost ≤ €90/person",
+            "name": "cost ≤ €120/person",
             "passed": false,
-            "detail": "€142.59 (+€52.59)",
+            "detail": "€142.59 (+€22.59)",
             "verified": true
           },
           {
@@ -547,9 +547,9 @@
             "verified": true
           },
           {
-            "name": "cost ≤ €90/person",
+            "name": "cost ≤ €120/person",
             "passed": false,
-            "detail": "€147.46 (+€57.46)",
+            "detail": "€147.46 (+€27.46)",
             "verified": true
           },
           {
@@ -622,9 +622,9 @@
             "verified": true
           },
           {
-            "name": "cost ≤ €90/person",
+            "name": "cost ≤ €120/person",
             "passed": false,
-            "detail": "€152.46 (+€62.46)",
+            "detail": "€152.46 (+€32.46)",
             "verified": true
           },
           {
@@ -656,10 +656,10 @@
       }
     ],
     "suggestions": [
-      "Option C (€135.59/person) only fails \"cost ≤ €90/person\" (€135.59 (+€45.59)).",
-      "Option E (€140.59/person) only fails \"cost ≤ €90/person\" (€140.59 (+€50.59)).",
-      "Option F (€142.59/person) only fails \"cost ≤ €90/person\" (€142.59 (+€52.59)).",
-      "Option H (€152.46/person) only fails \"cost ≤ €90/person\" (€152.46 (+€62.46))."
+      "Option C (€135.59/person) only fails \"cost ≤ €120/person\" (€135.59 (+€15.59)).",
+      "Option E (€140.59/person) only fails \"cost ≤ €120/person\" (€140.59 (+€20.59)).",
+      "Option F (€142.59/person) only fails \"cost ≤ €120/person\" (€142.59 (+€22.59)).",
+      "Option H (€152.46/person) only fails \"cost ≤ €120/person\" (€152.46 (+€32.46))."
     ]
   },
   "trace": []

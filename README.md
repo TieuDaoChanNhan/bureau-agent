@@ -55,7 +55,7 @@ cp .env.example .env                      # add OPENAI_API_KEY (default model: g
 python -m bureau detect hackathon         # issues found by fixed code (no LLM)
 python -m bureau plan wei                 # LLM extraction, cached hotels + recorded transport (needs an OpenAI key)
 python -m bureau plan wei --recorded-constraints  # offline demo, recorded constraints + Jinko replay
-python -m bureau plan wei --recorded-constraints --budget 90  # diagnosis, no relaxation
+python -m bureau plan wei --recorded-constraints --budget 120  # diagnosis, no relaxation
 python -m bureau run hackathon --issue message:m01   # the agent (needs a key)
 python -m eval.run_eval                  # labeled corpus evaluation (needs a key)
 
@@ -70,11 +70,16 @@ requests produce clarification questions before any travel-option search. Use
 without an API key. `--budget` overrides the per-person budget; other unresolved
 questions still require an organizer's answer.
 
-The WEI demo has 100 fictional registrations and includes groceries and their
-transport in the student fee. Its dates, costs and logistics remain unconfirmed
-by kès. Current composed options exceed the EUR 120 ceiling (the cheapest
-time-compliant package is EUR 135.59), so the default returns `ESCALATE`.
-`--budget 140` is an explicit what-if scenario for showing selection.
+The neutral **Student association WEI (demo)** has 100 fictional registrations
+and a provisional EUR 150 student fee, including groceries and their transport
+by the association. Dates, prices and logistics remain unconfirmed; an experienced
+WEI organizer's review is still pending before merge. The short organizer request
+deliberately leaves coach inclusion in the EUR 150 ceiling unclear, so live
+extraction should ask for clarification before searching. Once the organizer
+answers that the ceiling covers the full package, current cached options C/E/F
+pass the supported checks at EUR 135.59/140.59/142.59. The offline
+`--recorded-constraints` mode supplies that complete-package interpretation
+explicitly; `--budget 120` demonstrates `ESCALATE` with the same cache.
 
 ## Status
 

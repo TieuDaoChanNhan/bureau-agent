@@ -34,7 +34,7 @@ LLM interprets and explains. Code composes, prices and validates. The planner ne
 ```bash
 python -m bureau plan wei
 python -m bureau plan wei --recorded-constraints
-python -m bureau plan wei --recorded-constraints --budget 90
+python -m bureau plan wei --recorded-constraints --budget 120
 python -m eval.run_eval --suite planning
 ```
 
@@ -43,39 +43,46 @@ The default extracts the organizer's text using `OPENAI_API_KEY` and
 for extraction. Null hard fields are omitted, cents remain integers, arrival
 times use `HH:MM`, and preference order is preserved. Accessibility always
 requires organizer verification. Questions stop the planner before searching.
-The WEI briefing now describes kès's 100-person demo, charter coaches and a group
+The WEI briefing describes a neutral student association's 100-person demo, charter coaches and a group
 venue with cooking and activity spaces. Meals and grocery transport are included
-in the student fee: kès buys the groceries and transports them to the venue.
-Two separate step-free rooms are requested. Charter hire, kitchens and activity
+in the EUR 150 provisional student fee: the association buys groceries and transports
+them to the venue. Two separate step-free rooms are requested. The short request
+deliberately leaves coach inclusion in the EUR 150 budget unclear. The live demo
+should first ask about this scope; after an all-inclusive answer it can search
+and propose options. Charter hire, kitchens and activity
 permissions are outside the current schema. The model may ask clarifications or
 proceed with only the supported checks. See [fixture provenance and limits](../../data/README.md#wei-source-assumptions-and-scenarios-t16--issue-15).
 
 The budget is the ceiling for the full requested package. Explicit meal inclusion
 is supported; ambiguity about inclusion still requires clarification. The optional
-`TravelRequest.catering` carries the organizer's group budgets. For the WEI demo,
-composition adds EUR 2000 for groceries and EUR 200 for food transport across
-100 people (EUR 22/person) once, alongside transport and lodging. The fallback
+`TravelRequest.catering` dictionary is empty by default and carries the organizer's
+per-person allocations. For the WEI demo, composition adds EUR 20 for groceries
+and EUR 2 for food transport per person once, alongside transport and lodging
+(EUR 2000 + EUR 200 for 100 people). The fallback
 packages already include these allocations in their unchanged totals; option A
-matches the EUR 112 provisional participation fee. Composed prices may differ
-from that fee. These fictional budgets await kès confirmation. An optional
-`cost_breakdown_per_person_cents` itemizes a `TravelOption`; code requires
+costs EUR 112, independently of the EUR 150 provisional participation fee.
+Composed prices may also differ from that fee. These fictional budgets await
+organizer confirmation; approval of the scenario by a teammate who has attended
+or organized a WEI remains pending before merge. An optional
+`cost_breakdown_per_person_cents` dictionary (empty by default) itemizes a `TravelOption`; code requires
 nonnegative integer values whose sum equals `cost_per_person_cents` and never
 adds the breakdown a second time. Menus, quantities, dietary needs, purchasing
 and food transport arrangements remain organizer checks.
 
-`--recorded-constraints` explicitly replays the supported sample constraints for an offline
-demo. Search normally combines cached Jinko hotel rates with illustrative charter
+`--recorded-constraints` explicitly replays the supported sample constraints,
+including the EUR 150 full-package ceiling, for an offline demo without extraction.
+Search normally combines cached Jinko hotel rates with illustrative charter
 transport. A cached quote for one double room is scaled to 50 rooms for 100 people;
 group availability remains unconfirmed. Ground search returned 404 for the current
 key, so transport is recorded. If hotel search is unavailable, the planner uses
-`travel_options.json`: A/B pass at EUR 120 and none passes at EUR 90 in that
+`travel_options.json`: A/B/D pass at EUR 150, A/B pass at EUR 120, and none passes at EUR 90 in that
 fallback fixture. Composed options have their own IDs and prices. Neither path
 confirms coach hire, group availability or venue facilities; those requirements
 remain in `travel.organizer_checks`. This mode does not evaluate extraction.
-The current composed results return `ESCALATE` at the unchanged EUR 120 ceiling
-and at EUR 90: the cheapest package meeting the travel-time checks costs EUR
-135.59/person including meals. `--budget 140` is a what-if selection demo only;
-it does not change the configured ceiling or the provisional participation fee.
+The current composed options C/E/F pass at the configured EUR 150 ceiling,
+at EUR 135.59/140.59/142.59 per person including meals. Lower-budget what-if
+scenarios at EUR 120 or EUR 90 return `ESCALATE`; an override does not change
+the stored ceiling or provisional participation fee.
 Unit tests and API example generation also
 use explicit fixtures. Missing credentials, API errors, refusals, truncated output,
 and invalid values raise errors; they never fall back to the sample's answers.
@@ -104,10 +111,17 @@ No Pipelex dependency, credentials, or machine-specific configuration is shipped
 
 ## Validation and limits
 
+The PR #62 live API check exercised the current WEI sequence: the initial request
+returned `ESCALATE` with a question about coach inclusion; an appended all-inclusive
+budget answer returned `SELECT_TRAVEL_PLAN`, ranked F/C/E. The recorded EUR 120
+what-if returned `ESCALATE`. Restoring EUR 150 and approving F removed
+`no_logistics_plan` and unlocked dependent issues. This verifies the API flow;
+it is not a manual browser-tour check or an experienced organizer's sign-off.
+
 `tests/test_extract.py` covers the provider boundary using scripted completions.
 The eight synthetic planning cases cover English/French, decimal budgets, time
-normalization, ambiguity, preferences, and accessibility. The live T10 evaluation
-with `gpt-4.1` matched hard constraints on 8/8 cases, clarification presence on
+normalization, ambiguity, preferences, and accessibility. The live evaluation
+with `gpt-4.1`, rerun for PR #62, matched hard constraints on 8/8 cases, clarification presence on
 8/8, optional preference/verification labels on 7/7, and recorded feasibility on
 5/5; the three clarification cases were not searched. Reports are saved under
 ignored `eval/results/`; see [evaluation definitions](../../eval/README.md).

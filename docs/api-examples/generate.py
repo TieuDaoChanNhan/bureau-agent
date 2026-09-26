@@ -82,15 +82,12 @@ def main() -> None:
     c = Constraints(hard=dict(recorded["hard"]), soft=list(recorded["soft"]),
                     organizer_verified=list(recorded.get("organizer_verified", [])),
                     clarifications=list(recorded.get("clarifications", [])))
-    # The current cached hotel prices exceed the demo's EUR 120 ceiling once meals
-    # are included. The selection example is an explicit EUR 140 what-if.
-    c140 = Constraints(hard={**c.hard, "max_cost_per_person_cents": 14000}, soft=c.soft,
-                       organizer_verified=c.organizer_verified)
-    selection = plan_trip(req, c140, search=t.get("search"))
+    # Recorded constraints represent the organizer's clarified complete-package budget.
+    selection = plan_trip(req, c, search=t.get("search"))
     dump("action_SELECT_TRAVEL_PLAN.json", asdict(selection))
-    c90 = Constraints(hard={**c.hard, "max_cost_per_person_cents": 9000}, soft=c.soft,
+    c120 = Constraints(hard={**c.hard, "max_cost_per_person_cents": 12000}, soft=c.soft,
                       organizer_verified=c.organizer_verified)
-    dump("action_ESCALATE_no_valid_plan.json", asdict(plan_trip(req, c90, search=t.get("search"))))
+    dump("action_ESCALATE_no_valid_plan.json", asdict(plan_trip(req, c120, search=t.get("search"))))
 
     dump("POST_approve_request.json", {"edited_description": None,
                                        "option_id": selection.payload["ranked_valid"][0]})

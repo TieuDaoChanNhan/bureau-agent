@@ -35,6 +35,9 @@ class WEIFixtureTests(unittest.TestCase):
 
         self.assertEqual(len(state.payments), 97)
         self.assertEqual(len({payment.id for payment in state.payments}), 97)
+        self.assertEqual(state.settings["fee_amount_cents"], 15000)
+        self.assertTrue(all(payment.amount_cents == state.settings["fee_amount_cents"]
+                            for payment in state.payments))
         self.assertEqual(len(eligibility["paid"]), 96)
         self.assertEqual(set(eligibility["unpaid"]), {"w01", "w06", "w07", "w08"})
         self.assertEqual(eligibility["unmatched_payments"], ["b90"])
@@ -71,25 +74,37 @@ class WEIFixtureTests(unittest.TestCase):
                 self.assertIs(type(option["cost_per_person_cents"]), int)
                 self.assertFalse(option["source"].startswith("jinko:"))
 
-    def test_real_event_context_is_distinguished_from_unconfirmed_demo_details(self):
-        travel = load_event("wei").travel
+    def test_public_demo_uses_a_neutral_association_and_unconfirmed_details(self):
+        state = load_event("wei")
+        travel = state.travel
         provenance = travel["provenance"]
 
         self.assertEqual(provenance["status"], "unconfirmed_demo")
-        self.assertIn("kès", provenance["association"])
-        self.assertIn("École polytechnique", provenance["association"])
+        self.assertEqual(provenance["association"], "Unnamed student association")
+        self.assertEqual(state.name, "Student association WEI (demo)")
+        self.assertEqual(travel["origin"], "Campus in Palaiseau")
         self.assertIn("WEI", provenance["event"])
         self.assertTrue(provenance["source"])
         self.assertTrue(travel["organizer_checks"])
         self.assertTrue(all(isinstance(check, str) and check.strip()
                             for check in travel["organizer_checks"]))
 
+    def test_organizer_brief_is_short_and_preserves_the_budget_question(self):
+        request = wei_request()
+
+        self.assertGreaterEqual(len(request.text.split()), 60)
+        self.assertLessEqual(len(request.text.split()), 90)
+        self.assertIn("€150 each, meals included", request.text)
+        self.assertIn("unsure whether coach hire is covered", request.text)
+        self.assertEqual(wei_constraints().hard["max_cost_per_person_cents"], 15000)
+        self.assertEqual(wei_constraints().clarifications, [])
+
     def test_meals_and_food_transport_are_included_in_the_student_fee(self):
         state = load_event("wei")
         catering = state.travel["catering"]
         self.assertIs(catering["included_in_participation_fee"], True)
-        self.assertEqual(catering["purchased_by"], "kès")
-        self.assertEqual(catering["transported_by"], "kès")
+        self.assertEqual(catering["purchased_by"], "student organizers")
+        self.assertEqual(catering["transported_by"], "student organizers")
         self.assertEqual(catering["budget_status"], "unconfirmed_demo")
         self.assertIsNone(catering["transport_method"])
 
@@ -103,9 +118,8 @@ class WEIFixtureTests(unittest.TestCase):
                 self.assertEqual(costs["groceries"], catering["groceries_per_person_cents"])
                 self.assertEqual(costs["food_transport"], catering["food_transport_per_person_cents"])
                 self.assertEqual(sum(costs.values()), option["cost_per_person_cents"])
-        best = next(row["option"] for row in action.payload["options"]
-                    if row["option"]["id"] == action.payload["ranked_valid"][0])
-        self.assertEqual(state.settings["fee_amount_cents"], best["cost_per_person_cents"])
+        self.assertEqual(state.settings["fee_amount_cents"], 15000)
+        self.assertEqual(state.settings["fee_status"], "provisional_demo")
 
 
 if __name__ == "__main__":
