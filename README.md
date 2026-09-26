@@ -26,15 +26,7 @@ The work is not hard. It is **fragmented, repetitive, and easy to get wrong**, a
 
 One loop handles every kind of event:
 
-```mermaid
-flowchart LR
-  S[Event state<br/>registrations · payments · teams · inbox · trip] --> D[Detect<br/>fixed checks in code]
-  D --> A[Investigate<br/>AI agent chooses tools]
-  A --> P[Proposed action<br/>with evidence and checks]
-  P --> H{Organizer<br/>approves · edits · dismisses}
-  H -->|approved| X[Executor re-checks rules<br/>and applies]
-  X --> S
-```
+![The loop: event state → detect (code) → investigate (AI agent) → proposed action → organizer approves, edits or dismisses → executor re-checks rules and applies → event state](docs/screenshots/loop-diagram.png)
 
 1. **Detect.** Deterministic checks read the event and list what needs attention, blocking first: unmatched payments, unpaid fees, a person in two teams, a team over capacity, unanswered messages, a trip without a plan. 31 issues are found in the sample hackathon.
 2. **Investigate.** An AI agent (OpenAI `gpt-4.1`, tool calling) picks its own tools: look up a participant, read payments, score an identity match, search the rules, check teams. It proposes **one** action: link a payment, send a reply, move a member, or ask the organizers. Every tool call is recorded and shown.
@@ -67,7 +59,7 @@ Offline evaluation on **50 labeled messages** (the 25 sample messages plus 25 pa
 
 Constraint extraction on 8 labeled trip requests: hard constraints 8/8, clarification presence 8/8.
 
-**192 automated tests** (no API calls: a scripted fake model) run on every push.
+**193 automated tests** (no API calls: a scripted fake model) run on every push.
 
 Real-user feedback: TODO (T18).
 
@@ -101,7 +93,7 @@ Then open http://127.0.0.1:8000 and click **Start the guided demo**. **Reset dem
 
 **Tests and evaluation**
 ```bash
-python -m unittest discover -s tests -t .     # 192 tests, no API key needed
+python -m unittest discover -s tests -t .     # 193 tests, no API key needed
 python -m eval.run_eval                       # 50-case evaluation (needs a key)
 python -m bureau plan wei --recorded-constraints   # trip planner offline: 3 of 8 packages valid at €150
 python -m bureau plan wei --recorded-constraints --budget 120   # none valid: diagnosis, no relaxation
