@@ -11,13 +11,16 @@ uvicorn api.main:app --reload     # then open http://127.0.0.1:8000
 |---|---|
 | `index.html` | Page shell: top bar, event cards, status line, issue list, detail pane |
 | `app.js` | State, API calls, rendering and event handlers |
+| `tour.js` | The guided product tour (T34): the `STEPS` list and the logic that waits for each action |
+| `vendor/` | Driver.js 1.3.1 (MIT, licence in `DRIVER_LICENSE`), vendored so the tour works offline and when deployed |
 | `style.css` | Design tokens (light and dark) and components, taken from the mockup |
 | `reference/mockup.html` | Target design: the interactive mockup with hard-coded sample data |
 
 ## What the console does
 | Area | Behaviour | API |
 |---|---|---|
-| Intro and Demo tour (T33) | A one-sentence intro and the loop in three steps. **Demo tour** opens six steps; each selects the right event and issue and highlights the button to press (alternatives in priority order). A step already done on this event says to Reset demo | — |
+| Intro (T33) | One sentence on what the product does and the loop in three steps | — |
+| Demo tour (T34) | A 30-step guided tour (Driver.js): "Step n of 30", the page dimmed and one element highlighted, a detailed explanation next to it. Action steps name the button to click and move on by themselves when the result appears; Skip step, Close and Esc always work; clicks on the dimmed page do not end the tour. It resets both sample events first and uses the live agent (a few cents) | the routes the steps trigger |
 | Event cards | Open blocking / non-blocking counts, proposals ready for review, resolved issues | `GET /api/events/{id}` |
 | Issue list | Blocking first, then non-blocking; resolved and dismissed issues move to a collapsed **Done** group | same |
 | Status pills | `Running…` (being investigated), `Not analysed` (no proposal), `Action proposed`, `Needs you` (escalation, or identity link below 0.98), `Waiting` (unresolved `depends_on`), `Agent failed`, `Resolved`, `Dismissed` | same |
@@ -41,3 +44,14 @@ shows the subjects' names under each non-message issue.
   reply, to `draftOf()` (what can be edited). Approve labels live in `APPROVE_LABEL`.
 - **New issue kind:** add a branch to `inputBlock()`; unknown kinds fall back to a key/value list.
 - Keep the layout usable at 400 px wide without horizontal scrolling (checked with a 400 px frame).
+
+## Adding a tour step
+Add an object to `STEPS` in `tour.js`:
+- `el`: a CSS selector, resolved when the step is shown. Omit it for a centred step.
+- `title` and `text`: HTML, in English; start action steps with the button to click.
+- `prepare()`: optional; navigate before the step is shown (`tourShow(event, issueKey)`, fill a form).
+- `action: true` with `done()`: the step waits for the viewer's click and moves on when `done()` becomes true.
+- `button`: optional; an extra button in the popover (used to save the edited reply).
+- `side`: optional; where the popover goes (`top`, `left`…).
+
+Keep steps short enough to be read in about ten seconds.

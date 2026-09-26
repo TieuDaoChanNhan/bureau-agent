@@ -51,23 +51,12 @@ code { font-family: var(--mono); }
 .btn[disabled] { opacity: .5; cursor: default; }
 .btn:focus-visible, .issue:focus-visible, .evcard:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* Intro strip and demo tour (T33) */
+/* Intro strip (T33) */
 .intro { padding: 12px 18px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
 .intro p { max-width: 90ch; color: var(--muted); } .intro b { color: var(--ink); }
 .loopsteps { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; font-size: 12.5px; font-weight: 600; }
 .loopsteps li { display: flex; align-items: center; gap: 6px; background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 3px 10px 3px 4px; }
-.loopsteps span, .tourlist .n { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 11px; }
-.tour { padding: 12px 18px; border-bottom: 1px solid var(--line); background: var(--accent-soft); display: flex; flex-direction: column; gap: 10px; }
-.tourhead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; } .tourhead .btn { margin-left: auto; }
-.tourlist { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
-.tourlist button { font: inherit; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; border: 1px solid var(--line);
-                   background: var(--surface); color: var(--ink); border-radius: 999px; padding: 4px 10px 4px 4px; cursor: pointer; }
-.tourlist li.on button { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.tourtext { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; font-size: 14px; max-width: 90ch; }
-.hint { outline: 3px solid var(--warn) !important; outline-offset: 3px; animation: hint 1.2s ease-in-out infinite; }
-@keyframes hint { 50% { outline-color: transparent; } }
-@media (prefers-reduced-motion: reduce) { .hint { animation: none; } }
-.tournote { color: var(--warn); font-weight: 600; font-size: 13px; }
+.loopsteps span { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 11px; }
 .named { text-decoration: underline dotted var(--line); text-underline-offset: 3px; }
 .evmeta { font-size: 12.5px; color: var(--muted); }
 
@@ -223,3 +212,24 @@ details.done > summary .grouphead { position: static; }
   .detail { padding: 16px 12px; }
   .counts { gap: 14px; }
 }
+
+/* Product tour (T34), on top of web/vendor/driver.css */
+.driver-popover.tour-popover { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px;
+  max-width: min(420px, calc(100vw - 32px)); font-family: var(--sans); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.tour-popover .driver-popover-title { font-size: 16px; font-weight: 700; font-family: var(--sans); }
+.tour-popover .driver-popover-description { font-size: 13.5px; line-height: 1.5; color: var(--ink); font-family: var(--sans); }
+.tour-popover .driver-popover-description p { margin: 0 0 8px; }
+.tour-popover .driver-popover-progress-text { color: var(--muted); font-size: 12px; font-weight: 600; }
+.tour-popover .driver-popover-next-btn { background: var(--accent); color: var(--accent-ink); border: 0; text-shadow: none;
+  font: 600 13px var(--sans); border-radius: 8px; padding: 6px 12px; }
+.tour-popover .driver-popover-close-btn { color: var(--muted); }
+#clarify { display: flex; flex-direction: column; gap: 12px; }
+.tour-do { font-weight: 600; color: var(--accent); }
+.tour-wait { font-size: 12.5px; color: var(--muted); }
+.tour-extra { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 6px;
+  padding-top: 8px; border-top: 1px solid var(--line); }
+.tour-status { font-size: 12.5px; color: var(--warn); font-weight: 600; }
+.tour-act { font: 600 13px var(--sans); background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px;
+  padding: 6px 12px; cursor: pointer; margin-left: auto; }
+.tour-skip { font: 600 12px var(--sans); background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 6px;
+  padding: 3px 8px; cursor: pointer; }

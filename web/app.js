@@ -11,7 +11,6 @@ const ui = {
   doneOpen: false,
   busy: false,
   running: null,        // issue id the agent is investigating right now
-  tourStep: null,       // index in TOUR while the demo tour is open
   stopRequested: false,
 };
 
@@ -439,12 +438,12 @@ function planDetail(issue, action, st) {
   }
   const questions = (action.payload && action.payload.clarifications) || [];
   if (action.action_type === "ESCALATE" && questions.length && !(action.payload.options || []).length) {
-    return head + input + `<div class="block"><span class="lbl">The planner asks before searching</span>
+    return head + input + `<div id="clarify"><div class="block"><span class="lbl">The planner asks before searching</span>
       <div class="question">${questions.map(q => esc(q)).join("<br>")}</div>
       <p class="note">Nothing is searched until the request is clear. Your answer is added to the request and the constraints are extracted again.</p></div>
       <form class="compose" id="answerForm"><label>Your answer <textarea name="answer" required maxlength="1000" rows="3"
         placeholder="No, the budget covers travel and lodging only."></textarea></label>
-        <div class="actions"><button class="btn primary" type="submit">Answer and plan again</button></div></form>`;
+        <div class="actions"><button class="btn primary" type="submit">Answer and plan again</button></div></form></div>`;
   }
   const c = (action.payload && action.payload.constraints) || { hard: {}, soft: [], organizer_verified: [] };
   const budget = c.hard.max_cost_per_person_cents;
@@ -526,64 +525,6 @@ async function chooseOption(optionId) {
     keepSelection();
     setRun(`Travel plan chosen: option ${optionId}. ${unlocked} dependent issue${unlocked === 1 ? "" : "s"} unlocked.`);
   });
-}
-
-// ---------- demo tour (T33) ----------
-
-const TOUR = [
-  { ev: "hackathon", key: "issue:multiple_group_membership:p02", title: "Code finds the problems",
-    text: "Fixed checks read registrations, payments, teams and the inbox, and list what needs attention, blocking first. Here Léa Martin is in two teams, against the one-team rule. No AI is involved yet." },
-  { ev: "hackathon", key: "issue:message:m01", target: '[data-act="retry"], [data-act="edit"]', title: "The agent investigates",
-    text: "Antoine says he already paid from his personal email. Click Run agent on this issue and read the Agent steps: it looks him up, reads the unmatched payments and scores the identity match (0.91). Not sure enough, so it asks you." },
-  { ev: "hackathon", key: "issue:message:m01", target: '[data-act="edit"], [data-act="approve"]', title: "You stay in charge",
-    text: "Edit the drafted reply, then Confirm and link. Only now is the payment linked and the reply added to the Outbox; the payment issue disappears from the list." },
-  { ev: "hackathon", compose: 1, target: "#composeForm button[type=submit]", title: "Try your own message",
-    text: "A sponsor asks for participants' phone numbers. Send it, or type anything in English or French: the agent checks the rules (§10 personal data) and escalates instead of sharing." },
-  { ev: "wei", key: "issue:no_logistics_plan", target: '[data-act="plan"], #answerForm button', title: "Same loop, a trip for 40",
-    text: "Plan the trip. The planner asks whether the budget includes meals before searching. Answer, then compare packages built from real hotel offers (Jinko); rejected ones show why." },
-  { ev: "wei", key: "issue:no_logistics_plan", target: '[data-budget="9000"], [data-act="choose"]', title: "Constraints are never relaxed",
-    text: "Try €90: nothing is valid and the planner says which constraint binds, without relaxing it. Back to €120, choose an option: the waiting issues (reminders, rooms, meeting time) unlock." },
-];
-
-function renderTour() {
-  const el = $("#tour");
-  if (!el) return;
-  el.hidden = ui.tourStep == null;
-  if (el.hidden) return;
-  const k = ui.tourStep;
-  el.innerHTML = `<div class="tourhead"><b>Demo tour</b><span class="note">Tip: Reset demo (click twice) for a fresh start.</span>
-      <button class="btn" type="button" data-tour="close">Close</button></div>
-    <ol class="tourlist">${TOUR.map((t, i) => `<li class="${i === k ? "on" : ""}"><button type="button" data-tour="${i}">
-      <span class="n">${i + 1}</span>${esc(t.title)}</button></li>`).join("")}</ol>
-    <div class="tourtext"><p>${esc(TOUR[k].text)}</p>${ui.tourNote ? `<p class="tournote">${esc(ui.tourNote)}</p>` : ""}
-      ${k < TOUR.length - 1 ? `<button class="btn primary" type="button" data-tour="${k + 1}">Next: ${esc(TOUR[k + 1].title)}</button>` : ""}</div>`;
-}
-
-async function goTour(k) {
-  const step = TOUR[k];
-  ui.tourStep = k;
-  if (ui.current !== step.ev) await selectEvent(step.ev);
-  if (step.compose != null) {
-    ui.tourNote = "";
-    ui.view = "compose";
-    renderIssues(); renderDetail();
-    const ex = EXAMPLES[step.compose], form = $("#composeForm");
-    form.sender.value = ex.sender; form.channel.value = ex.channel; form.text.value = ex.text;
-  } else {
-    ui.view = "issue";
-    const present = summary().issues.some(i => `issue:${i.id}` === step.key && !TERMINAL.includes(i.status));
-    ui.tourNote = present ? "" : "This step was already done on this event. Click Reset demo twice to replay it.";
-    ui.sel[ui.current] = present ? step.key : firstKey(summary());
-    render();
-    const row = document.querySelector(`[data-key="${CSS.escape(step.key)}"]`);
-    if (row) row.scrollIntoView({ block: "nearest" });
-  }
-  renderTour();
-  document.querySelectorAll(".hint").forEach(x => x.classList.remove("hint"));
-  // Selectors are alternatives in priority order (e.g. Edit before Approve), not document order.
-  const target = step.target && step.target.split(",").map(sel => document.querySelector(sel.trim())).find(Boolean);
-  if (target) { target.classList.add("hint"); target.scrollIntoView({ block: "center" }); }
-  else $("#detail").scrollIntoView({ block: "start" });
 }
 
 function outboxHTML() {
@@ -816,13 +757,6 @@ $("#detail").addEventListener("click", e => {
 });
 
 $("#runBtn").addEventListener("click", () => runAgent());   // doubles as Stop during a run
-$("#tourBtn").addEventListener("click", () => { if (!ui.busy) goTour(ui.tourStep ?? 0); });
-$("#tour").addEventListener("click", e => {
-  const b = e.target.closest("[data-tour]");
-  if (!b || ui.busy) return;
-  if (b.dataset.tour === "close") { ui.tourStep = null; renderTour(); document.querySelectorAll(".hint").forEach(x => x.classList.remove("hint")); return; }
-  goTour(+b.dataset.tour);
-});
 $("#composeBtn").addEventListener("click", () => {
   if (ui.busy) return;
   ui.view = "compose";
