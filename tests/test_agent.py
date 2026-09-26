@@ -5,6 +5,7 @@ not the quality of the model's decisions: that is measured by eval/ (T08).
 """
 import json
 from copy import deepcopy
+from dataclasses import asdict
 import unittest
 
 from bureau.agent.loop import resolve_issue
@@ -174,6 +175,43 @@ class AgentLoopTests(unittest.TestCase):
                 self.assertEqual(action.payload, PROPOSAL["payload"])
                 self.assertEqual(issue.status, "proposed")
 
+    def test_invalid_group_replacement_is_rejected_without_mutating_state(self):
+        state = load_event("hackathon")
+        original = deepcopy(state.groups)
+        issue = message_issue(state)
+        groups = [{k: v for k, v in asdict(g).items() if k != "declared_at"}
+                  for g in state.groups]
+        client = FakeClient([
+            [("propose_action", {**PROPOSAL, "action_type": "UPDATE_GROUPS",
+                                 "payload": {"groups": groups}})],
+            [("propose_action", {**PROPOSAL, "action_type": "ESCALATE", "payload": {}})],
+        ])
+        action = resolve_issue(state, issue, client=client, verbose=False)
+        replies = [m for m in client.requests[-1]["messages"] if m["role"] == "tool"]
+        error = json.loads(replies[-1]["content"])["error"]
+        self.assertIn("multiple_group_membership", error)
+        self.assertIn("group_over_capacity", error)
+        self.assertEqual(state.groups, original)
+        self.assertEqual(state.actions, [action])
+        self.assertEqual(action.action_type, "ESCALATE")
+
+    def test_new_teams_cannot_replace_and_drop_existing_assignments(self):
+        state = load_event("hackathon")
+        original = deepcopy(state.groups)
+        client = FakeClient([
+            [("propose_action", {**PROPOSAL, "action_type": "UPDATE_GROUPS", "payload": {
+                "groups": [{"id": "t-new", "kind": "team", "name": "New team",
+                            "members": ["p13", "p14"], "capacity_min": 2, "capacity_max": 4}],
+            }})],
+            [("propose_action", {**PROPOSAL, "action_type": "ESCALATE", "payload": {}})],
+        ])
+        action = resolve_issue(state, message_issue(state), client=client, verbose=False)
+        replies = [m for m in client.requests[-1]["messages"] if m["role"] == "tool"]
+        self.assertIn("must retain assigned participants", json.loads(replies[-1]["content"])["error"])
+        self.assertEqual(state.groups, original)
+        self.assertEqual(state.actions, [action])
+        self.assertEqual(action.action_type, "ESCALATE")
+
     def test_batched_proposal_waits_and_answers_every_tool_call(self):
         state = load_event("hackathon")
         client = FakeClient([
@@ -264,6 +302,8 @@ class AgentLoopTests(unittest.TestCase):
         for action_type, payload in payloads.items():
             with self.subTest(action_type=action_type):
                 state = load_event("hackathon")
+                if action_type == "UPDATE_GROUPS":
+                    state.groups = []  # A complete replacement when no groups exist yet.
                 client = FakeClient([[("propose_action", {
                     **PROPOSAL, "action_type": action_type, "payload": payload,
                 })]])
@@ -289,6 +329,18 @@ class AgentToolContextTests(unittest.TestCase):
         orbit["members"].clear()
         payment["participant_id"] = "p01"
         self.assertEqual((state.payments, state.groups), original)
+
+    def test_group_candidates_respect_preferences_and_existing_membership(self):
+        state = load_event("hackathon")
+        state.participant("p02").looking_for_group = True
+        handlers = build_handlers(state)
+        candidates = handlers["list_group_candidates"]()
+        ids = {person["id"] for person in candidates}
+        self.assertEqual(ids, {"p13", "p14", "p15", "p16", "p17", "p18", "p48", "p49"})
+        self.assertNotIn("p50", ids)  # Explicitly wants to remain solo.
+        self.assertNotIn("p02", ids)  # Already grouped even though the flag is set.
+        candidates[0]["skills"].clear()
+        self.assertTrue(state.participant(candidates[0]["id"]).skills)
 
     def test_all_rules_can_be_read_when_keyword_search_is_inconclusive(self):
         state = load_event("hackathon")

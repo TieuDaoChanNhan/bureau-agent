@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
+from dataclasses import asdict, replace
 
 from .. import config
 from ..core.detect import detect_issues
-from ..core.models import Check, EventState, Evidence, Issue, ProposedAction
+from ..core.models import Check, EventState, Evidence, Group, Issue, ProposedAction
 from ..core.store import merge_issue_status, save_state
+from ..tools.groups import check_groups
 from .prompts import SYSTEM_PROMPT
 from .tool_specs import ACTION_TYPES, TOOLS, build_handlers
 
@@ -80,6 +81,25 @@ def _action_from_args(state: EventState, issue: Issue, args: dict) -> ProposedAc
         raise ValueError("Include a payload object; nest executor fields inside it, not at the top level")
     payload = args["payload"]
     _validate_payload(action_type, payload)
+    if action_type == "UPDATE_GROUPS":
+        replacement = [Group(
+            id=g["id"], kind=g["kind"], name=g["name"], members=list(g["members"]),
+            capacity_min=g["capacity_min"], capacity_max=g["capacity_max"],
+        ) for g in payload["groups"]]
+        kinds = {group.kind for group in replacement}
+        for kind in kinds:
+            existing_members = {pid for g in state.groups if g.kind == kind for pid in g.members}
+            proposed_members = {pid for g in replacement if g.kind == kind for pid in g.members}
+            missing = existing_members - proposed_members
+            if missing:
+                raise ValueError(
+                    f"UPDATE_GROUPS replaces every {kind} group; it must retain assigned participants: "
+                    f"{sorted(missing)}. Include existing groups. Escalate unresolved choices instead of deleting them."
+                )
+        preview = replace(state, groups=[g for g in state.groups if g.kind not in kinds] + replacement)
+        violations = [v for kind in kinds for v in check_groups(preview, kind)]
+        if violations:
+            raise ValueError(f"UPDATE_GROUPS would break group invariants: {violations}")
     evidence = [Evidence(e["source_type"], e["source_id"], e.get("description", ""))
                 for e in args.get("evidence", [])]
     checks = [Check(c["name"], c["passed"], c.get("detail", "")) for c in args.get("checks", [])]

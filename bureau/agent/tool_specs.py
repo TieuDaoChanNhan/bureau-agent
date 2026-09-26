@@ -40,6 +40,7 @@ TOOLS = [
     _tool("get_payment", "Read payer, email, amount_cents (minor units), currency, date, reference and existing link.",
           {"payment_id": {"type": "string"}}, ["payment_id"]),
     _tool("list_groups", "Read all group ids, names, members, capacities and declaration dates.", {}, []),
+    _tool("list_group_candidates", "Read ungrouped participants who explicitly want a group, with names, skills and needs.", {}, []),
     _tool("search_rules", "Keyword search of the English rules. Use English words, not just section ids.",
           {"query": {"type": "string"}}, ["query"]),
     _tool("list_rules", "Read all rule sections to verify a policy when keyword search is inconclusive.", {}, []),
@@ -104,6 +105,12 @@ def build_handlers(state: EventState) -> dict[str, Callable[..., Any]]:
         payment = next((p for p in state.payments if p.id == payment_id), None)
         return asdict(payment) if payment else {"error": "Payment not found"}
 
+    def list_group_candidates():
+        kind = state.settings.get("group_kind", "team")
+        grouped = {pid for group in state.groups if group.kind == kind for pid in group.members}
+        return [asdict(person) for person in state.participants
+                if person.looking_for_group and person.id not in grouped]
+
     return {
         "get_event_summary": lambda: {
             "name": state.name, "deadlines": {k: str(v) for k, v in state.deadlines.items()},
@@ -113,6 +120,7 @@ def build_handlers(state: EventState) -> dict[str, Callable[..., Any]]:
         },
         "get_participant": get_participant,
         "get_payment": get_payment,
+        "list_group_candidates": list_group_candidates,
         "list_groups": lambda: [asdict(group) for group in state.groups],
         "search_rules": lambda query: search_rules(state, query),
         "list_rules": lambda: [
