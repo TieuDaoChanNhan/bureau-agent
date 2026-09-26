@@ -16,6 +16,25 @@ uvicorn api.main:app --reload     # then open http://127.0.0.1:8000
 | `style.css` | Design tokens (light and dark) and components, taken from the mockup |
 | `reference/mockup.html` | Target design: the interactive mockup with hard-coded sample data |
 
+## Layout (T35)
+- **Hero** (first screen): value proposition, three numbers (issues detected in the sample, the 90% evaluation
+  result, zero actions without approval) and **Start the guided demo**. "How it works" in three steps.
+- **Console**: title and actions (New message, Outbox, Reset demo, Run agent); event **tabs** with context
+  (type, dates, headcount); a KPI row (blocking, ready for review, waiting, resolved).
+- **Issue list**: an icon per kind, title and names on two lines, colour-coded status chips with a legend.
+- **Issue detail, proposal first**: a card with the action type, a one-line summary, the agent's question (or
+  "why"), what will change, the draft reply and the decision buttons. Below it, collapsible **Agent steps**
+  (open), **Evidence** (decision trace and checks) and **Input** (what the fixed checks detected). Open/closed
+  state is remembered while you browse.
+- **While the agent runs** on the selected issue, a "thinking" card shows elapsed seconds and a generic phase;
+  when the result arrives, the **recorded** tool calls are revealed one by one. This is a replay of the real
+  steps of that run, not a live stream.
+- **Trip view**: the planner's proposal card (trade-offs or diagnosis, what-if budget) with the valid packages
+  as cards (ranked first highlighted, Choose buttons) and the rejected ones in a compact table with the broken
+  constraint; constraints below; evidence and input collapsible.
+- **Theme**: light by default, **Dark** toggle in the top bar (remembered per browser when storage is
+  available). Works at 400 px wide without horizontal scrolling.
+
 ## What the console does
 | Area | Behaviour | API |
 |---|---|---|

@@ -49,11 +49,12 @@ const STEPS = [
     next: tourResetAll,
   },
   {
-    el: '[data-ev="hackathon"]', title: "One console, several events",
-    text: `<p>An association runs several events at once. Each card is one event: here a 50-person hackathon; the second card is a
+    el: "#eventbar", title: "One console, several events",
+    text: `<p>An association runs several events at once. Each tab is one event: here a 50-person hackathon; the second tab is a
       40-person integration weekend with a trip to organize.</p>
-      <p>The numbers are live: ${b("blocking")} issues stop the event from running (unpaid fees, broken teams), ${b("non-blocking")}
-      ones are questions and wishes, ${b("ready for review")} counts proposals waiting for you, ${b("resolved")} what is done.</p>`,
+      <p>The numbers below are live for the selected event: ${b("blocking")} issues stop the event from running (unpaid fees,
+      broken teams), ${b("ready for your review")} counts proposals waiting for you, ${b("waiting")} issues depend on another one,
+      and ${b("resolved")} is what is done.</p>`,
   },
   {
     el: "#issues", title: "Issues found by code, before any AI",
@@ -63,15 +64,15 @@ const STEPS = [
       ${b("Needs you")} (the agent wants your decision), ${b("Waiting")} (depends on another issue) and ${b("Resolved")}.</p>`,
   },
   {
-    el: "#detail .block", title: "What the code detected",
+    el: '#detail [data-sec="input"]', title: "What the code detected",
     prepare: () => tourShow("hackathon", "issue:multiple_group_membership:p02"),
     text: `<p>Léa Martin is registered in two teams, but the rules say one team per person. This was found by a deterministic check,
-      not guessed by a model: the ${b("Input")} block shows exactly what the check saw.</p>
+      not guessed by a model: the ${b("Input")} section shows exactly what the check saw.</p>
       <p>Rules that must always hold (team size, one team per person, identity thresholds, budgets) are enforced in code. The AI is used
       only where language and judgment are needed.</p>`,
   },
   {
-    el: '[data-act="retry"]', title: "Let the agent investigate a message", action: true,
+    el: '[data-act="retry"], #detail .thinking', title: "Let the agent investigate a message", action: true,
     prepare: () => tourShow("hackathon", "issue:message:m01"),
     text: `<p>Antoine writes (in French) that he already paid his membership fee from his personal email, yet keeps getting reminders.
       Answering him means checking registrations and payments, which usually takes a volunteer several minutes.</p>${CLICK("Run agent on this issue")}
@@ -86,13 +87,15 @@ const STEPS = [
       would appear here in red.</p>`,
   },
   {
-    el: ".trace", title: "Decision trace",
+    el: '#detail [data-sec="evidence"]', title: "Evidence: the decision trace",
+    prepare: () => { ui.open.evidence = true; renderDetail(); },
     text: `<p>The evidence behind the proposal, grouped as ${b("Checked")} (records and rules consulted), ${b("Found")} (facts),
       ${b("Applied")} (rule sections) and ${b("Proposed")}. Hover a name to see the underlying id.</p>
-      <p>Below it, ${b("Checks")} lists what was verified: ✓ passed, ✗ failed, ? must be confirmed by a person.</p>`,
+      <p>Below it, ${b("Checks")} lists what was verified: ✓ passed, ✗ failed, ? must be confirmed by a person. This section is
+      folded by default so the proposal stays in front; open it whenever you want to audit a decision.</p>`,
   },
   {
-    el: "#detail .question", title: "The agent asks instead of guessing",
+    el: "#detail .proposal-card .question", title: "The agent asks instead of guessing",
     text: `<p>The identity score is 0.91: a strong match, but below the 0.98 needed to be sure. So the agent does not decide alone. It
       proposes the link ${b("and asks you to confirm")}, which is why the issue shows ${b("Needs you")}.</p>
       <p>If the score had been below 0.70, code would have refused the link entirely, whatever the model said.</p>`,
@@ -140,7 +143,7 @@ const STEPS = [
     done: () => ui.view === "compose",
   },
   {
-    el: "#composeForm", title: "A risky request", action: true,
+    el: "#composeForm, #detail .thinking", title: "A risky request", action: true,
     prepare: () => {
       const ex = EXAMPLES[1], form = $("#composeForm");
       if (form) { form.sender.value = ex.sender; form.channel.value = ex.channel; form.text.value = ex.text; }
@@ -163,7 +166,7 @@ const STEPS = [
   },
   {
     el: '[data-ev="wei"]', title: "Same loop, another kind of event", action: true,
-    text: `<p>The integration weekend adds something harder: organizing a trip for 40 people under several constraints.</p>${CLICK("the WEI 2026 card")}`,
+    text: `<p>The integration weekend adds something harder: organizing a trip for 40 people under several constraints.</p>${CLICK("the WEI 2026 tab")}`,
     done: () => ui.current === "wei",
   },
   {
@@ -200,8 +203,8 @@ const STEPS = [
   {
     el: ".optwrap", title: "Packages built from real hotel offers",
     text: `<p>Each package is one departure plus one hotel, priced per person in code. Hotels come from ${b("Jinko")} (real offers in
-      Deauville, cached); departures are recorded fares. Rejected packages show the broken constraint in red (arrives after 21:00,
-      overnight travel, over budget).</p>
+      Deauville, cached); departures are recorded fares. The valid packages are the cards, ranked first highlighted; the table lists
+      the rejected ones with the broken constraint in red (arrives after 21:00, overnight travel, over budget).</p>
       <p>Jinko only quotes small bookings, so every hotel says ${b("Group block to confirm with the hotel")}: the agent is explicit about
       what it could not verify.</p>`,
   },
@@ -266,9 +269,21 @@ function tourWatch(step) {
   tourStopPolling();
   tourState.started = Date.now();
   if (step.done()) { tourAdvance(); return; }
+  let rehighlighted = false;
   tourState.poll = setInterval(() => {
     if (step.done()) { tourAdvance(); return; }
+    // The console re-renders while the agent works: when the highlighted control is gone, highlight
+    // the step again so the selector can match the "thinking" panel (once per step, to avoid flicker).
+    if (!rehighlighted && !document.querySelector(".driver-active-element") && document.querySelector("#detail .thinking")) {
+      rehighlighted = true;
+      tourState.driver.moveTo(tourState.driver.getActiveIndex());
+      return;
+    }
     const status = document.querySelector(".tour-status");
+    if (status && ui.busy && !status.dataset.working) {
+      status.dataset.working = "1";
+      status.textContent = "The agent is working… the tour continues by itself.";
+    }
     const failed = !ui.busy && $("#run").classList.contains("error");
     if (status && failed) status.textContent = `Something went wrong: ${$("#runText").textContent}. Use Skip step, or Close.`;
     else if (status && Date.now() - tourState.started > 120000) status.textContent = "This is taking long. Use Skip step to continue.";
@@ -321,4 +336,5 @@ function startTour() {
 }
 
 $("#tourBtn").addEventListener("click", () => { if (!ui.busy) startTour(); });
+$("#heroTourBtn").addEventListener("click", () => { if (!ui.busy) startTour(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && tourState.driver) tourState.driver.destroy(); });
