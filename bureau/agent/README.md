@@ -34,8 +34,8 @@ The Chat Completions flow follows the [OpenAI function-calling guide](https://de
 
 Install the repository dependencies, then set `OPENAI_API_KEY` and `OPENAI_MODEL` in the project `.env` (see `bureau/config.py` and `.env.example`).
 Use the model enabled for your hackathon credits, with Chat Completions function-calling support.
-The repository default is `gpt-4o-mini`; an environment variable overrides the corresponding `.env` value.
-Live acceptance was verified with `OPENAI_MODEL=gpt-4.1` on 2026-09-26. Model choice can change proposal quality; rerun the labeled cases when changing it.
+The repository default is `gpt-4.1`, the model the agent was validated with (T04 live run; T08 evaluation, see [eval/README.md](../../eval/README.md#model-comparison)). An environment variable overrides the corresponding `.env` value.
+Model choice changes proposal quality: before switching, run `OPENAI_MODEL=<model> python -m eval.run_eval` and compare with the recorded results.
 
 ```bash
 python -m venv .venv

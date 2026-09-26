@@ -50,7 +50,7 @@ Requires Python 3.11+. Full setup (venv, pre-commit hook, Windows notes) in [CON
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env                      # add OPENAI_API_KEY and OPENAI_MODEL
+cp .env.example .env                      # add OPENAI_API_KEY (default model: gpt-4.1)
 
 python -m bureau detect hackathon         # issues found by fixed code (no LLM)
 python -m bureau plan wei                 # trip planner on recorded options (no LLM)

@@ -23,5 +23,6 @@ def _load_dotenv() -> None:
 _load_dotenv()
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-# Which models the hackathon credits cover is not confirmed yet: set OPENAI_MODEL in .env.
-OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+# gpt-4.1 is the model the agent was validated with (T04 live run, T08 evaluation).
+# Another model needs its own run: OPENAI_MODEL=<model> python -m eval.run_eval
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4.1")

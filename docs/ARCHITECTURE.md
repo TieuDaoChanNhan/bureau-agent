@@ -169,7 +169,7 @@ Mọi `datetime` có múi giờ (dữ liệu mẫu dùng `+02:00`, giờ Paris �
 | `propose_groups` | danh sách người, cỡ nhóm → các nhóm | Tham lam, trải đều kỹ năng |
 
 ### 5.3. Agent (`agent.py`) [đã có, chưa chạy với API]
-- **Mô hình:** OpenAI Chat Completions với gọi công cụ. Tên model lấy từ `OPENAI_MODEL` trong `.env` [VERIFY: model nào được cấp credit].
+- **Mô hình:** OpenAI Chat Completions với gọi công cụ. Tên model lấy từ `OPENAI_MODEL` trong `.env`; mặc định `gpt-4.1`, model đã được đánh giá (T08, `eval/README.md`).
 - **Vòng lặp:** tối đa 8 bước. Mỗi bước: gọi mô hình → chạy công cụ được yêu cầu → trả kết quả. Kết thúc khi mô hình gọi `propose_action`.
 - **System prompt** gồm các quy tắc: phải tra quy chế trước khi trả lời; không bịa quy tắc (không có thì `ESCALATE`); không tự gộp danh tính; dữ liệu cá nhân, tiền, ngoại lệ luôn chuyển người; tin nhắn soạn theo ngôn ngữ người gửi, kèm dòng minh bạch AI.
 - **Công cụ đưa cho mô hình:** `get_event_summary`, `get_participant`, `search_rules`, `check_eligibility`, `match_person`, `check_groups`, `propose_groups`, `propose_action`.
