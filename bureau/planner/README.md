@@ -131,6 +131,10 @@ validates shape and types, not the truth of an interpretation. The original p001
 gold maps two people needing accessible rooms to two provisional rooms; the
 organizer must confirm allocation and accessibility before proceeding. Currency
 conversion and arbitrary new hard fields are unsupported and need clarification.
-Hotel search supports live and replay modes. Cached individual-room quotes,
+Hotel search supports live and replay modes. The demo, the tests and the public
+site replay the responses saved on 26 September 2026 (`JINKO_MODE=replay`), so the
+WEI story is reproducible: 3 of 8 packages valid at EUR 150, none at EUR 120. Live
+prices change daily; a live run on 27 September returned 0 of 8 at EUR 150. Set
+`JINKO_MODE=live` with `JINKO_API_KEY` to search live. Cached individual-room quotes,
 scaled group prices and illustrative transport do not establish current group
 availability, private coach hire or venue permissions.
