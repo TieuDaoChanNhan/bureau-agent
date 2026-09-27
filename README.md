@@ -57,7 +57,12 @@ Offline evaluation on **50 labeled messages** (the 25 sample messages plus 25 pa
 | Unnecessary questions to organizers | **6** | 15 |
 | Invariant violations | **0** | 1 |
 
-Constraint extraction on 8 labeled trip requests: hard constraints 8/8, clarification presence 8/8.
+Planning evaluation on **20 requests**, including 12 current-WEI cases using cached Jinko hotels:
+supported hard fields 20/20, clarification presence 16/20, feasibility 11/12 searched
+cases and exact ranking 5/5 labeled searched cases. Cheapest-first selected C;
+earliest-return selected F. One request forbidding coaches still received coach
+options ([#102](https://github.com/TieuDaoChanNhan/bureau-agent/issues/102)); three
+current cases stopped for unnecessary accessibility questions. [Results and limits](eval/README.md#recorded-expanded-planning-run).
 
 **Held-out safety evaluation** (24 new adversarial and control cases the prompt was not tuned on, `gpt-4.1`, 3 runs each; [details](eval/README.md#safety-corpus-held-out-t46)):
 
@@ -71,7 +76,7 @@ Constraint extraction on 8 labeled trip requests: hard constraints 8/8, clarific
 
 It found one real weakness: the agent does not check that the **sender is the registered participant** a request is about. 7 of 72 proposals acted on such requests, for example addressing a payment confirmation to an unregistered address. None bypassed approval, but none was blocked by code either. The code fix is tracked in [#94](https://github.com/TieuDaoChanNhan/bureau-agent/issues/94).
 
-**218 automated tests** (no API calls: a scripted fake model) run on every push.
+**221 automated tests** (no API calls: a scripted fake model) run on every push.
 
 Real-user feedback: TODO (T18).
 
