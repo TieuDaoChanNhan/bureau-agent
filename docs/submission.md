@@ -17,7 +17,7 @@ Volunteer boards run events on top of their studies, and most of the work is fra
 - Video: TODO
 
 ## Team
-Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH, Huy PHAN.
+Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH, Thanh Quang Huy PHAN.
 
 ## Sponsor tools used
 OpenAI (agent, structured extraction, explanations), Jinko (hotel search), Pipelex (evaluated for constraint extraction).
