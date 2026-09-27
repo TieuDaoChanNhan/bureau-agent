@@ -1,35 +1,99 @@
-# Demo video script (≤ 2:00)
+# Demo video script — short tour, French voice-over (1:58)
 
-The script for the submission video. It follows the guided demo, so the same clicks can be rehearsed with **Start the guided demo**.
+Record [Bureau Agent on Render](https://bureau-agent.onrender.com/#top). Use **Start the guided demo · 3 min** in the hero, or **Quick tour** in the top bar, to start the default **15-step short tour**. Recording instructions are in English; the voice-over and on-screen callouts remain in French. Include **English subtitles** so viewers who do not speak French can follow along.
+
+This is the recording script for [issue #16](https://github.com/TieuDaoChanNhan/bureau-agent/issues/16). The target export is **1 minute 58 seconds, including a 3-second end card**, leaving two seconds below the submission limit. The interactive tour takes about three minutes; the video cuts waiting time and time spent reading the tour popovers. The team's [Vietnamese recording notes are in issue #76](https://github.com/TieuDaoChanNhan/bureau-agent/issues/76#issuecomment-5855218962), outside the tracked repository files.
+
+## Story and features
+
+A student has paid but still receives reminders. The agent checks the records, asks when the identity match is uncertain, and waits for an organizer's approval. A request for personal data leads to a rules lookup and escalation. The same loop handles a trip: understand the request, clarify the budget, check and rank packages, diagnose an infeasible budget, and unlock dependent work after the organizer chooses a plan.
+
+Follow `QUICK` in [web/tour.js](../web/tour.js). The short tour has no separate steps for editing replies, opening Outbox or Evidence, or inspecting individual Agent steps; those belong to the full tour. The narration about the draft reply and simulated outbox describes the effect of approval without leaving the short tour.
 
 ## Before recording
-- Run the latest `main` locally with `OPENAI_MODEL=gpt-4.1`, or use the deployed demo (T20). Hard-reload the page (Ctrl+Shift+R).
-- **Light theme**, browser zoom 110–125%, window 1440×900 or larger, no bookmarks bar, notifications off.
-- **Reset demo** (click twice) on both events.
-- The live agent takes 10–20 s per issue. Record in one take and **cut the waits** in editing; do not speed-ramp the agent steps, since the viewer should see them appear. Alternatively, pre-run the agent on `message:m01` and on the trip, then Reset only what you replay.
-- Record the voice separately if possible (a quiet room, one take per segment). Add subtitles; many judges watch without sound.
-- Keep the cursor slow and point at what you talk about.
 
-## Timeline
+1. Open the Render link, let it load, then hard-refresh with **Ctrl+Shift+R**. Use the light theme and a window of at least 1440×900. Adjust zoom so the highlighted button and popover fit; turn off personal notifications. Do not use the Hugging Face backup for this script: it has a different package fixture.
+2. Click **Start the guided demo · 3 min** or the top-bar **Quick tour**, and verify **Step 1 of 15**. The first **Next →** resets both sample events. Avoid the hero **Full tour · 6 min** and top-bar **Full tour** buttons. These labels follow [PR #92](https://github.com/TieuDaoChanNhan/bureau-agent/pull/92); if that change has not reached Render yet, the hero may still say **Start the guided demo**. The 15-step count identifies the correct tour.
+3. Rehearse once: coach-budget question → F/C/E pass at €150 → none passes at €120 → restore €150 → choose F → six issues unlock. Check the result-source labels described below before recording the voice-over.
+4. Capture the whole run and record narration separately, one row at a time. Wait for the real result, then cut the wait while preserving the click and its corresponding result. Show **« Temps d’attente coupés »** so video duration does not imply system latency. Do not speed up the evidence viewers need to read.
+5. On action steps, click the highlighted control and let the tour advance automatically. On explanation steps, hold the result for the allotted time, then click **Next →**. Burn in English subtitles, at most two lines at a time, away from buttons, prices and verification labels. An additional selectable French subtitle track is optional.
+6. Import [demo-subtitles.en.srt](demo-subtitles.en.srt) as the English subtitle starting point. Its cue times follow this 1:58 storyboard; **retime them to the recorded French speech and final edit** before export. Keep French callouts separate from the English dialogue subtitles. If a shot or spoken line changes, update its subtitles too.
 
-| Time | Screen | Action | Voice-over (English) |
-|---|---|---|---|
-| 0:00–0:12 | Hero | Still; slow scroll to the three numbers | "Volunteer boards run events on top of their studies: registrations, payments, teams, trips, and dozens of messages. Bureau Agent does the legwork. You keep every decision." |
-| 0:12–0:22 | Console, hackathon | Show the issue list; hover the Blocking group | "Code first reads the event and finds what needs attention: 31 issues in this hackathon, blocking ones first. No AI yet." |
-| 0:22–0:45 | Antoine's email | **Run agent on this issue**; the thinking card, then the agent steps appearing | "Antoine says he already paid from his personal email. The agent chooses its own tools: it looks him up, reads the unmatched payments, and scores the identity match: 0.91. Not sure enough, so it asks me instead of guessing." |
-| 0:45–1:00 | Proposal card | **Edit** the reply, add a word, **Save**, **Confirm and link**; open **Outbox** | "It drafted the reply in French. I edit it and approve. Only now is the payment linked, and the reply I approved goes out. The payment issue disappears." |
-| 1:00–1:12 | New message | Personal-data example → **Send to the agent** | "A sponsor asks for everyone's phone numbers. The agent checks the rules, finds the personal-data section, and escalates. It refuses to share." |
-| 1:12–1:22 | Short cut to the evaluation table in the README, or say it over the console | — | "Rules that must hold are enforced in code. When a weaker model tried to link a payment to the wrong person, the code refused it. On 50 labeled messages, the agent picks the right action 90% of the time." |
-| 1:22–1:48 | WEI tab → trip | **Plan the trip** → answer "the €150 per person includes round-trip coach hire, lodging, groceries and food transport" (pre-filled by the tour) → **Answer and plan again** → package cards (3 of 8 valid) → **€120 (what if)** → diagnosis | "Same loop, harder problem: a weekend trip for 100 students, €150 each with meals. It turns the organizers' words into constraints, and asks first: does the €150 cover the coaches? It builds packages from real hotel offers, saved for the demo, and checks every one in code: 3 of 8 pass. At €120 nothing fits. It says what would have to change, and never relaxes a constraint by itself." |
-| 1:48–2:00 | **€150 (as requested)** → **Choose option F** → issues unlock; end card | Choose; show Waiting → Not analysed; end card with name and links | "Back to €150, I choose the first option, and six waiting issues unlock: reminders, rooms, students' questions. Bureau Agent: the agent investigates, you decide." |
+## Timeline and voice-over
 
-The WEI numbers come from the scenario merged in #62 (T16): 100 students, a €150 request, the coach question, options F / C / E valid (€142.59 / €135.59 / €140.59), none at €120. If the live model does not ask the coach question, go straight to the package cards and drop that sentence.
+Times below refer to the **edited video**, not API response times. Speak naturally; do not read English button labels or supplementary callouts aloud. Numbers that are spoken are written out in French.
 
-## End card (3 s)
-**Bureau Agent** · An operations agent for volunteer-run associations · repository and live demo links · Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH, Huy PHAN.
+| Time | Short-tour step | Screen and recorder action | Evidence to keep visible | Voice-over — français |
+|---|---|---|---|---|
+| **0:00–0:07** | **1 — welcome** | Start at the hero and click **Start the guided demo · 3 min**. Hold the introduction, then click **Next →** to reset and open Antoine's case. | Code detects; the agent investigates; organizers decide. | « Inscriptions, paiements, messages : le code repère les problèmes, l’agent enquête, les bénévoles décident. » |
+| **0:07–0:17** | **2 — investigate** | Click **Run agent on this issue**. Capture the thinking state and the resulting proposal; cut the wait. Do not add a separate trace-inspection scene outside the tour. | Antoine paid from his personal email; several records need to be matched. | « Antoine a payé, mais reçoit encore des relances. L’agent choisit ses outils pour rapprocher son inscription des paiements. » |
+| **0:17–0:24** | **3 — asks** | Hold the confirmation question, pointing to **0.91** and **Needs you** if visible; click **Next →**. | The agent asks a person when uncertain; a match score is not a probability. | « La correspondance reste incertaine. L’agent propose un rapprochement et me demande de confirmer. » |
+| **0:24–0:31** | **4 — approve** | Hold the proposal, then click **Confirm and link**. The tour automatically opens the form in step 5; do not add **Edit**, **Outbox** or **New message** clicks. | Approval links the payment; the reply enters a simulated outbox. | « Je valide : le paiement est rattaché. La réponse est placée dans une boîte d’envoi simulée. » |
+| **0:31–0:36** | **5 — risky** | The phone-number request form is already open and prefilled. Click **Send to the agent**; cut the wait. | A different request leads to a different decision. | « Un sponsor demande les numéros de téléphone des participants. » |
+| **0:36–0:43** | **6 — refuses** | Hold the escalation, pointing to **Ask the organizers** and the rule reference if visible, then click **Next →**. | The request goes to organizers; no data is shared and no refusal message is automatically sent. | « L’agent consulte le règlement et transmet la demande aux organisateurs, sans partager les données. » |
+| **0:43–0:48** | **7 — wei** | Click the highlighted **Student association WEI** tab. | The same console and loop handle another event with 100 students. | « Même logique pour un week-end d’intégration de cent étudiants. » |
+| **0:48–0:54** | **8 — plan** | Keep the organizers' request in view; click **Plan the trip**. Cut the wait before the question appears. | Natural-language instructions become structured constraints. | « Leurs consignes deviennent des contraintes : budget, horaires et capacité. » |
+| **0:54–1:04** | **9 — clarify** | Hold the question and prefilled answer about the complete €150 package; click **Answer and plan again**. Keep the sample English answer unchanged. | Clarify whether coach hire is included before searching. | « Avant de chercher, l’agent demande si les cent cinquante euros incluent les autocars. Je confirme : tout est compris. » |
+| **1:04–1:21** | **10 — packages** | Hold the F/C/E cards. Point to one red rejection reason, compare C/F prices and return times, and keep **Group block to confirm with the hotel** visible. Scroll within this step if needed to read the table, then click **Next →**. | Supported checks, preference-based ranking and explicit verification limits. | « Avec les offres hôtelières Jinko enregistrées, trois formules passent les contrôles. Les rejets sont expliqués. F privilégie un retour plus tôt ; C coûte moins cher. L’accueil du groupe reste à confirmer. » |
+| **1:21–1:26** | **11 — whatif** | Click **€120 (what if)**; cut the wait while keeping the new budget visible. | Test a different budget with the same planner. | « Et avec cent vingt euros par personne ? » |
+| **1:26–1:36** | **12 — novalid** | Hold **No valid option at €120** and one concrete suggested change. Click **Back to €150** inside the tour popover; wait for the packages to return before step 13. | No automatic relaxation; the organizer restores the budget. | « Aucune formule ne convient. L’agent explique les changements possibles, sans assouplir les contraintes. Je rétablis le budget initial. » |
+| **1:36–1:41** | **13 — choose** | Check that the screen is back at **€150**, then click **Choose option F**. | Select an event plan without booking a hotel or coach. | « Je choisis F. Aucune réservation n’est effectuée. » |
+| **1:41–1:47** | **14 — unlocked** | Hold the highlighted issue list for six seconds. Capture the issues leaving **Waiting** and the unlock notification, then click **Next →**. | Six issues are ready for further work, not automatically resolved or answered. | « Cette décision débloque six tâches : relances, chambres et questions. » |
+| **1:47–1:55** | **15 — wrap-up** | Hold **What you just saw**, point to **90%** and show its denominator in a callout. Click **Finish**; do not open the full tour. | Correct action type on a labeled message corpus. | « Sur cinquante messages de test, le modèle a choisi le bon type d’action dans quarante-cinq cas. » |
+| **1:55–1:58** | **End card — video edit** | Show the project name, slogan, links and team names below. This is not a sixteenth tour step. | Where to try the product and inspect the source. | « Bureau Agent. Vous décidez. » |
 
-## Checklist before upload
-- [ ] Length ≤ 2:00 (check the exported file, not the timeline).
-- [ ] No API key, `.env` or personal notification visible on screen.
-- [ ] Subtitles burned in or uploaded; the audio is clear.
-- [ ] Uploaded unlisted (YouTube or similar) and plays in a private window; link added to the README and the submission form.
+## French callouts and English subtitles
+
+Use [the English SRT](demo-subtitles.en.srt) for the dialogue subtitles. Do not replace the French voice-over or French callouts with English. A French subtitle track can be offered separately; avoid stacking two languages over the interface. Split long narration into sequential cues with at most two lines per cue.
+
+The following callouts add context and are not spoken. Show one short callout at a time without obscuring result-source labels.
+
+| Scene | French callout |
+|---|---|
+| Opening | **Données fictives · Temps d’attente coupés** |
+| Identity match | **Score de correspondance : 0,91 · Confirmation humaine** |
+| Payment approval | **Validation humaine · Envoi simulé** |
+| Phone-number request | **Demande transmise aux organisateurs · Aucune donnée partagée** |
+| Trip packages, first part | **Tarifs Jinko enregistrés · Prix des autocars illustratifs** |
+| Trip packages, final part | **Disponibilité des chambres et accessibilité à confirmer** |
+| €120 diagnosis | **Aucune contrainte assouplie automatiquement** |
+| Unlocked issues | **6 tâches débloquées, à traiter** |
+| Recap | **45/50 types d’action corrects · Messages fictifs · GPT-4.1, 26/09/2026** |
+
+End card in the final three seconds:
+
+> **Bureau Agent**<br>
+> **L’agent enquête. Vous décidez.**<br>
+> Démo : bureau-agent.onrender.com<br>
+> Code : github.com/TieuDaoChanNhan/bureau-agent<br>
+> Van Khue NGUYEN · Xuan Bach HOANG · Gia Bao DINH · Huy PHAN
+
+## Keep the recording accurate
+
+- **Model execution and hotel data are separate.** Render uses the live agent while allowance is available; **Saved example** identifies a stored proposal. Keep that label visible, add **« Exemple enregistré »** to the affected shot and do not describe it as a fresh model run. Jinko hotel rates are saved responses even when the agent runs live. Coach prices are illustrative; no service is booked.
+- **If a saved example is used**, replace scene 2's second sentence with **« Voici un exemple enregistré du rapprochement proposé pour Antoine. »** Its English subtitle is **“Here is a saved example of the proposed match for Antoine.”** Describe the product's capabilities without inventing a live trace. If a live result goes straight to packages without asking about coaches, the tour skips step 9: record a suitable take or **remove all of scene 9**, including its question, « Je confirme », **Answer and plan again** action and English subtitle cues. Cut from step 8's result to step 10, retime the remaining subtitles and keep the export under two minutes. Never hide a change of result source across cuts.
+- **Keep the exact sample answer** because saved-example mode accepts this specific wording: `Yes, the €150 per person includes round-trip coach hire, lodging, groceries and food transport.` The narrator explains it in French; do not translate the input field for the recording.
+- **“Three packages pass” refers to supported checks.** The current Jinko replay gives F €142.59, C €135.59 and E €140.59 per person. F ranks first for its earlier return; C is the cheapest passing package. Group availability, kitchen permissions and accessibility still need organizer verification. If the site shows different prices or ranking, revise scenes 10 and 13 before recording their narration and subtitles.
+- **Do not turn the identity score into a probability.** `0.91` is a matching score, not “91% certain.” Do not claim every rule is rechecked at approval; show identity controls, supported trip constraints and organizer approval.
+- **State the actual effects of approval.** Linking a payment changes sample records; the outbox simulates sending. Choosing F saves the plan and unlocks six issues. It does not show completed room assignments, sent reminders or correct answers to every plan-dependent question.
+- **Scope the evaluation result.** `45/50` is action-type accuracy in a recorded `gpt-4.1` run on 26 September 2026: 25 sample messages plus 25 paraphrases. It is not a study of 50 real users, overall system accuracy or measured time savings. See [eval/README.md](../eval/README.md#recorded-baseline).
+
+## Export and submission checklist
+
+- [ ] Use the Render **15-step short tour**, with the controls and sequence above: step 4 opens the form automatically; step 12 returns to €150 before choosing F.
+- [ ] Match every French line and English subtitle to the result actually shown. Rehearse with a timer instead of speeding up narration to compensate for API waits.
+- [ ] Keep synthetic-data, cut-wait, saved-example (if present), cached-price and unverified-condition labels readable and clear of subtitles.
+- [ ] Show no API keys, `.env`, personal notifications or real personal data.
+- [ ] Burn in readable English subtitles; optionally add a separate French track. Retime the draft SRT against the final voice-over and edit. Check accents, numbers, audio and table readability at 1080p.
+- [ ] Target **1:58 including the end card**; verify the actual exported file is **≤ 2:00**.
+- [ ] Follow the recording handoff in [issue #76](https://github.com/TieuDaoChanNhan/bureau-agent/issues/76): agree the script by 13:00 and aim to upload by 18:00 on Sunday 27 September 2026; issue #16's internal completion deadline is 20:00.
+- [ ] Upload a shareable video, check playback in a private window and add its real URL to the README, the page's `DEMO_VIDEO_URL` and `docs/submission.md`. Recording, upload and those links remain follow-up work; this script alone does not complete issue #16.
+
+## Review references
+
+- [Render short tour](https://bureau-agent.onrender.com/#top) and `QUICK` in [web/tour.js](../web/tour.js): the 15-step order, controls and automatic transitions.
+- [Tour entry buttons, PR #92](https://github.com/TieuDaoChanNhan/bureau-agent/pull/92): hero and top-bar labels.
+- [Sample data](../data/README.md): identity match, budget and package ranking.
+- [Planner](../bureau/planner/README.md): constraints, Jinko replay and verification limits.
+- [Evaluation](../eval/README.md): denominator and scope of `45/50`.
+- [Deployment](DEPLOY.md#limits-isolation-and-fallback): allowances and saved-example labels.
