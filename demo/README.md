@@ -2,6 +2,9 @@
 
 Target Space: https://huggingface.co/spaces/bachbeo2007/bureau
 
+The [27 September 2026 verification record](VERIFICATION.md#static-backup-refresh--27-september-2026)
+includes the published revision, public tour results and screenshots.
+
 This is a browser-only adaptation of the existing operations console and its
 30-step Demo tour. It shows two fictional events, evidence, editable replies,
 approval/dismissal, a simulated outbox, local activity, clarification, and trip
@@ -99,7 +102,7 @@ python demo/publish.py
 ```
 
 The uploader first checks the assets, refuses a non-public or non-static target,
-and uploads only the 12 known public files. Deployment credentials stay on the
+and uploads only the 15 known public files. Deployment credentials stay on the
 maintainer's computer. A file manifest and uploaded commit id are recorded under
 ignored `demo/artifacts/`. The archive is an alternative for manual deployment:
 extract it and upload its contents, not the ZIP file itself.
