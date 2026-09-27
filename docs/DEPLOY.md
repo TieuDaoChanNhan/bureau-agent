@@ -20,7 +20,40 @@ method, exhausting them disables builds or suspends services instead of billing
 overages. Keep one service, no paid resources or payment method. Render may also
 suspend unusually high outbound traffic. Copy these dated terms into the PR.
 
-## Create and redeploy
+## Test the branch before merging
+
+Push `t20-deploy` to GitHub and open a PR, leaving `main` unchanged. For a
+pre-merge Render test, choose **New → Web Service**, connect the GitHub repository
+through **Git Provider**, and select branch **t20-deploy**. If a service already
+exists, change its linked branch instead of creating another service.
+
+Keep the root directory empty, choose Python and **Free**, use
+`pip install -r requirements.txt` for the build and
+`uvicorn api.main:app --host 0.0.0.0 --port $PORT` for startup. Set `/health` as
+the health check. Copy the environment settings from `render.yaml`, but start
+with `DEMO_DAILY_LLM_LIMIT=0` and no OpenAI key to test replay without spending.
+The Blueprint currently pins `main`, so use this manual service setup for branch
+testing. See [Render web services](https://render.com/docs/web-services).
+
+Complete the tour and isolation checks on its public URL. Then configure the
+project hard spend limit, add the key privately, set the intended call limits,
+redeploy and repeat with the live agent. Record the public acceptance evidence
+before merging. After review and green CI, merge the PR, change this same
+service's branch to `main` and enable automatic deploys. Keep only one service.
+
+Local replay testing does not require any push. In PowerShell, set
+`$env:DEMO_MODE='1'`, `$env:DEMO_DAILY_LLM_LIMIT='0'` and
+`$env:JINKO_MODE='replay'`, then run:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn api.main:app --host 0.0.0.0 --port 10000
+```
+
+Open http://127.0.0.1:10000 and run the tour. The zero limit prevents model calls
+even if a local `.env` has a key. Before running the ordinary Python suite in
+that shell, set `$env:DEMO_MODE='0'`; the public-demo tests enable it themselves.
+
+## Create from main and redeploy
 
 1. Merge the reviewed change into `main` in `TieuDaoChanNhan/bureau-agent`.
 2. In Render, choose **New → Blueprint**, connect that GitHub repository, select
