@@ -16,7 +16,7 @@ to 50 rooms, with illustrative two-coach transport and the catering budgets.
 Generated options may differ from the A–E fallback packages. The room block,
 charter coaches, venue facilities and meal arrangements require organizer
 verification; a passing option only satisfies the
-currently supported checks. See [data provenance](../../data/README.md#wei-source-assumptions-and-scenarios-t16--issue-15).
+currently supported checks. See [data provenance](../../data/README.md#wei-source-assumptions-and-scenarios).
 
 At the default EUR 150 budget, cached composed options C/E/F pass at
 EUR 135.59/140.59/142.59 per person. The EUR 120 what-if example yields

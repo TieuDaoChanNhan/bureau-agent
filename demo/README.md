@@ -16,7 +16,7 @@ curated proposals during the build; the static adapter checks their action and
 source-issue snapshots rather than maintaining another eligibility policy. The
 result reports approved and failed counts with failure reasons. Money, identity,
 escalations and locally edited drafts stay under individual review. See the
-[full rule](../web/README.md#bulk-reply-eligibility-t24).
+[full rule](../web/README.md#bulk-reply-eligibility).
 
 Each tab owns its own state and random session id. Browser `sessionStorage`
 preserves proposals, saved reply edits, decisions, outbox, activity and planning
@@ -76,10 +76,10 @@ executor runs in the static backup. Approval changes only sample browser state.
 
 ## Browser verification
 
-The static backup includes the same T25 status/kind/search controls as the live
+The static backup includes the same status/kind/search controls as the live
 console. Filter preferences stay in this browser's local storage, separately
 from its isolated sample-data sessions. Tours temporarily show all issues and
-restore filters on exit. See the [filter behavior](../web/README.md#issue-filters-t25).
+restore filters on exit. See the [filter behavior](../web/README.md#issue-filters).
 `tests/test_web_filters.py` supplies shared browser cases inherited by both
 browser suites: combined filters, complete message search, Done entries, event
 totals, draft preservation, storage failures, keyboard navigation and 400 px layout.

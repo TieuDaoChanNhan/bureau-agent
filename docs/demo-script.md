@@ -81,7 +81,7 @@ The Gradium credit is not spoken and remains within the existing three-second en
 - **“Three packages pass” refers to supported checks.** The current Jinko replay gives F €142.59, C €135.59 and E €140.59 per person. F ranks first for its earlier return; C is the cheapest passing package. Group availability, kitchen permissions and accessibility still need organizer verification. If the site shows different prices or ranking, revise scenes 10 and 13 before recording their narration and subtitles.
 - **Do not turn the identity score into a probability.** `0.91` is a matching score, not “91% certain.” Do not claim every rule is rechecked at approval; show identity controls, supported trip constraints and organizer approval.
 - **State the actual effects of approval.** Linking a payment changes sample records; the outbox simulates sending. Choosing F saves the plan and unlocks six issues. It does not show completed room assignments, sent reminders or correct answers to every plan-dependent question.
-- **Scope the evaluation result.** `45/50` is action-type accuracy in a recorded `gpt-4.1` run on 26 September 2026: 25 sample messages plus 25 paraphrases. It is not a study of 50 real users, overall system accuracy or measured time savings. See [eval/README.md](../eval/README.md#recorded-baseline).
+- **Scope the evaluation result.** `45/50` is action-type accuracy in a recorded `gpt-4.1` run on 26 September 2026: 25 sample messages plus 25 paraphrases. It is not a study of 50 real users, overall system accuracy or measured time savings. See [eval/README.md](../eval/README.md#messages).
 
 ## Export and submission checklist
 

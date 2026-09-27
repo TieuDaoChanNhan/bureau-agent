@@ -1,8 +1,5 @@
 # Documentation
 
-Task codes such as T24 and numbers such as #103 refer to this repository's GitHub issues
-and pull requests, where each change was specified and reviewed.
-
 | File | Content |
 |---|---|
 | `ARCHITECTURE.md` | Current system components, data lifecycle, planner pipeline, API, and decisions |
@@ -14,12 +11,12 @@ and pull requests, where each change was specified and reviewed.
 | `submission.md` | Ready-to-paste submission-form text |
 | `screenshots/` | The screenshots used by the README and public-demo verification |
 
-T24 bulk-approval evidence: [review preview](screenshots/t24-bulk-preview.png)
+Bulk-approval evidence: [review preview](screenshots/t24-bulk-preview.png)
 and [partial-success result](screenshots/t24-bulk-result.png), captured with the
-fake-provider browser tests. The [eligibility rule](../web/README.md#bulk-reply-eligibility-t24)
+fake-provider browser tests. The [eligibility rule](../web/README.md#bulk-reply-eligibility)
 describes which replies can be included.
 
-T25 issue-filter evidence: [desktop](screenshots/t25-filters-desktop.png) and
+Issue-filter evidence: [desktop](screenshots/t25-filters-desktop.png) and
 [400 px controls](screenshots/t25-filters-400.png), captured by the shared browser
-checks. The [filter behavior](../web/README.md#issue-filters-t25) explains status
+checks. The [filter behavior](../web/README.md#issue-filters) explains status
 categories, search, browser preferences and event-wide action scope.

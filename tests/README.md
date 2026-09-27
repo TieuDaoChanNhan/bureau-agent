@@ -26,8 +26,8 @@ python -m unittest tests.test_core.LoaderTests -v          # one class
 | `test_public_demo.py` | Public demo sessions, call limits and saved-example replay |
 | `test_executor_hardening.py` | Executor rejection, payment ownership, optional replies, and unchanged state on failure |
 | `test_api.py` | Runtime API, proposal persistence, approval/dismiss/reset, error responses, and outbox; fake agent and temporary storage |
-| `test_bulk_approval.py` | T24 eligibility exclusions, read-only previews, exact snapshots, mixed batches, per-item failures, concurrent/duplicate/retry protection, browser isolation and unverified model checks |
-| `test_web_filters.py` | T25 shared browser cases: status/kind/search intersections, complete text, Done entries, live updates, unchanged totals/action scope/drafts, preferences and storage failures, keyboard/400 px, escaping, tour restoration |
+| `test_bulk_approval.py` | Eligibility exclusions, read-only previews, exact snapshots, mixed batches, per-item failures, concurrent/duplicate/retry protection, browser isolation and unverified model checks |
+| `test_web_filters.py` | Shared browser cases: status/kind/search intersections, complete text, Done entries, live updates, unchanged totals/action scope/drafts, preferences and storage failures, keyboard/400 px, escaping, tour restoration |
 | `fake_llm.py` | Fake OpenAI clients for tool calls and structured completions (no key, no cost) |
 | `helpers.py` | Shared fixtures (e.g. `wei_request()`) |
 
@@ -86,12 +86,12 @@ demo" (with the fake live agent and with replay at a zero limit), separate
 visitors and local font loading. They run in the CI `browser` job; locally,
 `DEMO_CHROME_PATH` can point to an installed Chrome or Edge.
 
-T24 browser checks also cover bulk-preview cancellation, preservation of unsaved
+Browser checks also cover bulk-preview cancellation, preservation of unsaved
 edits, partial failures, duplicate confirmation clicks, network errors, HTML
 escaping, mobile layout and static proposal-certificate invalidation. They use
 the fake server or local static fixtures and never contact a model provider.
 
-T25's `IssueFilterChecks` in `test_web_filters.py` is a shared mixin, inherited by
+The `IssueFilterChecks` in `test_web_filters.py` is a shared mixin, inherited by
 the static and live browser suites. Its methods run in the CI `browser` job;
 ordinary unittest discovery imports it without needing Playwright. For just
 these cases, run `python demo/test_browser.py -k filters` and

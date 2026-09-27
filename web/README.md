@@ -11,11 +11,11 @@ uvicorn api.main:app --reload     # then open http://127.0.0.1:8000
 |---|---|
 | `index.html` | Page shell: top bar, event cards, status line, issue list, detail pane |
 | `app.js` | State, API calls, rendering and event handlers |
-| `tour.js` | The guided product tours (T34, T38): the full `STEPS` list, the `QUICK` tour built from it, and the logic that waits for each action |
+| `tour.js` | The guided product tours: the full `STEPS` list, the `QUICK` tour built from it, and the logic that waits for each action |
 | `vendor/` | Driver.js 1.3.1 (MIT, licence in `DRIVER_LICENSE`), vendored so the tour works offline and when deployed |
 | `style.css` | Design tokens (light and dark) and console components |
 
-## Layout (T35)
+## Layout
 - **Hero** (first screen): value proposition, three numbers (issues detected in the sample, the 90% evaluation
   result, zero actions without approval) and **Start the guided demo**. "How it works" in three steps.
 - **Console**: title and actions (New message, Outbox, Reset demo, Approve safe replies, Run agent); event **tabs** with context
@@ -37,14 +37,14 @@ uvicorn api.main:app --reload     # then open http://127.0.0.1:8000
 ## What the console does
 | Area | Behaviour | API |
 |---|---|---|
-| Intro (T33) | One sentence on what the product does and the loop in three steps | — |
-| Demo tour (T34, T38) | Two guided tours (Driver.js). **Quick** (default, 15 steps, about 3 minutes): the highlights with short copy and the key numbers at the end. **Full** ("Full tour · 6 min" in the hero and "Full tour" in the top bar, 30 steps). Each step shows its chapter (Intro, Agent, Safety or Messages, Trip, Wrap-up) and "Step n of N", the page dimmed and one element highlighted, a detailed explanation next to it. Action steps name the button to click and move on by themselves when the result appears; Skip step, Close and Esc always work; clicks on the dimmed page do not end the tour. It resets both sample events first and uses the live agent (a few cents) | the routes the steps trigger |
+| Intro | One sentence on what the product does and the loop in three steps | — |
+| Demo tour | Two guided tours (Driver.js). **Quick** (default, 15 steps, about 3 minutes): the highlights with short copy and the key numbers at the end. **Full** ("Full tour · 6 min" in the hero and "Full tour" in the top bar, 30 steps). Each step shows its chapter (Intro, Agent, Safety or Messages, Trip, Wrap-up) and "Step n of N", the page dimmed and one element highlighted, a detailed explanation next to it. Action steps name the button to click and move on by themselves when the result appears; Skip step, Close and Esc always work; clicks on the dimmed page do not end the tour. It resets both sample events first and uses the live agent (a few cents) | the routes the steps trigger |
 | Event cards | Open blocking / non-blocking counts, proposals ready for review, resolved issues | `GET /api/events/{id}` |
-| Issue list (T25) | Combined status, kind and text filters; matching/total count; blocking first, then non-blocking. Done entries expand when a filter matches them | same, client-side filtering |
+| Issue list | Combined status, kind and text filters; matching/total count; blocking first, then non-blocking. Done entries expand when a filter matches them | same, client-side filtering |
 | Status pills | `Running…` (being investigated), `Not analysed` (no proposal), `Action proposed`, `Needs you` (escalation, or identity link below 0.98), `Waiting` (unresolved `depends_on`), `Agent failed`, `Resolved`, `Dismissed` | same |
 | Issue detail | Input found by fixed checks, **Agent steps** (the real tool calls of the run, from `ProposedAction.trace`; rejected calls in red), decision trace built from the proposal's evidence (checked / found / applied / proposed), checks ✓ / ✗ / ? (unverified), the agent's note, the proposed action and its draft reply | same |
 | Approve / Edit / Dismiss | Edit makes the draft reply editable; approving sends it as `edited_description`. The issue leaves the open list | `POST /api/actions/{id}/approve`, `/dismiss` |
-| Approve safe replies (T24) | Preview the count, titles, recipients, complete drafts and rule citations; confirm once to approve those unchanged replies. Cancel changes nothing. The result counts successes and names every failure | `GET /api/events/{id}/safe-replies`, `POST /api/events/{id}/approve-safe-replies` |
+| Approve safe replies | Preview the count, titles, recipients, complete drafts and rule citations; confirm once to approve those unchanged replies. Cancel changes nothing. The result counts successes and names every failure | `GET /api/events/{id}/safe-replies`, `POST /api/events/{id}/approve-safe-replies` |
 | Run agent | Runs the runnable issues one request at a time (`run?issue_id=`), blocking first: the current row shows **Running…** and the status line `Investigating n/total`. The button becomes **Stop** (takes effect after the current issue). One issue can also be run or retried from its detail pane | `POST /api/events/{id}/run` |
 | New message | A form (with three fictional examples) that adds an incoming message and immediately runs the agent on it, with the run progress display | `POST /api/events/{id}/messages`, then `run?issue_id=` |
 | Trip view (`no_logistics_plan`) | The planning request, hard / soft constraints (with the ones organizers must confirm), the planner's clarification questions with an answer box (nothing is searched until they are answered), a budget what-if (requested vs 20% less, rounded to €10, keeping the answers), the decision trace, option cards with the return time and per-person cost split (coach, lodging, meals), the option table with rejection reasons in red, the diagnosis when nothing is valid, and one **Choose option** button per valid option. Choosing sets the plan and unlocks the waiting issues | `POST /api/events/{id}/plan`, `/approve` with `option_id` |
@@ -53,11 +53,11 @@ uvicorn api.main:app --reload     # then open http://127.0.0.1:8000
 
 The decision trace is derived from `ProposedAction.evidence`: every evidence item is listed
 under *Checked*, non-rule items under *Found*, rule sections under *Applied*, and the action
-title under *Proposed*. Everything user-supplied is HTML-escaped before rendering. Ids are shown as names, with the id in a tooltip (T33;
-`named()` / `cell()`), rather than in brackets (`nameOf()`, from the summary's `records`): "Antoine Nguyen (p01)"; the issue list
+title under *Proposed*. Everything user-supplied is HTML-escaped before rendering. Ids are shown as names, with the id in a tooltip
+(`named()` / `cell()`), rather than in brackets (`nameOf()`, from the summary's `records`): "Antoine Nguyen (p01)"; the issue list
 shows the subjects' names under each non-message issue.
 
-## Issue filters (T25)
+## Issue filters
 
 Status chips, the **Kind** selector and **Search issues** work together. All
 search words must occur in the title or full source message (including text
@@ -96,7 +96,7 @@ consoles through the existing `demo/test_*browser.py` suites.
 Screenshots: [desktop filters](../docs/screenshots/t25-filters-desktop.png)
 and [400 px controls](../docs/screenshots/t25-filters-400.png).
 
-## Bulk reply eligibility (T24)
+## Bulk reply eligibility
 
 `bureau/core/bulk_approval.py:reply_problem` is the single authoritative rule.
 The browser displays the server's candidates; it does not classify model output.

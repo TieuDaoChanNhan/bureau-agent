@@ -14,12 +14,12 @@ LLM interprets and explains. Code composes, prices and validates. The planner ne
 | File | Role | Status |
 |---|---|---|
 | `interface.py` | Contract with the core: `TravelRequest`, `Constraints`, `TravelOption` | done |
-| `planner.py` | `plan_trip(req, constraints, client, search) -> ProposedAction`; `search_options` composes Jinko hotels (replay) × recorded transport, falling back to `travel_options.json` | done (T14) |
+| `planner.py` | `plan_trip(req, constraints, client, search) -> ProposedAction`; `search_options` composes Jinko hotels (replay) × recorded transport, falling back to `travel_options.json` | done |
 | `constraints.py` | Hard-constraint checks, ranking by soft priorities, diagnosis | done |
-| `extract.py` | Words → `Constraints` with OpenAI strict structured output | done (T10) |
-| `jinko.py` | `ground_search`, `hotel_search`, live/replay cache under `data/<event>/jinko_cache/` | done (T11): hotels verified live; ground search returns 404 for our key |
-| `compose.py` | Transport × lodging → packages, integer cents; lodging share rounded up; one package per transport first, cheapest always kept | done (T12) |
-| `explain.py` | Plain-language trade-offs: LLM prose when a client is given (OpenAI), template otherwise; the list of rejected options and broken constraints is always appended by code; never changes the ranking | done (T13) |
+| `extract.py` | Words → `Constraints` with OpenAI strict structured output | done |
+| `jinko.py` | `ground_search`, `hotel_search`, live/replay cache under `data/<event>/jinko_cache/` | done: hotels verified live; ground search returns 404 for our key |
+| `compose.py` | Transport × lodging → packages, integer cents; lodging share rounded up; one package per transport first, cheapest always kept | done |
+| `explain.py` | Plain-language trade-offs: LLM prose when a client is given (OpenAI), template otherwise; the list of rejected options and broken constraints is always appended by code; never changes the ranking | done |
 
 ## Hard constraints
 | Key | Checked by | Can reject an option |
@@ -67,7 +67,7 @@ deliberately leaves coach inclusion in the EUR 150 budget unclear. The live demo
 should first ask about this scope; after an all-inclusive answer it can search
 and propose options. Charter hire, kitchens and activity
 permissions are outside the current schema. The model may ask clarifications or
-proceed with only the supported checks. See [fixture provenance and limits](../../data/README.md#wei-source-assumptions-and-scenarios-t16--issue-15).
+proceed with only the supported checks. See [fixture provenance and limits](../../data/README.md#wei-source-assumptions-and-scenarios).
 
 The budget is the ceiling for the full requested package. Explicit meal inclusion
 is supported; ambiguity about inclusion still requires clarification. The optional
@@ -113,7 +113,7 @@ tree. No Pipelex code or dependency is shipped.
 
 ## Validation and limits
 
-The PR #62 live API check exercised the current WEI sequence: the initial request
+A live API check exercised the current WEI sequence: the initial request
 returned `ESCALATE` with a question about coach inclusion; an appended all-inclusive
 budget answer returned `SELECT_TRAVEL_PLAN`, ranked F/C/E. The recorded EUR 120
 what-if returned `ESCALATE`. Restoring EUR 150 and approving F removed
@@ -123,7 +123,7 @@ the browser tour copy is updated separately.
 `tests/test_extract.py` covers the provider boundary using scripted completions.
 The eight synthetic planning cases cover English/French, decimal budgets, time
 normalization, ambiguity, preferences, and accessibility. The live evaluation
-with `gpt-4.1`, rerun for PR #62, matched hard constraints on 8/8 cases, clarification presence on
+with `gpt-4.1`, matched hard constraints on 8/8 cases, clarification presence on
 8/8, optional preference/verification labels on 7/7, and recorded feasibility on
 5/5; the three clarification cases were not searched. Reports are saved under
 ignored `eval/results/`; see [evaluation definitions](../../eval/README.md).
