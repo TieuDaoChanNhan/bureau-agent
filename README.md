@@ -18,7 +18,7 @@ Team **cylindricalbirds**, X-IA Hackathon n°1 "Rise of Agents X" (25–27 Septe
 |---|---|
 | **2 min** | Watch the [demo video](https://drive.google.com/file/d/1Zao5Yndk3AOOPt89zQ0dxiTy8JNssqQZ/view?usp=sharing). |
 | **5 min** | Open [bureau-agent.onrender.com](https://bureau-agent.onrender.com) and click **Start the guided demo · 3 min**: 15 highlighted steps with the live agent (`gpt-4.1`). **Full tour · 6 min** shows every feature. Nothing to install; each browser gets its own copy of the fictional data. |
-| **15 min** | Run it locally ([Try it](#try-it)); 264 automated tests run without any API key. |
+| **15 min** | Run it locally ([Try it](#try-it)); 266 automated tests run without any API key. |
 
 ## The problem
 
@@ -116,7 +116,7 @@ The three weaknesses found (an unverified sender, a fake "pre-approved" answer, 
 
 **Trip planning** (20 requests, 12 on the current 100-student weekend): constraints extracted 20/20, clarification when needed 18/20, feasible or not after clarification 12/12, exact ranking of valid packages 6/6.
 
-**Tests:** 264 automated tests (no API calls: a scripted fake model) and browser tests of both guided tours run on every push.
+**Tests:** 266 automated tests (no API calls: a scripted fake model) and browser tests of both guided tours run on every push.
 
 ## Try it
 
@@ -155,7 +155,7 @@ Then open http://127.0.0.1:8000 and click **Start the guided demo · 3 min**. **
 
 **Tests and evaluation**
 ```bash
-python -m unittest discover -s tests -t .      # 264 tests, no API key needed
+python -m unittest discover -s tests -t .      # 266 tests, no API key needed
 python -m bureau plan wei --recorded-constraints                # trip planner offline: 3 of 8 packages valid at €150
 python -m bureau plan wei --recorded-constraints --budget 120   # none valid: diagnosis, no relaxation
 python -m eval.run_eval --suite messages        # needs a key
