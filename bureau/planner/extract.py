@@ -14,6 +14,7 @@ from typing import Any
 from .. import config
 from ..core.llm_usage import create_completion
 from .interface import Constraints, TravelRequest
+from .requirements import unsupported_request_questions
 
 SOFT_KEYS = ("fewer_changes", "near_station", "early_return", "lower_cost")
 HARD_FIELDS = {
@@ -32,8 +33,9 @@ CONSTRAINTS_SCHEMA = {
         "soft": {"type": "array", "items": {"type": "string", "enum": list(SOFT_KEYS)}},
         "organizer_verified": {"type": "array", "items": {"type": "string", "enum": ["step_free_rooms"]}},
         "clarifications": {"type": "array", "items": {"type": "string"}},
+        "unsupported_requirements": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["hard", "soft", "organizer_verified", "clarifications"],
+    "required": ["hard", "soft", "organizer_verified", "clarifications", "unsupported_requirements"],
 }
 
 SYSTEM_PROMPT = """You extract constraints for an association's trip planner.
@@ -75,7 +77,8 @@ if no room count can be determined, leave its hard value null and ask for a coun
 Ask concise clarification questions in the language of the text field (English
 text needs English questions, French text needs French questions; do not infer
 language from a city or event name) for ambiguity,
-conflicting numbers, vague limits, or unsupported hard requirements. In particular,
+conflicting numbers, vague limits, or restrictions that change package eligibility
+but cannot be checked, especially transport-mode restrictions. In particular,
 if a budget does not explicitly say whether meals are included or excluded, ask
 whether meals are included. Naming only 'travel and lodging' does not establish
 that meals are excluded: record the stated ceiling and ask about meals. Only
@@ -90,6 +93,33 @@ Ask for a maximum budget when the organizer requests one or only says 'cheap'.
 Do not ask about optional constraints that are simply absent. Origin, destination,
 departure and return context belong to TravelRequest, not additional hard keys.
 If the request is clear, clarifications is empty.
+
+Account for every stated hard requirement. Put requirements that need supplier or
+organizer verification into unsupported_requirements, using a short faithful
+description in the request's language (English request means English notes).
+Kitchen facilities, activity spaces, number of coaches, hotel ratings and room
+types are confirmation notes, not blocking questions: packages may be compared
+conditionally while organizers verify these before booking. Do not ask the
+organizer to waive them or to confirm them before searching. Code will show them
+as unverified checks for every option; it will never mark them satisfied.
+Transport-mode restrictions (train only, no coaches) instead require a blocking
+clarification because the checker cannot enforce which mode is acceptable.
+Never drop a requirement just because hard has a fixed schema.
+Do not put ordinary trip context, stated soft preferences, or supported fields
+(including organizer-verified step_free_rooms) in unsupported_requirements.
+An empty list means there are no additional hard requirements to verify.
+
+Before returning, distinguish restrictions from mentions: 'budget includes coach
+hire' or 'autocar, hébergement et repas inclus' describes package costs, not a
+coach-only restriction. 'Trains only; coaches forbidden' is a restriction. A
+comfortable hotel near a station described as preferable is a preference, not a
+mandatory unsupported condition. Preserve supported preferences without adding
+lower_cost just because a budget was stated.
+If accessibility is not requested, leave step_free_rooms null and do not ask
+about accessible rooms. An absent optional need is not an ambiguity. An approximate
+budget with an undecided ceiling stays null. If a request names an arrival limit
+and asks to relax it without naming a replacement, retain the named limit and
+ask for the new limit; do not silently remove it.
 """
 
 
@@ -121,7 +151,7 @@ def _constraints_from_json(content: str) -> Constraints:
             raise ConstraintExtractionError(f"Constraint extraction returned invalid {key}.")
         hard[key] = item
     for key, allowed in (("soft", SOFT_KEYS), ("organizer_verified", ("step_free_rooms",)),
-                         ("clarifications", None)):
+                         ("clarifications", None), ("unsupported_requirements", None)):
         items = value[key]
         if (not isinstance(items, list) or
                 any(not isinstance(item, str) or not item.strip() or
@@ -131,6 +161,10 @@ def _constraints_from_json(content: str) -> Constraints:
     # This boundary invariant must hold even if a provider omits the marker.
     if "step_free_rooms" in hard and "step_free_rooms" not in value["organizer_verified"]:
         value["organizer_verified"].append("step_free_rooms")
+    # Supplier/facility requirements stay visible without preventing comparison.
+    # Eligibility restrictions remain blocking questions, including the text guard below.
+    value["organizer_verified"] = list(dict.fromkeys(
+        value["organizer_verified"] + value["unsupported_requirements"]))
     return Constraints(hard=hard, soft=value["soft"],
                        organizer_verified=value["organizer_verified"], clarifications=value["clarifications"])
 
@@ -163,4 +197,8 @@ def extract_constraints(req: TravelRequest, *, client: Any = None) -> Constraint
         raise ConstraintExtractionError("The model refused to extract travel constraints.")
     if choice.finish_reason != "stop":
         raise ConstraintExtractionError("Constraint extraction did not finish.")
-    return _constraints_from_json(choice.message.content)
+    constraints = _constraints_from_json(choice.message.content)
+    for question in unsupported_request_questions(req.text):
+        if question not in constraints.clarifications:
+            constraints.clarifications.append(question)
+    return constraints
