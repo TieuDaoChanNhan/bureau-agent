@@ -240,6 +240,7 @@ details.sec > .sec-body { padding: 0 16px 16px; display: flex; flex-direction: c
 .optcard .price { font-size: 26px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .optcard .price small { font-size: 13px; font-weight: 500; color: var(--muted); }
 .optcard .line { font-size: 13.5px; color: var(--ink-2); }
+.optcard .line.cost { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: -4px; }
 .verdict { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; display: inline-block; }
 .v-pick { background: var(--ok-soft); color: var(--ok); } .v-alt { background: var(--accent-soft); color: var(--accent); }
 .v-rej { background: var(--crit-soft); color: var(--crit); }
@@ -297,11 +298,17 @@ details.sec > .sec-body { padding: 0 16px 16px; display: flex; flex-direction: c
   font: 600 13.5px var(--sans); border-radius: 9px; padding: 7px 14px; }
 .tour-popover .driver-popover-close-btn { color: var(--muted); }
 .tour-do { font-weight: 700; color: var(--accent); }
+.tour-ch { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+           color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 8px; margin-right: 6px; }
+.tour-ch:empty { display: none; }
+.tour-nums { list-style: none; padding: 0; margin: 0 0 10px; display: grid; gap: 6px; }
+.tour-nums b { display: inline-block; min-width: 52px; font-size: 18px; color: var(--accent); font-variant-numeric: tabular-nums; }
 .tour-wait { font-size: 12.5px; color: var(--muted); }
 .tour-extra { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--line); }
 .tour-status { font-size: 12.5px; color: var(--warn); font-weight: 600; }
 .tour-act { font: 600 13px var(--sans); background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 9px;
   padding: 6px 12px; cursor: pointer; margin-left: auto; }
+.tour-act.ghost { background: none; color: var(--accent); border: 1px solid var(--line); }
 .tour-skip { font: 600 12px var(--sans); background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 7px; padding: 3px 8px; cursor: pointer; }
 
 /* Responsive */

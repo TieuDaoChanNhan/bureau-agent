@@ -7,8 +7,12 @@
 // `prepare()` runs before a step is shown and does the navigation (select an event or issue,
 // pre-fill a form), so the viewer's clicks are only the product's real actions.
 // To add a step: insert an object in STEPS below; `el` is a CSS selector resolved when shown.
+//
+// Two tours share these steps (T38): QUICK (about 3 minutes, the default, short copy) picks steps
+// by `id` and overrides their text; STEPS is the full tour ("See every feature"). Each step shows
+// its chapter in the progress line.
 
-const tourState = { driver: null, poll: null, started: 0 };
+const tourState = { driver: null, poll: null, started: 0, steps: [] };
 
 const hackathon = () => ui.summaries.hackathon;
 const wei = () => ui.summaries.wei;
@@ -123,16 +127,24 @@ async function tourAdvance() {
   const d = tourState.driver;
   const i = d.getActiveIndex();
   if (i == null) return;
-  const cur = STEPS[i];
+  const steps = tourState.steps;
+  const cur = steps[i];
   if (cur.next) {
     try { await cur.next(); } catch (err) { setRun(err.message, "error"); }
   }
-  if (i + 1 >= STEPS.length) { d.destroy(); return; }
-  const nxt = STEPS[i + 1];
+  if (i + 1 >= steps.length) { d.destroy(); return; }
+  const nxt = steps[i + 1];
   if (nxt.prepare) {
     try { await nxt.prepare(); } catch (err) { setRun(err.message, "error"); }
   }
   d.moveNext();
+  // If the console re-renders while Driver animates to the next step (for example the Edit click
+  // swaps the draft), the animation can stop before the popover is shown: highlight the step again.
+  const shown = d.getActiveIndex();
+  setTimeout(() => {
+    const pop = document.querySelector(".driver-popover");
+    if (tourState.driver === d && d.getActiveIndex() === shown && (!pop || pop.style.display === "none")) d.moveTo(shown);
+  }, 1000);
 }
 
 // Poll for the expected result of an action step, and move on when it appears.
@@ -161,9 +173,12 @@ function tourWatch(step) {
   }, 400);
 }
 
-function startTour() {
+const QUICK = STEPS;
+
+function startTour(mode = "quick") {
   if (!window.driver || !window.driver.js) { setRun("The tour library did not load.", "error"); return; }
   if (tourState.driver) tourState.driver.destroy();
+  const steps = tourState.steps = mode === "full" ? STEPS : QUICK;
   const d = window.driver.js.driver({
     showProgress: true,
     animate: false,
@@ -174,7 +189,7 @@ function startTour() {
     popoverClass: "tour-popover",
     nextBtnText: "Next →",
     doneBtnText: "Finish",
-    steps: STEPS.map(s => ({
+    steps: steps.map(s => ({
       element: s.el,
       popover: {
         title: s.title,
@@ -186,15 +201,17 @@ function startTour() {
     })),
     onNextClick: () => { tourAdvance(); },
     onPopoverRender: (popover, { state }) => {
-      const s = STEPS[state.activeIndex];
-      if (!s || !s.action) return;
+      const s = steps[state.activeIndex];
+      if (!s) return;
+      popover.progress.innerHTML = `<span class="tour-ch">${s.ch || ""}</span> Step ${state.activeIndex + 1} of ${steps.length}`;
+      if (!s.action && !s.button) return;
       const extra = document.createElement("div");
       extra.className = "tour-extra";
-      extra.innerHTML = `<span class="tour-status" aria-live="polite">Waiting for you…</span>
-        ${s.button ? `<button type="button" class="tour-act">${s.button.label}</button>` : ""}
-        <button type="button" class="tour-skip">Skip step</button>`;
+      extra.innerHTML = `${s.action ? '<span class="tour-status" aria-live="polite">Waiting for you…</span>' : ""}
+        ${s.button ? `<button type="button" class="tour-act${s.button.ghost ? " ghost" : ""}">${s.button.label}</button>` : ""}
+        ${s.action ? '<button type="button" class="tour-skip">Skip step</button>' : ""}`;
       if (s.button) extra.querySelector(".tour-act").addEventListener("click", s.button.run);
-      extra.querySelector(".tour-skip").addEventListener("click", () => tourAdvance());
+      if (s.action) extra.querySelector(".tour-skip").addEventListener("click", () => tourAdvance());
       popover.description.appendChild(extra);
     },
     // A click on the dimmed page must not end the tour (easy to do by accident); the close button
@@ -208,5 +225,6 @@ function startTour() {
 }
 
 $("#tourBtn").addEventListener("click", () => { if (!ui.busy) startTour(); });
-$("#heroTourBtn").addEventListener("click", () => { if (!ui.busy) startTour(); });
+$("#heroTourBtn").addEventListener("click", () => { if (!ui.busy) startTour("quick"); });
+$("#fullTourLink").addEventListener("click", e => { e.preventDefault(); if (!ui.busy) startTour("full"); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && tourState.driver) tourState.driver.destroy(); });

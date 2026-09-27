@@ -72,12 +72,12 @@ class LiveConsoleTests(unittest.TestCase):
         return page
 
     def tour(self, page, prefix):
-        page.locator("#heroTourBtn").click()
+        page.locator("#fullTourLink").click()  # the hero button opens the 15-step quick tour
         clicks = {4: '[data-act="retry"]', 8: '[data-act="edit"]', 9: '.tour-act',
                   10: '[data-act="approve"]', 12: '#outboxBtn', 14: '#composeBtn',
                   15: '#composeForm button[type="submit"]', 18: '[data-ev="wei"]',
                   20: '[data-act="plan"]', 21: '#answerForm button[type="submit"]',
-                  24: '[data-budget="9000"]', 26: '[data-budget=""]', 27: '[data-act="choose"]'}
+                  24: '[data-budget]:not([data-budget=""])', 26: '[data-budget=""]', 27: '[data-act="choose"]'}
         self.assertEqual(30, page.evaluate("STEPS.length"))
         for index in range(30):
             with self.subTest(step=index + 1):

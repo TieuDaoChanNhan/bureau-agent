@@ -1341,7 +1341,7 @@ window.DEMO_FIXTURES = {
     "issue_id": "no_logistics_plan",
     "action_type": "SELECT_TRAVEL_PLAN",
     "title": "3 of 5 options pass every verified hard constraint",
-    "description": "Option D ranks first under the current priorities (fewer_changes, early_return, lower_cost) at €141/person. Other valid options: Option A (€112), Option B (€118). Rejected: Option C (arrive before 21:00); Option E (arrive before 21:00, no overnight travel). Organizers choose; nothing is booked automatically.",
+    "description": "Option D ranks first under the current priorities (fewer changes, an earlier return, lower cost) at €141/person. Other valid options: Option A (€112), Option B (€118). Rejected: Option C (arrive before 21:00); Option E (arrive before 21:00, no overnight travel). Organizers choose; nothing is booked automatically.",
     "evidence": [
       {
         "source_type": "travel_option",
@@ -1900,5 +1900,5 @@ window.DEMO_FIXTURES = {
     "§7": "Impact 30%, innovation 20%, execution quality 20%, user experience 15%, demo and pitch clarity 15%. Building on an existing project is allowed if declared at submission; only the part created during the hackathon is evaluated.",
     "§10": "Registration data is used only to organise the hackathon and to communicate with participants."
   },
-  "revision": "2efa24d0a3c858ec"
+  "revision": "29100921149b2019"
 };

@@ -76,7 +76,7 @@ def issue_example(state, issue):
                           payload=payload, evidence=[Evidence("rule", rule, rules[rule])])
 
 
-def planner_example(state, text=None, overrides=None, *, recorded=False):
+def planner_example(state, text=None, overrides=None, *, recorded=False, saved_hotels=True):
     if state.id != "wei" or not state.travel:
         raise NoSavedExample("No saved planning example for this event.")
     base = state.travel["request"]
@@ -90,8 +90,10 @@ def planner_example(state, text=None, overrides=None, *, recorded=False):
     constraints.hard.update(overrides or {})
     if not answered and not recorded:
         constraints.clarifications = [BUDGET_QUESTION]
-    # Same packages as a live run: the saved Jinko hotel responses (JINKO_MODE=replay) x recorded transport.
-    action = plan_trip(request_from_state(state, text=text), constraints, client=None, search=state.travel.get("search"))
+    # Server replay: the same packages as a live run (saved Jinko hotel responses x recorded transport).
+    # The static backup (saved_hotels=False) keeps its five illustrative packages.
+    search = state.travel.get("search") if saved_hotels else None
+    action = plan_trip(request_from_state(state, text=text), constraints, client=None, search=search)
     action.payload.update(constraints=asdict(constraints), request_text=text or base,
                           constraints_source="recorded", answered=answered)
     return action
