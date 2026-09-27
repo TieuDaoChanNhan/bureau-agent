@@ -28,7 +28,8 @@ class LiveConsoleTests(unittest.TestCase):
         cls.pw.stop()
 
     def server(self, mode):
-        directory = tempfile.TemporaryDirectory()
+        # ignore_cleanup_errors: on Windows the server log can stay locked for a moment after the server stops.
+        directory = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         self.addCleanup(directory.cleanup)
         with socket.socket() as sock:
             sock.bind(("127.0.0.1", 0))
@@ -72,7 +73,7 @@ class LiveConsoleTests(unittest.TestCase):
         return page
 
     def tour(self, page, prefix):
-        page.locator("#fullTourLink").click()  # the hero button opens the 15-step quick tour
+        page.locator("#fullTourBtn").click()  # "Start the guided demo" opens the 15-step quick tour
         clicks = {4: '[data-act="retry"]', 8: '[data-act="edit"]', 9: '.tour-act',
                   10: '[data-act="approve"]', 12: '#outboxBtn', 14: '#composeBtn',
                   15: '#composeForm button[type="submit"]', 18: '[data-ev="wei"]',
@@ -116,6 +117,17 @@ class LiveConsoleTests(unittest.TestCase):
         page.wait_for_function("tourState.driver === null")
         self.assertEqual("F", page.evaluate("summary('wei').logistics.id"))
         self.assertFalse(page.evaluate("summary('wei').issues.some(i => isWaiting(i, summary('wei')))"))
+
+    def test_each_entry_point_opens_its_tour(self):
+        url, _ = self.server("limit")
+        page = self.page(url)
+        for selector, total in (("#heroTourBtn", 15), ("#tourBtn", 15), ("#fullTourBtn", 30), ("#fullTourTopBtn", 30)):
+            with self.subTest(button=selector):
+                page.locator(selector).click()
+                page.wait_for_function("t => document.querySelector('.driver-popover-progress-text')?.textContent.includes(t)",
+                                       arg=f"Step 1 of {total}")
+                page.locator(".driver-popover-close-btn").click()
+                page.wait_for_function("tourState.driver === null")
 
     def test_quick_tour_with_fake_live_agent(self):
         url, runtime = self.server("live")

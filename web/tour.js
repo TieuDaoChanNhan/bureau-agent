@@ -439,7 +439,8 @@ function startTour(mode = "quick") {
   d.drive(0);
 }
 
-$("#tourBtn").addEventListener("click", () => { if (!ui.busy) startTour(); });
-$("#heroTourBtn").addEventListener("click", () => { if (!ui.busy) startTour("quick"); });
-$("#fullTourLink").addEventListener("click", e => { e.preventDefault(); if (!ui.busy) startTour("full"); });
+// Quick tour (hero and top bar) and full tour (hero and top bar); the static backup may drop the full-tour buttons.
+for (const [id, mode] of [["#tourBtn", "quick"], ["#heroTourBtn", "quick"], ["#fullTourBtn", "full"], ["#fullTourTopBtn", "full"]]) {
+  $(id)?.addEventListener("click", () => { if (!ui.busy) startTour(mode); });
+}
 document.addEventListener("keydown", e => { if (e.key === "Escape" && tourState.driver) tourState.driver.destroy(); });
