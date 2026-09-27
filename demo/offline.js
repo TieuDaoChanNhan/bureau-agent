@@ -14,6 +14,16 @@ function createDemoStore(fixtures, options = {}) {
     if (s.audit.length > 300) s.audit.splice(0, s.audit.length - 300);
   };
   const waiting = (s, issue) => issue.depends_on.some(id => s.issues.some(i => i.id === id && !terminal(i)));
+  const canonical = value => JSON.stringify(value, function(key, item) {
+    return item && typeof item === "object" && !Array.isArray(item)
+      ? Object.fromEntries(Object.keys(item).sort().map(k => [k, item[k]])) : item;
+  });
+  const safeReplies = s => s.actions.flatMap(action => {
+    const certified = fixtures.bulk_replies?.[action.id];
+    const issue = s.issues.find(i => i.id === action.issue_id);
+    return certified && canonical(action) === canonical(certified.action)
+      && canonical(issue) === canonical(certified.issue) ? [copy(certified.preview)] : [];
+  });
   const summary = s => {
     const result = copy(s);
     result.counts = {
@@ -21,6 +31,7 @@ function createDemoStore(fixtures, options = {}) {
       non_blocking: s.issues.filter(i => !terminal(i) && !i.blocking).length,
       resolved: s.issues.filter(i => i.status === "resolved").length,
     };
+    result.safe_replies = safeReplies(s);
     return result;
   };
   const proposal = (s, issue, type, title, description, payload = {}, evidence = []) => ({
@@ -33,6 +44,8 @@ function createDemoStore(fixtures, options = {}) {
   const saveProposal = (s, action) => {
     s.actions = s.actions.filter(a => a.issue_id !== action.issue_id);
     s.actions.push(action);
+    const issue = s.issues.find(i => i.id === action.issue_id);
+    if (issue) issue.status = action.action_type === "ESCALATE" ? "needs_human" : "proposed";
     return action;
   };
   function investigate(s, issue) {
@@ -48,12 +61,7 @@ function createDemoStore(fixtures, options = {}) {
     const french = text === "Salut, est-ce qu'on a le droit d'utiliser un modèle open source au lieu d'OpenAI pour le projet ?";
     let a;
     if (sample) {
-      a = proposal(s, issue, "SEND_MESSAGE", sample.title,
-        "A curated reply to this sample message, based on the displayed rule. Review it before adding it to the simulated outbox.",
-        {to: issue.details.sender, text: sample.text + signature},
-        [{source_type: "rule", source_id: sample.rule, description: fixtures.rules[sample.rule]},
-          {source_type: "message", source_id: issue.id, description: text}]);
-      a.trace.unshift({step: 1, tool: "search_rules", arguments: {section: sample.rule}, result: fixtures.rules[sample.rule], ok: true});
+      a = copy(fixtures.rule_replies[`${s.id}:${issue.id}`]);
     } else if (personal) {
       a = proposal(s, issue, "ESCALATE", "A sponsor requests participants' personal data",
         "The saved example hands this request to the organizers. No participant list or contact details are shared.",
@@ -189,7 +197,26 @@ function createDemoStore(fixtures, options = {}) {
       const route = parts[3];
       if (!route && method === "GET") return summary(s);
       if (["outbox", "audit"].includes(route) && method === "GET") return copy(s[route]);
+      if (route === "safe-replies" && method === "GET") return {event_id: s.id, replies: safeReplies(s), limit: fixtures.bulk_limit};
       if (method !== "POST") fail(405, "Unsupported demo operation.");
+      if (route === "approve-safe-replies") {
+        if (!Array.isArray(body.replies) || !body.replies.length || body.replies.length > fixtures.bulk_limit
+          || body.replies.some(r => typeof r.id !== "string" || !/^[a-f0-9]{64}$/.test(r.revision))) {
+          fail(422, `Choose between 1 and ${fixtures.bulk_limit} reviewed replies.`);
+        }
+        const approved = [], failed = [];
+        for (const item of body.replies) {
+          const action = s.actions.find(a => a.id === item.id);
+          try {
+            const candidate = safeReplies(s).find(a => a.id === item.id && a.revision === item.revision);
+            if (!candidate) fail(409, "This reply changed or no longer qualifies. Review it again.");
+            if (s.outbox.some(m => m.action_id === item.id)) fail(409, "This reply is already in the outbox.");
+            decide(s, action, "approve", {});
+            approved.push({id: item.id, title: action.title});
+          } catch (err) { failed.push({id: item.id, title: action?.title || item.id, reason: err.message}); }
+        }
+        return {...summary(s), bulk_approval: {approved, failed, approved_count: approved.length, failed_count: failed.length}};
+      }
       if (route === "reset") {
         events[s.id] = copy(fixtures.events[s.id]);
         for (const key of Object.keys(session.state.drafts)) if (key.startsWith(s.id + ":")) delete session.state.drafts[key];

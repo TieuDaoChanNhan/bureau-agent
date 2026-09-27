@@ -7,6 +7,14 @@ This is a browser-only adaptation of the existing operations console and its
 approval/dismissal, a simulated outbox, local activity, clarification, and trip
 budget comparisons. It makes **no model calls** and needs **no secrets**.
 
+**Approve safe replies** previews eligible saved replies and confirms only that
+snapshot. The Python policy in `bureau/core/bulk_approval.py` certifies exact
+curated proposals during the build; the static adapter checks their action and
+source-issue snapshots rather than maintaining another eligibility policy. The
+result reports approved and failed counts with failure reasons. Money, identity,
+escalations and locally edited drafts stay under individual review. See the
+[full rule](../web/README.md#bulk-reply-eligibility-t24).
+
 Each tab owns its own state and random session id. Browser `sessionStorage`
 preserves proposals, saved reply edits, decisions, outbox, activity and planning
 constraints across refreshes. Sessions expire after 24 hours without interaction;
@@ -65,6 +73,14 @@ executor runs in the static backup. Approval changes only sample browser state.
 
 ## Browser verification
 
+The static backup includes the same T25 status/kind/search controls as the live
+console. Filter preferences stay in this browser's local storage, separately
+from its isolated sample-data sessions. Tours temporarily show all issues and
+restore filters on exit. See the [filter behavior](../web/README.md#issue-filters-t25).
+`tests/test_web_filters.py` supplies shared browser cases inherited by both
+browser suites: combined filters, complete message search, Done entries, event
+totals, draft preservation, storage failures, keyboard navigation and 400 px layout.
+
 ```sh
 python -m pip install playwright
 python -m playwright install chromium
@@ -99,7 +115,7 @@ python demo/publish.py
 ```
 
 The uploader first checks the assets, refuses a non-public or non-static target,
-and uploads only the 12 known public files. Deployment credentials stay on the
+and uploads only the 15 known public files. Deployment credentials stay on the
 maintainer's computer. A file manifest and uploaded commit id are recorded under
 ignored `demo/artifacts/`. The archive is an alternative for manual deployment:
 extract it and upload its contents, not the ZIP file itself.

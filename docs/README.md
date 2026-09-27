@@ -10,3 +10,13 @@
 | `demo-subtitles.fr.srt` | Draft French subtitles matching the narration verbatim; retime against the generated audio |
 | `submission.md` | Ready-to-paste submission-form text |
 | `screenshots/` | The screenshots used by the README and public-demo verification |
+
+T24 bulk-approval evidence: [review preview](screenshots/t24-bulk-preview.png)
+and [partial-success result](screenshots/t24-bulk-result.png), captured with the
+fake-provider browser tests. The [eligibility rule](../web/README.md#bulk-reply-eligibility-t24)
+describes which replies can be included.
+
+T25 issue-filter evidence: [desktop](screenshots/t25-filters-desktop.png) and
+[400 px controls](screenshots/t25-filters-400.png), captured by the shared browser
+checks. The [filter behavior](../web/README.md#issue-filters-t25) explains status
+categories, search, browser preferences and event-wide action scope.

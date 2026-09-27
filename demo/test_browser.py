@@ -4,6 +4,7 @@ from __future__ import annotations
 import functools
 import json
 import os
+import sys
 import threading
 import time
 import unittest
@@ -14,6 +15,8 @@ from playwright.sync_api import sync_playwright
 
 DEMO = Path(__file__).resolve().parent
 ARTIFACTS = DEMO / "artifacts"
+sys.path.insert(0, str(DEMO.parent))
+from tests.test_web_filters import IssueFilterChecks
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
@@ -21,7 +24,12 @@ class QuietHandler(SimpleHTTPRequestHandler):
         pass
 
 
-class DemoTests(unittest.TestCase):
+class DemoTests(IssueFilterChecks, unittest.TestCase):
+    filter_artifacts = ARTIFACTS
+
+    def filter_page(self):
+        return self.page
+
     @classmethod
     def setUpClass(cls):
         cls.server = ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(QuietHandler, directory=str(DEMO / "site")))
@@ -67,6 +75,7 @@ class DemoTests(unittest.TestCase):
         return (page or self.page).evaluate("([path, body]) => demoStore.request(path, body === null ? {} : {method:'POST',body:JSON.stringify(body)})", [path, body])
 
     def test_full_30_step_tour(self):
+        self.page.locator('#issueSearch').fill('no-results-t25')
         self.page.locator("#heroTourBtn").click()
         clicks = {
             4: '[data-act="retry"]', 8: '[data-act="edit"]', 9: '.tour-act',
@@ -286,6 +295,45 @@ class DemoTests(unittest.TestCase):
         self.page.locator(".driver-popover-title").wait_for(state="visible")
         self.page.keyboard.press("Escape")
         self.page.wait_for_function("tourState.driver === null")
+
+    def test_bulk_approval_uses_certified_samples_and_leaves_other_actions(self):
+        self.api("/api/events/hackathon/run", {})
+        self.page.evaluate("async () => {store(await api('/api/events/hackathon')); render();}")
+        certified = self.page.evaluate("summary().safe_replies")
+        self.assertGreater(len(certified), 1)
+        self.page.locator("#bulkApproveBtn").click()
+        self.page.locator("#bulkDialog[open]").wait_for()
+        self.assertEqual(len(certified), self.page.locator(".bulk-item").count())
+        self.assertEqual([], self.api("/api/events/hackathon/outbox"))
+        self.page.locator('[data-bulk="close"]').click()
+        self.assertEqual([], self.api("/api/events/hackathon/outbox"))
+        self.page.locator("#bulkApproveBtn").click()
+        self.page.locator('[data-bulk="confirm"]').click()
+        self.page.wait_for_function("!ui.busy && document.querySelector('#bulkTitle').textContent.includes('0 failed')")
+        self.assertEqual(len(certified), len(self.api("/api/events/hackathon/outbox")))
+        issues = {i["id"]: i for i in self.api("/api/events/hackathon")["issues"]}
+        self.assertEqual("proposed", issues["message:m01"]["status"])
+        self.assertEqual("needs_human", issues["message:m05"]["status"])
+        retry = self.api("/api/events/hackathon/approve-safe-replies", {"replies": certified})
+        self.assertEqual(0, retry["bulk_approval"]["approved_count"])
+        self.assertEqual(len(certified), len(self.api("/api/events/hackathon/outbox")))
+
+    def test_modified_static_proposal_loses_its_bulk_certificate(self):
+        self.api("/api/events/hackathon/run?issue_id=message:m07", {})
+        before = self.api("/api/events/hackathon/safe-replies")["replies"]
+        self.assertEqual(1, len(before))
+        self.page.evaluate("""() => {
+          const key = 'bureau-demo-session-v2';
+          const snapshot = JSON.parse(sessionStorage.getItem(key));
+          snapshot.events.hackathon.actions[0].payload.text = 'A changed draft.';
+          sessionStorage.setItem(key, JSON.stringify(snapshot));
+        }""")
+        self.page.reload()
+        self.page.wait_for_function("Object.keys(ui.summaries).length === 2 && !ui.busy")
+        self.assertEqual([], self.api("/api/events/hackathon/safe-replies")["replies"])
+        result = self.api("/api/events/hackathon/approve-safe-replies", {"replies": before})
+        self.assertEqual(1, result["bulk_approval"]["failed_count"])
+        self.assertEqual([], self.api("/api/events/hackathon/outbox"))
 
 
 if __name__ == "__main__":

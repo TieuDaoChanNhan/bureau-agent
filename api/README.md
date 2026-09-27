@@ -16,13 +16,15 @@ uvicorn api.main:app --reload     # http://127.0.0.1:8000  (docs at /docs)
 | GET | `/api/actions/{action_id}` | done |
 | POST | `/api/actions/{action_id}/approve` | done (executor validation, optional edits/selection) |
 | POST | `/api/actions/{action_id}/dismiss` | done (issue status only) |
+| GET | `/api/events/{event_id}/safe-replies` | done (read-only bulk-approval preview) |
+| POST | `/api/events/{event_id}/approve-safe-replies` | done (confirm exact snapshots; per-item results) |
 | GET | `/api/events/{event_id}/outbox` | done (simulated messages with `sent_at`) |
 | POST | `/api/events/{event_id}/reset` | done (restore sample data, clear runtime files) |
 
 JSON bodies are the dataclasses of `bureau/core/models.py` (`dataclasses.asdict`). Keep it that way so the web UI has one source of truth.
 
 `approve`, `dismiss`, and `reset` return the same summary as the event GET:
-`{id, name, counts, issues, actions, travel, logistics, records, meta}`. `meta` carries the event
+`{id, name, counts, issues, actions, travel, logistics, records, meta, safe_replies}`. `meta` carries the event
 card context from `settings.display` (type, dates, place) and the participant count (T33). `records` maps ids to display
 names (`participants`, `groups`, `payments`) so the UI can show names instead of ids (T23). `run` adds `remaining` and `errors` to
 that summary. GET routes do not write runtime files.
@@ -61,6 +63,30 @@ Tests use a temporary runtime directory and a fake agent, without external calls
 ```bash
 python -m unittest tests.test_api -v
 ```
+
+## Bulk reply approval (T24)
+
+The eligibility policy lives in `bureau/core/bulk_approval.py` and is documented
+in [web/README.md](../web/README.md#bulk-reply-eligibility-t24). Event summaries
+include `safe_replies` for the toolbar count. The read-only preview route returns
+`{event_id, limit, replies: [{id, title, to, text, rules, revision}]}` without writing
+files. `limit` is the maximum confirmation size; the UI previews that many at once.
+
+After human confirmation, post `{"replies": [{"id": "<action id>", "revision": "<64-character SHA-256>"}]}`
+to `/api/events/{event_id}/approve-safe-replies` (1–100 entries). The revision
+binds the action, issue, source message and cited rules. Every item is independently
+revalidated and executed through `executor.apply`, then persisted. The response
+contains the updated summary, `outbox`, and `bulk_approval` with `approved_count`,
+`failed_count`, `approved: [{id, title}]`, and `failed: [{id, title, reason}]`.
+HTTP 200 includes mixed outcomes; unknown events return 404 and malformed batches
+return 422 before any item runs. The API never expands a submitted batch.
+
+Bulk submissions are serialized within one worker; public-demo session middleware
+also serializes that visitor's other operations. The existing JSON store still
+requires a single writer outside demo mode. A storage error can occur after the
+outbox was written: the result asks the organizer to inspect the outbox, and a
+retry checks existing action ids before execution to avoid duplicate replies.
+No transactional guarantee across filesystem writes or multiple workers is added.
 
 ## Adding a message (T32)
 `POST /api/events/{event_id}/messages` with `{"sender": str, "channel": "email" | "discord" | "form", "text": str}`

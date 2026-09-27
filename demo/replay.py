@@ -10,7 +10,7 @@ import json
 import re
 
 from bureau.config import ROOT
-from bureau.core.models import Evidence, ProposedAction
+from bureau.core.models import Check, Evidence, ProposedAction
 from bureau.core.store import _action_from_dict
 from bureau.planner.planner import plan_trip, recorded_constraints, request_from_state
 
@@ -73,7 +73,12 @@ def issue_example(state, issue):
         raise NoSavedExample("No saved example for this issue. Try a sample inbox question or skip this step.")
     return ProposedAction(id=f"{state.id}:{issue.id}", event_id=state.id, issue_id=issue.id,
                           action_type=kind, title=title, description="Saved sample proposal; review before approval.",
-                          payload=payload, evidence=[Evidence("rule", rule, rules[rule])])
+                          payload=payload, evidence=[Evidence("rule", rule, rules[rule])],
+                          checks=[Check("Saved rule reference exists", rule in rules, rule)] if kind == "SEND_MESSAGE" else [],
+                          trace=[{"step": 1, "tool": "search_rules", "arguments": {"section": rule},
+                                  "result": rules[rule], "ok": True},
+                                 {"step": 2, "tool": "propose_action", "arguments": {"action_type": kind},
+                                  "result": "Curated sample; organizer approval required", "ok": True}])
 
 
 def planner_example(state, text=None, overrides=None, *, recorded=False, saved_hotels=True):

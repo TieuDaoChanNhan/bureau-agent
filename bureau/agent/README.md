@@ -29,6 +29,11 @@ Issue + source messages -> model -> tool call -> result -> ... -> propose_action
 - Verbose mode prints the complete tool arguments on `->` lines for review.
 - When the issue is a message, a `LINK_PAYMENT` must include `to` and `message` (a draft reply the organizer can edit); otherwise the proposal is rejected so the model adds it (T33).
 - Every proposal stores the run's tool calls in `ProposedAction.trace` (T31): step, tool, parsed arguments, a one-line readable result (`_summarize`, at most 240 characters) and `ok`. Rejected proposals stay in the trace with their error; a proposal's payload is not duplicated there. The web console shows it as the **Agent steps** timeline.
+- Proposal checks include a boolean `verified` (T24). An omitted verification is
+  treated as false; a supplied false value is preserved instead of being replaced
+  by the dataclass default. This keeps incomplete or unverified checks out of
+  [bulk reply approval](../../web/README.md#bulk-reply-eligibility-t24). The model
+  cannot set a `safe` flag or bypass the deterministic eligibility filter.
 
 The Chat Completions flow follows the [OpenAI function-calling guide](https://developers.openai.com/api/docs/guides/function-calling).
 

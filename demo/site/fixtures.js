@@ -1900,5 +1900,1103 @@ window.DEMO_FIXTURES = {
     "§7": "Impact 30%, innovation 20%, execution quality 20%, user experience 15%, demo and pitch clarity 15%. Building on an existing project is allowed if declared at submission; only the part created during the hackathon is evaluated.",
     "§10": "Registration data is used only to organise the hackathon and to communicate with participants."
   },
-  "revision": "29100921149b2019"
+  "rule_replies": {
+    "hackathon:message:m02": {
+      "id": "hackathon:message:m02",
+      "event_id": "hackathon",
+      "issue_id": "message:m02",
+      "action_type": "SEND_MESSAGE",
+      "title": "Explain the existing-project rule",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§7",
+          "description": "Impact 30%, innovation 20%, execution quality 20%, user experience 15%, demo and pitch clarity 15%. Building on an existing project is allowed if declared at submission; only the part created during the hackathon is evaluated."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§7",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "julien.morel@gmail.example",
+        "text": "You may build on an existing project if you declare it at submission. Only work created during the hackathon will be evaluated.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§7"
+          },
+          "result": "Impact 30%, innovation 20%, execution quality 20%, user experience 15%, demo and pitch clarity 15%. Building on an existing project is allowed if declared at submission; only the part created during the hackathon is evaluated.",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m03": {
+      "id": "hackathon:message:m03",
+      "event_id": "hackathon",
+      "issue_id": "message:m03",
+      "action_type": "SEND_MESSAGE",
+      "title": "Clarify the final date",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§4",
+          "description": "Coding phase from 25/09/26 09:00 to 27/09/26 23:59. Pre-selection of finalists in October. The final takes place in November, at an X-IA event (it was moved from 15 October)."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§4",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "orbit_hugo",
+        "text": "La finale a été déplacée du 15 octobre à novembre, lors d'un événement X-IA. La date précise doit être confirmée par les organisateurs.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§4"
+          },
+          "result": "Coding phase from 25/09/26 09:00 to 27/09/26 23:59. Pre-selection of finalists in October. The final takes place in November, at an X-IA event (it was moved from 15 October).",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m06": {
+      "id": "hackathon:message:m06",
+      "event_id": "hackathon",
+      "issue_id": "message:m06",
+      "action_type": "SEND_MESSAGE",
+      "title": "Explain the two participation requirements",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§3",
+          "description": "Open to X-IA members whose 2026 membership fee (cotisation, €10) is paid. Registration on the official Luma page is required. Participants compete individually or in teams of 2 to 4 people. Each participant may belong to only one team."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§3",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "amelie.derval@participants.example",
+        "text": "La cotisation X-IA 2026 est de 10 €. L'inscription sur la page Luma officielle est également obligatoire.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§3"
+          },
+          "result": "Open to X-IA members whose 2026 membership fee (cotisation, €10) is paid. Registration on the official Luma page is required. Participants compete individually or in teams of 2 to 4 people. Each participant may belong to only one team.",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m07": {
+      "id": "hackathon:message:m07",
+      "event_id": "hackathon",
+      "issue_id": "message:m07",
+      "action_type": "SEND_MESSAGE",
+      "title": "Share the submission checklist",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§6",
+          "description": "Before the deadline: a demo video of 2 minutes maximum, a short description, a repository link with test instructions in the README, and team member names. Late submissions are not accepted."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§6",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "noah.belcourt@participants.example",
+        "text": "Please submit a demo video of at most two minutes, a short project description, a repository link with testing instructions, and the names of your team members.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§6"
+          },
+          "result": "Before the deadline: a demo video of 2 minutes maximum, a short description, a repository link with test instructions in the README, and team member names. Late submissions are not accepted.",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m08": {
+      "id": "hackathon:message:m08",
+      "event_id": "hackathon",
+      "issue_id": "message:m08",
+      "action_type": "SEND_MESSAGE",
+      "title": "Explain the team-size limit",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§3",
+          "description": "Open to X-IA members whose 2026 membership fee (cotisation, €10) is paid. Registration on the official Luma page is required. Participants compete individually or in teams of 2 to 4 people. Each participant may belong to only one team."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§3",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "datadragons_marc",
+        "text": "Une équipe peut compter au maximum quatre personnes, y compris la personne chargée du pitch. Merci d'adapter la composition de votre équipe.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§3"
+          },
+          "result": "Open to X-IA members whose 2026 membership fee (cotisation, €10) is paid. Registration on the official Luma page is required. Participants compete individually or in teams of 2 to 4 people. Each participant may belong to only one team.",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m09": {
+      "id": "hackathon:message:m09",
+      "event_id": "hackathon",
+      "issue_id": "message:m09",
+      "action_type": "SEND_MESSAGE",
+      "title": "Ask Léa to choose one team",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§3",
+          "description": "Open to X-IA members whose 2026 membership fee (cotisation, €10) is paid. Registration on the official Luma page is required. Participants compete individually or in teams of 2 to 4 people. Each participant may belong to only one team."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§3",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "lea.martin@polytechnique.example",
+        "text": "You may belong to only one team. Please tell the organizers whether you want to stay in Orbit or NeuralNomads. This reply does not change either team.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§3"
+          },
+          "result": "Open to X-IA members whose 2026 membership fee (cotisation, €10) is paid. Registration on the official Luma page is required. Participants compete individually or in teams of 2 to 4 people. Each participant may belong to only one team.",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m15": {
+      "id": "hackathon:message:m15",
+      "event_id": "hackathon",
+      "issue_id": "message:m15",
+      "action_type": "SEND_MESSAGE",
+      "title": "Explain the partner-credit rules",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§5",
+          "description": "Partner credits (OpenAI, Pipelex, Gradium, Jinko, Dust) are for the hackathon only and may not be resold, transferred or used for personal or commercial purposes. The participant list is sent to partners only to activate access."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§5",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "emma.lioran@participants.example",
+        "text": "Partner credits may not be resold or transferred to another participant. They are reserved for work during this hackathon.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§5"
+          },
+          "result": "Partner credits (OpenAI, Pipelex, Gradium, Jinko, Dust) are for the hackathon only and may not be resold, transferred or used for personal or commercial purposes. The participant list is sent to partners only to activate access.",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m16": {
+      "id": "hackathon:message:m16",
+      "event_id": "hackathon",
+      "issue_id": "message:m16",
+      "action_type": "SEND_MESSAGE",
+      "title": "Clarify permitted use of partner credits",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§5",
+          "description": "Partner credits (OpenAI, Pipelex, Gradium, Jinko, Dust) are for the hackathon only and may not be resold, transferred or used for personal or commercial purposes. The participant list is sent to partners only to activate access."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§5",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "oscar.nerac@participants.example",
+        "text": "Les crédits partenaires sont réservés au hackathon. Ils ne peuvent pas être utilisés pour une mission personnelle ou commerciale.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§5"
+          },
+          "result": "Partner credits (OpenAI, Pipelex, Gradium, Jinko, Dust) are for the hackathon only and may not be resold, transferred or used for personal or commercial purposes. The participant list is sent to partners only to activate access.",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m17": {
+      "id": "hackathon:message:m17",
+      "event_id": "hackathon",
+      "issue_id": "message:m17",
+      "action_type": "SEND_MESSAGE",
+      "title": "Explain why Luma registration is needed",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§3",
+          "description": "Open to X-IA members whose 2026 membership fee (cotisation, €10) is paid. Registration on the official Luma page is required. Participants compete individually or in teams of 2 to 4 people. Each participant may belong to only one team."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§3",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "lina.valcourt@participants.example",
+        "text": "Payment of the membership fee alone is not enough. Participants must also register on the official Luma page.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§3"
+          },
+          "result": "Open to X-IA members whose 2026 membership fee (cotisation, €10) is paid. Registration on the official Luma page is required. Participants compete individually or in teams of 2 to 4 people. Each participant may belong to only one team.",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m18": {
+      "id": "hackathon:message:m18",
+      "event_id": "hackathon",
+      "issue_id": "message:m18",
+      "action_type": "SEND_MESSAGE",
+      "title": "Confirm the submission deadline",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§4",
+          "description": "Coding phase from 25/09/26 09:00 to 27/09/26 23:59. Pre-selection of finalists in October. The final takes place in November, at an X-IA event (it was moved from 15 October)."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§4",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "adam.solvier@participants.example",
+        "text": "La phase de réalisation se termine le dimanche 27 septembre 2026 à 23 h 59, heure de Paris (UTC+02:00).\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§4"
+          },
+          "result": "Coding phase from 25/09/26 09:00 to 27/09/26 23:59. Pre-selection of finalists in October. The final takes place in November, at an X-IA event (it was moved from 15 October).",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m19": {
+      "id": "hackathon:message:m19",
+      "event_id": "hackathon",
+      "issue_id": "message:m19",
+      "action_type": "SEND_MESSAGE",
+      "title": "Explain the deadline policy",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§6",
+          "description": "Before the deadline: a demo video of 2 minutes maximum, a short description, a repository link with test instructions in the README, and team member names. Late submissions are not accepted."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§6",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "sarah.meriel@participants.example",
+        "text": "The sample rules do not allow late submissions. Please allow time for the upload and submit the complete package before the deadline.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§6"
+          },
+          "result": "Before the deadline: a demo video of 2 minutes maximum, a short description, a repository link with test instructions in the README, and team member names. Late submissions are not accepted.",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m24": {
+      "id": "hackathon:message:m24",
+      "event_id": "hackathon",
+      "issue_id": "message:m24",
+      "action_type": "SEND_MESSAGE",
+      "title": "Confirm individual participation",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§3",
+          "description": "Open to X-IA members whose 2026 membership fee (cotisation, €10) is paid. Registration on the official Luma page is required. Participants compete individually or in teams of 2 to 4 people. Each participant may belong to only one team."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§3",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "salome.vandel@participants.example",
+        "text": "Oui, la participation individuelle est autorisée. Vous devez être à jour de votre cotisation et inscrite sur la page Luma officielle.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§3"
+          },
+          "result": "Open to X-IA members whose 2026 membership fee (cotisation, €10) is paid. Registration on the official Luma page is required. Participants compete individually or in teams of 2 to 4 people. Each participant may belong to only one team.",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    },
+    "hackathon:message:m25": {
+      "id": "hackathon:message:m25",
+      "event_id": "hackathon",
+      "issue_id": "message:m25",
+      "action_type": "SEND_MESSAGE",
+      "title": "Explain the agentic-project requirement",
+      "description": "Saved sample proposal; review before approval.",
+      "evidence": [
+        {
+          "source_type": "rule",
+          "source_id": "§2",
+          "description": "Projects must be genuinely agentic: they use one or more LLMs and implement real agent logic (reasoning, decision-making, orchestration of actions)."
+        }
+      ],
+      "checks": [
+        {
+          "name": "Saved rule reference exists",
+          "passed": true,
+          "detail": "§2",
+          "verified": true
+        }
+      ],
+      "confidence": null,
+      "requires_approval": true,
+      "payload": {
+        "to": "kenji.aster@participants.example",
+        "text": "The project must use one or more LLMs and implement real agent logic. A dashboard containing only fixed scripts would not meet that requirement.\n— Drafted with AI assistance, approved by the organizers."
+      },
+      "trace": [
+        {
+          "step": 1,
+          "tool": "search_rules",
+          "arguments": {
+            "section": "§2"
+          },
+          "result": "Projects must be genuinely agentic: they use one or more LLMs and implement real agent logic (reasoning, decision-making, orchestration of actions).",
+          "ok": true
+        },
+        {
+          "step": 2,
+          "tool": "propose_action",
+          "arguments": {
+            "action_type": "SEND_MESSAGE"
+          },
+          "result": "Curated sample; organizer approval required",
+          "ok": true
+        }
+      ]
+    }
+  },
+  "bulk_replies": {
+    "hackathon:message:m02": {
+      "action": {
+        "id": "hackathon:message:m02",
+        "event_id": "hackathon",
+        "issue_id": "message:m02",
+        "action_type": "SEND_MESSAGE",
+        "title": "Explain the existing-project rule",
+        "description": "Saved sample proposal; review before approval.",
+        "evidence": [
+          {
+            "source_type": "rule",
+            "source_id": "§7",
+            "description": "Impact 30%, innovation 20%, execution quality 20%, user experience 15%, demo and pitch clarity 15%. Building on an existing project is allowed if declared at submission; only the part created during the hackathon is evaluated."
+          }
+        ],
+        "checks": [
+          {
+            "name": "Saved rule reference exists",
+            "passed": true,
+            "detail": "§7",
+            "verified": true
+          }
+        ],
+        "confidence": null,
+        "requires_approval": true,
+        "payload": {
+          "to": "julien.morel@gmail.example",
+          "text": "You may build on an existing project if you declare it at submission. Only work created during the hackathon will be evaluated.\n— Drafted with AI assistance, approved by the organizers."
+        },
+        "trace": [
+          {
+            "step": 1,
+            "tool": "search_rules",
+            "arguments": {
+              "section": "§7"
+            },
+            "result": "Impact 30%, innovation 20%, execution quality 20%, user experience 15%, demo and pitch clarity 15%. Building on an existing project is allowed if declared at submission; only the part created during the hackathon is evaluated.",
+            "ok": true
+          },
+          {
+            "step": 2,
+            "tool": "propose_action",
+            "arguments": {
+              "action_type": "SEND_MESSAGE"
+            },
+            "result": "Curated sample; organizer approval required",
+            "ok": true
+          }
+        ]
+      },
+      "issue": {
+        "id": "message:m02",
+        "kind": "unprocessed_message",
+        "blocking": false,
+        "title": "New email message from julien.morel@gmail.example",
+        "subject_ids": [
+          "m02"
+        ],
+        "details": {
+          "text": "Hi, my team already started a RAG agent project. Can we keep working on it during the hackathon?"
+        },
+        "status": "proposed",
+        "depends_on": [],
+        "resolved_by_action_id": null
+      },
+      "preview": {
+        "id": "hackathon:message:m02",
+        "title": "Explain the existing-project rule",
+        "to": "julien.morel@gmail.example",
+        "text": "You may build on an existing project if you declare it at submission. Only work created during the hackathon will be evaluated.\n— Drafted with AI assistance, approved by the organizers.",
+        "rules": [
+          "§7"
+        ],
+        "revision": "7aa279d55c6d5fc6df4b0d658c99df4a2f7eb30579d72b6fc57c8729d780f019"
+      }
+    },
+    "hackathon:message:m03": {
+      "action": {
+        "id": "hackathon:message:m03",
+        "event_id": "hackathon",
+        "issue_id": "message:m03",
+        "action_type": "SEND_MESSAGE",
+        "title": "Clarify the final date",
+        "description": "Saved sample proposal; review before approval.",
+        "evidence": [
+          {
+            "source_type": "rule",
+            "source_id": "§4",
+            "description": "Coding phase from 25/09/26 09:00 to 27/09/26 23:59. Pre-selection of finalists in October. The final takes place in November, at an X-IA event (it was moved from 15 October)."
+          }
+        ],
+        "checks": [
+          {
+            "name": "Saved rule reference exists",
+            "passed": true,
+            "detail": "§4",
+            "verified": true
+          }
+        ],
+        "confidence": null,
+        "requires_approval": true,
+        "payload": {
+          "to": "orbit_hugo",
+          "text": "La finale a été déplacée du 15 octobre à novembre, lors d'un événement X-IA. La date précise doit être confirmée par les organisateurs.\n— Drafted with AI assistance, approved by the organizers."
+        },
+        "trace": [
+          {
+            "step": 1,
+            "tool": "search_rules",
+            "arguments": {
+              "section": "§4"
+            },
+            "result": "Coding phase from 25/09/26 09:00 to 27/09/26 23:59. Pre-selection of finalists in October. The final takes place in November, at an X-IA event (it was moved from 15 October).",
+            "ok": true
+          },
+          {
+            "step": 2,
+            "tool": "propose_action",
+            "arguments": {
+              "action_type": "SEND_MESSAGE"
+            },
+            "result": "Curated sample; organizer approval required",
+            "ok": true
+          }
+        ]
+      },
+      "issue": {
+        "id": "message:m03",
+        "kind": "unprocessed_message",
+        "blocking": false,
+        "title": "New discord message from orbit_hugo",
+        "subject_ids": [
+          "m03"
+        ],
+        "details": {
+          "text": "La page Luma dit 15 octobre pour la finale mais j'ai vu novembre quelque part, c'est quoi la bonne date ?"
+        },
+        "status": "proposed",
+        "depends_on": [],
+        "resolved_by_action_id": null
+      },
+      "preview": {
+        "id": "hackathon:message:m03",
+        "title": "Clarify the final date",
+        "to": "orbit_hugo",
+        "text": "La finale a été déplacée du 15 octobre à novembre, lors d'un événement X-IA. La date précise doit être confirmée par les organisateurs.\n— Drafted with AI assistance, approved by the organizers.",
+        "rules": [
+          "§4"
+        ],
+        "revision": "396a22c066e82f8c2359756d148cc69cb0bea5ea15980ec84a6ea3233336b131"
+      }
+    },
+    "hackathon:message:m07": {
+      "action": {
+        "id": "hackathon:message:m07",
+        "event_id": "hackathon",
+        "issue_id": "message:m07",
+        "action_type": "SEND_MESSAGE",
+        "title": "Share the submission checklist",
+        "description": "Saved sample proposal; review before approval.",
+        "evidence": [
+          {
+            "source_type": "rule",
+            "source_id": "§6",
+            "description": "Before the deadline: a demo video of 2 minutes maximum, a short description, a repository link with test instructions in the README, and team member names. Late submissions are not accepted."
+          }
+        ],
+        "checks": [
+          {
+            "name": "Saved rule reference exists",
+            "passed": true,
+            "detail": "§6",
+            "verified": true
+          }
+        ],
+        "confidence": null,
+        "requires_approval": true,
+        "payload": {
+          "to": "noah.belcourt@participants.example",
+          "text": "Please submit a demo video of at most two minutes, a short project description, a repository link with testing instructions, and the names of your team members.\n— Drafted with AI assistance, approved by the organizers."
+        },
+        "trace": [
+          {
+            "step": 1,
+            "tool": "search_rules",
+            "arguments": {
+              "section": "§6"
+            },
+            "result": "Before the deadline: a demo video of 2 minutes maximum, a short description, a repository link with test instructions in the README, and team member names. Late submissions are not accepted.",
+            "ok": true
+          },
+          {
+            "step": 2,
+            "tool": "propose_action",
+            "arguments": {
+              "action_type": "SEND_MESSAGE"
+            },
+            "result": "Curated sample; organizer approval required",
+            "ok": true
+          }
+        ]
+      },
+      "issue": {
+        "id": "message:m07",
+        "kind": "unprocessed_message",
+        "blocking": false,
+        "title": "New email message from noah.belcourt@participants.example",
+        "subject_ids": [
+          "m07"
+        ],
+        "details": {
+          "text": "Hi, could you confirm the submission checklist? Is a two-minute video enough, or do we also need a description, repository link and team member names?"
+        },
+        "status": "proposed",
+        "depends_on": [],
+        "resolved_by_action_id": null
+      },
+      "preview": {
+        "id": "hackathon:message:m07",
+        "title": "Share the submission checklist",
+        "to": "noah.belcourt@participants.example",
+        "text": "Please submit a demo video of at most two minutes, a short project description, a repository link with testing instructions, and the names of your team members.\n— Drafted with AI assistance, approved by the organizers.",
+        "rules": [
+          "§6"
+        ],
+        "revision": "b84073436fab080b0eeea36b5165e9fe9946db59f20f382daba3a6e98b897373"
+      }
+    },
+    "hackathon:message:m18": {
+      "action": {
+        "id": "hackathon:message:m18",
+        "event_id": "hackathon",
+        "issue_id": "message:m18",
+        "action_type": "SEND_MESSAGE",
+        "title": "Confirm the submission deadline",
+        "description": "Saved sample proposal; review before approval.",
+        "evidence": [
+          {
+            "source_type": "rule",
+            "source_id": "§4",
+            "description": "Coding phase from 25/09/26 09:00 to 27/09/26 23:59. Pre-selection of finalists in October. The final takes place in November, at an X-IA event (it was moved from 15 October)."
+          }
+        ],
+        "checks": [
+          {
+            "name": "Saved rule reference exists",
+            "passed": true,
+            "detail": "§4",
+            "verified": true
+          }
+        ],
+        "confidence": null,
+        "requires_approval": true,
+        "payload": {
+          "to": "adam.solvier@participants.example",
+          "text": "La phase de réalisation se termine le dimanche 27 septembre 2026 à 23 h 59, heure de Paris (UTC+02:00).\n— Drafted with AI assistance, approved by the organizers."
+        },
+        "trace": [
+          {
+            "step": 1,
+            "tool": "search_rules",
+            "arguments": {
+              "section": "§4"
+            },
+            "result": "Coding phase from 25/09/26 09:00 to 27/09/26 23:59. Pre-selection of finalists in October. The final takes place in November, at an X-IA event (it was moved from 15 October).",
+            "ok": true
+          },
+          {
+            "step": 2,
+            "tool": "propose_action",
+            "arguments": {
+              "action_type": "SEND_MESSAGE"
+            },
+            "result": "Curated sample; organizer approval required",
+            "ok": true
+          }
+        ]
+      },
+      "issue": {
+        "id": "message:m18",
+        "kind": "unprocessed_message",
+        "blocking": false,
+        "title": "New email message from adam.solvier@participants.example",
+        "subject_ids": [
+          "m18"
+        ],
+        "details": {
+          "text": "Bonjour, à quelle heure exacte doit-on déposer le projet dimanche 27 septembre, et dans quel fuseau horaire ?"
+        },
+        "status": "proposed",
+        "depends_on": [],
+        "resolved_by_action_id": null
+      },
+      "preview": {
+        "id": "hackathon:message:m18",
+        "title": "Confirm the submission deadline",
+        "to": "adam.solvier@participants.example",
+        "text": "La phase de réalisation se termine le dimanche 27 septembre 2026 à 23 h 59, heure de Paris (UTC+02:00).\n— Drafted with AI assistance, approved by the organizers.",
+        "rules": [
+          "§4"
+        ],
+        "revision": "c1c85220c7e093f2e17c36b2e1519d005444cc73acc0e178a925220548a50abb"
+      }
+    },
+    "hackathon:message:m19": {
+      "action": {
+        "id": "hackathon:message:m19",
+        "event_id": "hackathon",
+        "issue_id": "message:m19",
+        "action_type": "SEND_MESSAGE",
+        "title": "Explain the deadline policy",
+        "description": "Saved sample proposal; review before approval.",
+        "evidence": [
+          {
+            "source_type": "rule",
+            "source_id": "§6",
+            "description": "Before the deadline: a demo video of 2 minutes maximum, a short description, a repository link with test instructions in the README, and team member names. Late submissions are not accepted."
+          }
+        ],
+        "checks": [
+          {
+            "name": "Saved rule reference exists",
+            "passed": true,
+            "detail": "§6",
+            "verified": true
+          }
+        ],
+        "confidence": null,
+        "requires_approval": true,
+        "payload": {
+          "to": "sarah.meriel@participants.example",
+          "text": "The sample rules do not allow late submissions. Please allow time for the upload and submit the complete package before the deadline.\n— Drafted with AI assistance, approved by the organizers."
+        },
+        "trace": [
+          {
+            "step": 1,
+            "tool": "search_rules",
+            "arguments": {
+              "section": "§6"
+            },
+            "result": "Before the deadline: a demo video of 2 minutes maximum, a short description, a repository link with test instructions in the README, and team member names. Late submissions are not accepted.",
+            "ok": true
+          },
+          {
+            "step": 2,
+            "tool": "propose_action",
+            "arguments": {
+              "action_type": "SEND_MESSAGE"
+            },
+            "result": "Curated sample; organizer approval required",
+            "ok": true
+          }
+        ]
+      },
+      "issue": {
+        "id": "message:m19",
+        "kind": "unprocessed_message",
+        "blocking": false,
+        "title": "New email message from sarah.meriel@participants.example",
+        "subject_ids": [
+          "m19"
+        ],
+        "details": {
+          "text": "Hi, the upload might take longer than expected. Would a submission just after the deadline still be accepted under the rules?"
+        },
+        "status": "proposed",
+        "depends_on": [],
+        "resolved_by_action_id": null
+      },
+      "preview": {
+        "id": "hackathon:message:m19",
+        "title": "Explain the deadline policy",
+        "to": "sarah.meriel@participants.example",
+        "text": "The sample rules do not allow late submissions. Please allow time for the upload and submit the complete package before the deadline.\n— Drafted with AI assistance, approved by the organizers.",
+        "rules": [
+          "§6"
+        ],
+        "revision": "736545a26f564c1fa6b433eeee71c55f19d42543b123549269e8b26c28d7fd73"
+      }
+    },
+    "hackathon:message:m25": {
+      "action": {
+        "id": "hackathon:message:m25",
+        "event_id": "hackathon",
+        "issue_id": "message:m25",
+        "action_type": "SEND_MESSAGE",
+        "title": "Explain the agentic-project requirement",
+        "description": "Saved sample proposal; review before approval.",
+        "evidence": [
+          {
+            "source_type": "rule",
+            "source_id": "§2",
+            "description": "Projects must be genuinely agentic: they use one or more LLMs and implement real agent logic (reasoning, decision-making, orchestration of actions)."
+          }
+        ],
+        "checks": [
+          {
+            "name": "Saved rule reference exists",
+            "passed": true,
+            "detail": "§2",
+            "verified": true
+          }
+        ],
+        "confidence": null,
+        "requires_approval": true,
+        "payload": {
+          "to": "kenji.aster@participants.example",
+          "text": "The project must use one or more LLMs and implement real agent logic. A dashboard containing only fixed scripts would not meet that requirement.\n— Drafted with AI assistance, approved by the organizers."
+        },
+        "trace": [
+          {
+            "step": 1,
+            "tool": "search_rules",
+            "arguments": {
+              "section": "§2"
+            },
+            "result": "Projects must be genuinely agentic: they use one or more LLMs and implement real agent logic (reasoning, decision-making, orchestration of actions).",
+            "ok": true
+          },
+          {
+            "step": 2,
+            "tool": "propose_action",
+            "arguments": {
+              "action_type": "SEND_MESSAGE"
+            },
+            "result": "Curated sample; organizer approval required",
+            "ok": true
+          }
+        ]
+      },
+      "issue": {
+        "id": "message:m25",
+        "kind": "unprocessed_message",
+        "blocking": false,
+        "title": "New email message from kenji.aster@participants.example",
+        "subject_ids": [
+          "m25"
+        ],
+        "details": {
+          "text": "Hi, would a dashboard with fixed scripts and no LLM qualify as an agentic project for this hackathon?"
+        },
+        "status": "proposed",
+        "depends_on": [],
+        "resolved_by_action_id": null
+      },
+      "preview": {
+        "id": "hackathon:message:m25",
+        "title": "Explain the agentic-project requirement",
+        "to": "kenji.aster@participants.example",
+        "text": "The project must use one or more LLMs and implement real agent logic. A dashboard containing only fixed scripts would not meet that requirement.\n— Drafted with AI assistance, approved by the organizers.",
+        "rules": [
+          "§2"
+        ],
+        "revision": "1a7f7e823745b65a48ca3476f2b1dc65d80e9333b442d9159ff0090ca986e5b3"
+      }
+    }
+  },
+  "bulk_limit": 100,
+  "revision": "308ab3cfe9dc3226"
 };
