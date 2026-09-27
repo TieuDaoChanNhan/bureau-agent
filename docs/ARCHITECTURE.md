@@ -90,6 +90,7 @@ The organizer console shows detected issues, evidence, checks, proposals, tool t
 | One orchestrating agent | The agent chooses tools; fixed Python code enforces rules and execution boundaries. |
 | JSON runtime state | Small, inspectable demo data is easy to reset; deployed demo sessions are isolated per browser. |
 | Approval before execution | The agent drafts; organizers retain responsibility for money, identity, messages, groups, and travel. |
+| Invariants in code, at two layers | Identity threshold (T29) and requester identity (T50) are checked when the model proposes, so it can revise, and again when an organizer approves. Safety findings are fixed in code, not in the prompt. |
 | Replayable external data | The demonstration remains reliable without network availability or provider credits. |
 | Plain web console | No build pipeline is needed for the demo, and the API remains the single data contract. |
 | Labeled evaluation | Quality is measured against fixtures, while organizer feedback is reported separately when available. |

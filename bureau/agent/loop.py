@@ -11,6 +11,7 @@ from ..core.models import Check, EventState, Evidence, Group, Issue, ProposedAct
 from ..core.store import append_log, merge_issue_status, save_state
 from ..tools.groups import check_groups
 from ..tools.identity import ASK_HUMAN, link_band
+from ..tools.requester import requester_problem
 from .prompts import SYSTEM_PROMPT
 from .tool_specs import ACTION_TYPES, TOOLS, build_handlers
 
@@ -121,6 +122,9 @@ def _action_from_args(state: EventState, issue: Issue, args: dict) -> ProposedAc
         violations = [v for kind in kinds for v in check_groups(preview, kind)]
         if violations:
             raise ValueError(f"UPDATE_GROUPS would break group invariants: {violations}")
+    problem = requester_problem(state, action_type, payload, issue.id)
+    if problem:
+        raise ValueError(problem)
     evidence = [Evidence(e["source_type"], e["source_id"], e.get("description", ""))
                 for e in args.get("evidence", [])]
     checks = [Check(c["name"], c["passed"], c.get("detail", "")) for c in args.get("checks", [])]
