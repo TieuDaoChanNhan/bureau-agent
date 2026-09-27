@@ -2,9 +2,6 @@
 
 Target Space: https://huggingface.co/spaces/bachbeo2007/bureau
 
-The [27 September 2026 verification record](VERIFICATION.md#static-backup-refresh--27-september-2026)
-includes the published revision, public tour results and screenshots.
-
 This is a browser-only adaptation of the existing operations console and its
 30-step Demo tour. It shows two fictional events, evidence, editable replies,
 approval/dismissal, a simulated outbox, local activity, clarification, and trip
@@ -53,7 +50,6 @@ assets, no CDN, no build-time packages, and a CSP that disallows connections.
 | `publish.py` | Offline release checks, an upload ZIP, and authenticated upload of an explicit asset list to an existing public Static Space. |
 | `tour-steps.js` | All 30 customer tour steps; explains exactly what is simulated. |
 | `test_browser.py` | Browser tests for the complete tour, isolation, invalid approvals, reset, escaped text, and network isolation. |
-| `VERIFICATION.md` | Local results and remaining public-deployment checks. |
 | `site/` | Generated, committed, self-contained files to upload. Includes the vendored Driver.js license. Do not edit generated files directly. |
 
 Rebuild after changing any source or the upstream `web/` console. The generator

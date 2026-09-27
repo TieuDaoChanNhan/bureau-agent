@@ -2,7 +2,7 @@
 
 Primary: native Python on **one free Render web service**. Backup:
 [Hugging Face Static Space](https://huggingface.co/spaces/bachbeo2007/bureau).
-The live demo is https://bureau-agent.onrender.com. The static revision has passed its public tour and isolation checks; see demo/VERIFICATION.md.
+The live demo is https://bureau-agent.onrender.com.
 
 ## Free-tier terms checked 26 September 2026
 
@@ -181,4 +181,3 @@ Repeat the static tour on the published Space and record its deployed revision.
 Record screenshots, URLs, commits, actual timings, the hard-limit confirmation
 and green CI links with the change. Local fake-client screenshots
 are explicitly local evidence; they cannot establish public live acceptance.
-See `demo/VERIFICATION.md` for completed local checks and outstanding items.
