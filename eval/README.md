@@ -285,3 +285,57 @@ Run the same comparison for any other model before switching:
 Dataset SHA-256: `1a2f1192229cc3d8ebfc9fa3debd80b661b007ffdf8230cedfee3eb5bed317eb`.
 Fixture and runtime file hashes were unchanged after the run. Results can vary
 between model calls; rerun this baseline when changing the agent, model or corpus.
+
+## Unsupported trip restrictions (#102)
+
+The fix keeps unsupported requirements in structured extraction and turns them into
+blocking questions in code. Explicit English/French transport restrictions also
+have a deterministic text guard before search, including direct/recorded planner
+calls. Unknown hard keys cannot silently pass through `plan_trip`.
+
+PR #100 was still awaiting review during validation. Its runner and unchanged
+20-case corpus were exported from `50ab95e`, and executed against this branch's
+production code with Jinko replay. The planning dataset SHA-256 is unchanged:
+`9c60b831b143f51d134573355c83a991a0c9378701149a0a77056ef8f29f6f12`.
+
+Final run: 2026-09-27, 13:33:58–13:34:17 UTC, `gpt-4.1`, Python 3.13.12,
+production commit `af286bd136bd6ce8bc10e2fd9233d35e1b0c47c6`.
+
+| Metric | Historical 8 cases | Current WEI 12 cases | Total |
+|---|---|---|---|
+| Supported hard fields | 8/8 | 12/12 | 20/20 |
+| Clarification presence | 8/8 | 9/12 | 17/20 |
+| Ordered preferences | 7/7 | 12/12 | 19/19 |
+| Organizer verification | 7/7 | 12/12 | 19/19 |
+| Feasibility after clarification gate | 5/5 | 6/6 | 11/11 |
+| Exact labeled ranking after gate | N/A | 5/5 | 5/5 |
+| API/execution errors | 0 | 0 | 0 |
+
+`p014` now escalates with a transport-restriction question and no proposed coach
+options. The €140/€160 cases, total-budget conversion and earliest-return versus
+cheapest-first ranking passed. Remaining mismatches are extra accessibility
+questions in `p015`, `p019`, `p020`; `p020` also incorrectly treats its mention of
+coaches as a mandatory unsupported restriction. These three cases were not searched
+and remain outside feasibility/ranking denominators. They are not counted as passes.
+The code guard is bounded to direct wording; arbitrary unsupported requirements
+still depend on extraction, so this is not a complete natural-language guarantee.
+
+An earlier development run at `ff83369` already stopped `p014`, but scored 18/20
+hard fields and 13/20 clarification presence. It exposed over-clarification and
+confusion between package scope and requirements; extraction guidance was refined
+before the final run. Both reports are retained; the corpus and labels were unchanged:
+
+- Earlier: `eval/results/20260927T133238.479047Z.json`.
+- Final: `eval/results/20260927T133358.213408Z.json`, SHA-256
+  `adf0daec52c2bfef67999b6fd0c22c865f3b752e4207fefe3ecec7f75c055c3b`.
+
+Until #100 merges, reproduce the expanded evaluation from a frozen export:
+
+```bash
+eval_snapshot=$(mktemp -d)
+git archive 50ab95e eval | tar -x -C "$eval_snapshot"
+OPENAI_MODEL=gpt-4.1 PYTHONPATH=. python "$eval_snapshot/eval/run_eval.py" --suite planning --output-dir eval/results
+```
+
+After #100 merges, use `python -m eval.run_eval --suite planning`. The live command
+uses OpenAI credit; unit tests use scripted extraction and saved packages only.
