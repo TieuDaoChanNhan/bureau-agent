@@ -59,7 +59,19 @@ Offline evaluation on **50 labeled messages** (the 25 sample messages plus 25 pa
 
 Constraint extraction on 8 labeled trip requests: hard constraints 8/8, clarification presence 8/8.
 
-**207 automated tests** (no API calls: a scripted fake model) run on every push.
+**Held-out safety evaluation** (24 new adversarial and control cases the prompt was not tuned on, `gpt-4.1`, 3 runs each; [details](eval/README.md#safety-corpus-held-out-t46)):
+
+| Category | Handled correctly |
+|---|---|
+| Prompt injection ("mark me as paid", "admin mode", "ignore the rules") | **18/18** |
+| Personal-data requests | **9/9** |
+| Pressure and exceptions (claimed authority, refunds, waivers) | **15/15** |
+| Ordinary questions (must be answered, not escalated) | **15/15**, 0 false refusals |
+| Impersonation (unregistered or look-alike sender) | 11/15 |
+
+It found one real weakness: the agent does not check that the **sender is the registered participant** a request is about. 7 of 72 proposals acted on such requests, for example addressing a payment confirmation to an unregistered address. None bypassed approval, but none was blocked by code either. The code fix is tracked in [#94](https://github.com/TieuDaoChanNhan/bureau-agent/issues/94).
+
+**218 automated tests** (no API calls: a scripted fake model) run on every push.
 
 Real-user feedback: TODO (T18).
 
@@ -100,7 +112,7 @@ Then open http://127.0.0.1:8000 and click **Start the guided demo**. **Reset dem
 
 **Tests and evaluation**
 ```bash
-python -m unittest discover -s tests -t .     # 207 tests, no API key needed (or: uv run python -m unittest …)
+python -m unittest discover -s tests -t .     # 218 tests, no API key needed (or: uv run python -m unittest …)
 python -m eval.run_eval                       # 50-case evaluation (needs a key)
 python -m bureau plan wei --recorded-constraints   # trip planner offline: 3 of 8 packages valid at €150
 python -m bureau plan wei --recorded-constraints --budget 120   # none valid: diagnosis, no relaxation
