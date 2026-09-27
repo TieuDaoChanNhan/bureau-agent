@@ -46,6 +46,7 @@ PLANNING_METRIC_DEFINITIONS = {
     "soft_preferences": "Exact ordered preference list; only cases with expected_soft labels; extraction errors fail.",
     "organizer_verification": "Exact set of organizer-verified keys; only labeled cases; extraction errors fail.",
     "feasibility": "Any valid recorded option after the clarification gate; clarification stops and errors are unassessed and excluded.",
+    "ranking": "Exact ordered valid option IDs; only expected_ranked_valid cases reaching option checks; clarification stops and errors are excluded.",
 }
 
 
@@ -452,6 +453,7 @@ def evaluate_planning(
             "soft_correct": False if "expected_soft" in case else None,
             "organizer_verified_correct": False if "expected_organizer_verified" in case else None,
             "feasibility_correct": None,
+            "ranking_correct": None,
         }
         try:
             state = load_event(case["event"])
@@ -461,6 +463,7 @@ def evaluate_planning(
                 origin=travel["origin"], destination=travel["destination"],
                 depart_after=datetime.fromisoformat(travel["depart_after"]),
                 return_by=datetime.fromisoformat(travel["return_by"]) if travel.get("return_by") else None,
+                catering={} if "options_fixture" in case else deepcopy(travel.get("catering", {})),
             )
             row["input"] = asdict(request)
             constraints = extract(request)
@@ -488,13 +491,17 @@ def evaluate_planning(
                 with patch("bureau.planner.planner.search_options", side_effect=search_recorded):
                     action = plan_trip(request, constraints)
             else:
-                action = plan_trip(request, constraints)
+                # The evaluation always replays saved quotes, regardless of local live settings.
+                with patch("bureau.planner.jinko.JINKO_MODE", "replay"):
+                    action = plan_trip(request, constraints, search=travel.get("search"))
             row["action"] = asdict(action)
             # plan_trip owns the clarification gate and the recorded-option checks.
             # Do not search again here: that would bypass the organizer's answer.
             if not constraints.clarifications:
                 row["feasible"] = action.action_type == "SELECT_TRAVEL_PLAN"
                 row["feasibility_correct"] = row["feasible"] == case["feasible"]
+                if "expected_ranked_valid" in case:
+                    row["ranking_correct"] = action.payload.get("ranked_valid", []) == case["expected_ranked_valid"]
         except Exception as exc:
             row["error"] = _error(exc)
         rows.append(row)
@@ -507,6 +514,7 @@ def evaluate_planning(
             ("hard_constraints", "hard_correct"), ("clarifications", "clarifications_correct"),
             ("soft_preferences", "soft_correct"), ("organizer_verification", "organizer_verified_correct"),
             ("feasibility", "feasibility_correct"),
+            ("ranking", "ranking_correct"),
         )},
     }
 
@@ -571,7 +579,7 @@ def main(argv=None) -> int:
     events = {case["event"] for case in message_cases + planning_cases + safety_cases}
     report["fixture_sha256"] = {
         str(path.relative_to(config.DATA_DIR).as_posix()): hashlib.sha256(path.read_bytes()).hexdigest()
-        for event in sorted(events) for path in sorted((config.DATA_DIR / event).iterdir()) if path.is_file()
+        for event in sorted(events) for path in sorted((config.DATA_DIR / event).rglob("*")) if path.is_file()
     }
     if message_cases:
         def progress(index, total, row):
