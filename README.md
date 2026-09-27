@@ -32,7 +32,7 @@ One loop handles every kind of event:
 2. **Investigate.** An AI agent (OpenAI `gpt-4.1`, tool calling) picks its own tools: look up a participant, read payments, score an identity match, search the rules, check teams. It proposes **one** action: link a payment, send a reply, move a member, or ask the organizers. Every tool call is recorded and shown.
 3. **Decide.** The organizer sees the proposal first, with the agent's question, the evidence and an editable draft reply. Approving is what changes data or "sends" the reply (to a simulated outbox), and it is logged.
 
-The same loop plans trips. The organizer's request for a student integration weekend ("100 students, leave the campus Friday after 17:00, €150 each with meals included, arrive before 21:00, no overnight travel, two step-free rooms, two coaches") becomes structured constraints. The request does not say whether the €150 covers the coaches, so the planner **asks before searching**. It builds packages from **real hotel offers (Jinko)**, adds the meal budget once, and checks every package in code: **3 of 8 are valid** at €150, ranked by the organizers' preferences. At €120, **none is**, and it **never relaxes a constraint by itself**: it says which single change would unlock each option. Choosing a package unlocks six waiting issues (reminders, rooms, four student questions).
+The same loop plans trips. The organizer's request for a student integration weekend ("100 students, leave the campus Friday after 17:00, €150 each with meals included, arrive before 21:00, no overnight travel, two step-free rooms, two coaches") becomes structured constraints. The request does not say whether the €150 covers the coaches, so the planner **asks before searching**. It builds packages from **real hotel offers (Jinko responses saved on 26 September 2026 and replayed, so the demo is reproducible)**, adds the meal budget once, and checks every package in code: **3 of 8 are valid** at €150, ranked by the organizers' preferences. At €120, **none is**, and it **never relaxes a constraint by itself**: it says which single change would unlock each option. Choosing a package unlocks six waiting issues (reminders, rooms, four student questions).
 
 ## Why it is safe to use
 
@@ -133,7 +133,7 @@ Design choices: **one agent, not several** (the loop is the product); invariants
 | Tool | How we used it |
 |---|---|
 | **OpenAI** | `gpt-4.1` with tool calling for the agent; strict structured output for trip constraints; short trade-off explanations. Chosen after measuring `gpt-4o-mini` (table above). |
-| **Jinko** | Live hotel search, cached for replay (no network in tests and in the demo). Findings: our key works on the production host; ground search returned 404 for it; **group blocks (10×4 or 20×2 rooms) return no availability**, and rates allow "5 passengers and under". So a room is priced and scaled, and every package says "group block to confirm with the hotel". |
+| **Jinko** | Live hotel search, saved on 26 September 2026 and **replayed** in tests, in the demo and on the public site (`JINKO_MODE=replay`), because live prices change daily: a live run on 27 September returned **0 of 8** valid packages at €150 (the cheapest hotel was gone and prices rose), against 3 of 8 in the saved responses the tour and video use. To search live, set `JINKO_MODE=live` and `JINKO_API_KEY`; responses are saved under `data/<event>/jinko_cache/`. Findings: our key works on the production host; ground search returned 404 for it; **group blocks (10×4 or 20×2 rooms) return no availability**, and rates allow "5 passengers and under". So a room is priced and scaled, and every package says "group block to confirm with the hotel". |
 | **Pipelex** | Tried first for constraint extraction (typed `PipeLLM`, it worked on our case). We kept OpenAI structured output because it covered this one call with less setup ([why](bureau/planner/README.md)). |
 
 ## What is real and what is simulated
@@ -142,7 +142,7 @@ Design choices: **one agent, not several** (the loop is the product); invariants
 |---|---|
 | Issue detection, rule checks, identity scoring, constraint gate, executor | Real (Python), tested |
 | Agent investigation, constraint extraction, explanations | Real (OpenAI `gpt-4.1`) |
-| Hotel offers | Real Jinko responses, cached |
+| Hotel offers | Real Jinko responses from 26 September 2026, replayed so the demo gives the same result every time (live mode available, see Jinko above) |
 | Transport options | Illustrative coach charter prices (Jinko ground search unavailable for our key) |
 | Registrations, payments, messages | Fictional sample data with planted inconsistencies; no real personal data. The trip scenario was modelled on a student integration weekend and reviewed by a team member who took part in one |
 | Sending, booking, paying | Not performed: approved replies go to a simulated outbox, and organizers book themselves |
