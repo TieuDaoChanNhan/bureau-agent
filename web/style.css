@@ -51,6 +51,7 @@ code { font-family: var(--mono); }
         background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
 .topnav { display: flex; align-items: center; gap: 8px; }
 .topnav a { color: var(--ink-2); text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 10px; }
+.topnav .btn { white-space: nowrap; }
 
 main { max-width: 1240px; margin: 0 auto; padding: 0 20px 48px; }
 
@@ -323,6 +324,8 @@ details.sec > .sec-body { padding: 0 16px 16px; display: flex; flex-direction: c
   .topbar-in { padding: 10px 12px; }
   .sitefoot-in { padding: 0 12px; }
   .topnav a { display: none; }
+  .topnav { gap: 4px; }
+  .topnav .btn { padding: 6px 9px; font-size: 13px; }
   .hero { padding: 36px 0 28px; }
   .lede { font-size: 16px; }
   .console-head, .run { padding-left: 14px; padding-right: 14px; }

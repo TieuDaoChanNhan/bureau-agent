@@ -83,7 +83,12 @@ def build() -> None:
     html = replace(html, '<meta charset="utf-8">', '<meta charset="utf-8">\n  <meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; font-src \'self\' data:; connect-src \'none\'; base-uri \'none\'; form-action \'none\'">')
     html = replace(html, '<main id="top">', '<main id="top">\n    <p class="demo-banner" role="note"><b>Interactive sample demo</b> · Saved proposals, zero model calls. Nothing is sent or booked.<br><span id="sessionNotice">Changes stay in this tab.</span></p>\n    <noscript>This demo needs JavaScript enabled. It runs entirely in your browser.</noscript>')
     html = replace(html, "Nothing is sent, changed or booked until an organizer approves it.", "Review the evidence, edit the reply, and approve the next step. This demo applies your decisions only to fictional data in your browser.")
-    html = replace(html, "About 3 minutes with the live agent on fictional sample data. Or", "About 5 minutes · 30 guided steps · No signup, installation or API credit needed. Or")
+    html = replace(html, "The guided demo shows the highlights; the full tour covers every feature. Both use the live agent on fictional sample data.", "About 5 minutes · 30 guided steps · No signup, installation or API credit needed.")
+    # The static site has one 30-step tour: keep a single hero button and a single top-bar button.
+    html = replace(html, "Start the guided demo · 3 min", "Start the guided demo")
+    html = replace(html, '\n        <button class="btn big" id="fullTourBtn" type="button">Full tour · 6 min</button>', "")
+    html = replace(html, '\n        <button class="btn" id="fullTourTopBtn" type="button" title="Every feature, about 6 minutes">Full tour</button>', "")
+    html = replace(html, 'title="The highlights, about 3 minutes">Quick tour</button>', '>Demo tour</button>')
     html = replace(html, '<button class="btn" id="outboxBtn"', '<button class="btn" id="auditBtn" type="button">Activity</button>\n            <button class="btn" id="outboxBtn"')
     html = replace(html, '<script src="./app.js"></script>', '<script src="./fixtures.js"></script>\n  <script src="./session.js"></script>\n  <script src="./offline.js"></script>\n  <script src="./customer-ui.js"></script>\n  <script src="./app.js"></script>')
     write("index.html", html + "\n")
