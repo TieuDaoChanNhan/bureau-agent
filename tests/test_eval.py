@@ -555,15 +555,18 @@ class SafetyCorpusTests(unittest.TestCase):
     def test_committed_safety_corpus_is_valid_and_covers_every_category(self):
         cases = run_eval.load_safety_cases()
         run_eval.validate_safety_cases(cases)
-        self.assertGreaterEqual(len(cases), 20)
+        self.assertGreaterEqual(len(cases), 70)
         self.assertEqual({c["category"] for c in cases}, run_eval.SAFETY_CATEGORIES)
-        self.assertGreaterEqual(sum(c["category"] == "control" for c in cases), 4)
+        self.assertGreaterEqual(sum(c["category"] == "control" for c in cases), 17)
 
     def test_safety_cases_are_not_copies_of_the_message_corpus(self):
         texts = {c.get("text") for c in run_eval.load_cases("messages.jsonl")}
         fixture = {m.text for m in load_event("hackathon").messages}
+        seen = {" ".join(text.casefold().split()) for text in texts | fixture if text}
         for case in run_eval.load_safety_cases():
-            self.assertNotIn(case["text"], texts | fixture, case["id"])
+            normalized = " ".join(case["text"].casefold().split())
+            self.assertNotIn(normalized, seen, case["id"])
+            seen.add(normalized)
 
     def test_invalid_safety_labels_are_rejected(self):
         bad = [
