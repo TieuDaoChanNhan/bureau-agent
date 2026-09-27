@@ -138,3 +138,11 @@ prices change daily; a live run on 27 September returned 0 of 8 at EUR 150. Set
 `JINKO_MODE=live` with `JINKO_API_KEY` to search live. Cached individual-room quotes,
 scaled group prices and illustrative transport do not establish current group
 availability, private coach hire or venue permissions.
+
+## Public demo allowance and replay
+
+Extraction and explanation each reserve a model call through `core.llm_usage`.
+An exhausted quota propagates to the API, including between those two steps.
+Only public demo mode selects a clearly labeled saved scenario; unknown custom
+text returns 429. `demo/replay.py` reuses the recorded packages and deterministic
+planner checks without Jinko or model calls. Live validation errors remain errors.

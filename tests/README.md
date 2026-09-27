@@ -66,3 +66,12 @@ class StoreRoundTripTests(unittest.TestCase):
 - No network, no API keys: use sample data, `FakeClient`, and Jinko **replay** mode.
 - Useful assertions: `assertEqual`, `assertTrue`, `assertIn`, `assertIsNone`, `assertRaises` (for errors, e.g. `with self.assertRaises(InvariantViolation): ...`).
 - Look at the existing files for examples; `test_agent.py` shows how to script the fake LLM.
+
+## Public demo checks
+
+`test_public_demo.py` tests browser storage isolation, overlapping requests,
+secure cookie rotation/expiry, atomic global and per-session limits, UTC-day
+rollover, failed-call accounting, mid-agent/mid-planner exhaustion and replay or
+429 without further fake-model calls. Reset cannot reset model allowances.
+Browser checks in `demo/test_browser.py` and `demo/test_live_browser.py` cover
+all 30 steps, both modes, separate visitors and local font loading.

@@ -1,0 +1,44 @@
+name: Demo keep-alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: demo-keepalive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    if: vars.DEMO_KEEPALIVE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      DEMO_URL: ${{ vars.RENDER_DEMO_URL }}
+      KEEPALIVE_UNTIL: ${{ vars.DEMO_KEEPALIVE_UNTIL }}
+    steps:
+      - name: Wake the one free service during judging
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Sunday 27 September starts at midnight Europe/Paris (UTC+2).
+          start=$(date -u -d '2026-09-26T22:00:00Z' +%s)
+          now=$(date -u +%s)
+          if [[ -z "$KEEPALIVE_UNTIL" ]]; then
+            echo 'Set DEMO_KEEPALIVE_UNTIL to the results timestamp before enabling.'
+            exit 1
+          fi
+          end=$(date -u -d "$KEEPALIVE_UNTIL" +%s)
+          if (( now < start || now >= end )); then
+            echo 'Outside judging window; no request sent.'
+            exit 0
+          fi
+          if [[ ! "$DEMO_URL" =~ ^https://[a-z0-9-]+\.onrender\.com/?$ ]]; then
+            echo 'Set RENDER_DEMO_URL to the verified Render service URL.'
+            exit 1
+          fi
+          curl -fsS --max-time 120 "${DEMO_URL%/}/api/events" > /dev/null

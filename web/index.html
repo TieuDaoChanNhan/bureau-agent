@@ -6,9 +6,7 @@
   <title>Bureau Agent</title>
   <meta name="description" content="An operations agent for volunteer-run associations: it finds what needs attention, investigates, and proposes. You approve.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M10 9h8a4 4 0 0 1 0 8h-8zm0 8h9a4 4 0 0 1 0 8h-9z' fill='none' stroke='white' stroke-width='2.5'/%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/web/vendor/fonts.css">
   <link rel="stylesheet" href="/web/vendor/driver.css">
   <link rel="stylesheet" href="/web/style.css">
 </head>
@@ -27,6 +25,7 @@
   </header>
 
   <main id="top">
+    <p id="demoModeNotice" class="demo-status" role="status" hidden></p>
     <section class="hero" aria-labelledby="hero-title">
       <p class="eyebrow">Agentic operations · for volunteer-run associations</p>
       <h1 id="hero-title">Your association's busywork, investigated by an agent.<br><span>Every decision stays yours.</span></h1>

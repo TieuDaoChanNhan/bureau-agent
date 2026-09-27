@@ -331,3 +331,4 @@ details.sec > .sec-body { padding: 0 16px 16px; display: flex; flex-direction: c
   .cons { grid-template-columns: 1fr; }
   .mv { font-size: 34px; }
 }
+.demo-status{margin:16px auto;padding:10px 16px;max-width:1200px;border:1px solid var(--line);border-radius:10px;background:var(--accent-soft);font-size:13px}.demo-status[hidden]{display:none}

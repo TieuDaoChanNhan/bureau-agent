@@ -92,3 +92,10 @@ Fake-client tests verify the loop mechanics only; they are not evidence that the
 python -m unittest tests.test_agent -v
 python -m unittest discover -s tests -t .
 ```
+
+## Public demo allowance
+
+Each model turn passes through `core.llm_usage.create_completion`. Demo mode
+bounds output tokens and disables SDK retries. `LiveUnavailable` propagates
+through `run_pending` to the API's labeled saved-example fallback; it is never
+silently converted into an ordinary failed issue. Other CLI behavior is retained.

@@ -1,0 +1,25 @@
+name: static demo
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python demo/publish.py --check
+      - run: git diff --exit-code -- demo/site
+      - run: pip install -r requirements.txt playwright
+      - run: python -m playwright install --with-deps chromium
+      - run: python demo/test_browser.py
+      - run: python demo/test_live_browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: static-demo-screenshots
+          path: demo/artifacts/

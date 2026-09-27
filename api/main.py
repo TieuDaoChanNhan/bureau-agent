@@ -20,11 +20,20 @@ from bureau.core import store
 from bureau.core.detect import detect_issues
 from bureau.core.executor import InvariantViolation, apply
 from bureau.core.models import EventState, Issue, Message, ProposedAction
+from bureau.core.llm_usage import LiveUnavailable, ensure_available
 from bureau.config import DATA_DIR, ROOT
 from bureau.planner.planner import (HARD_KEYS, extract_constraints, plan_trip, recorded_constraints,
                                     request_from_state)
+from demo.replay import NoSavedExample, issue_example, mark_replay, planner_example
+from .sessions import DemoSessions
 
 app = FastAPI(title="Bureau Agent API")
+app.add_middleware(DemoSessions)
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 class NewMessage(BaseModel):
@@ -35,13 +44,13 @@ class NewMessage(BaseModel):
 
 
 class PlanRequest(BaseModel):
-    text: StrictStr | None = None          # the request, possibly with the organizer's answers appended
+    text: StrictStr | None = Field(default=None, max_length=8000)
     overrides: dict[str, int | bool | str] | None = None
     recorded: bool = False                 # use the constraints recorded with the event (offline demo)
 
 
 class ApprovalRequest(BaseModel):
-    edited_description: StrictStr | None = None
+    edited_description: StrictStr | None = Field(default=None, max_length=8000)
     option_id: StrictStr | None = None
 
 
@@ -142,6 +151,10 @@ def run_agent(event_id: str, limit: int = Query(5, ge=1), issue_id: str | None =
     if event_id not in _events():
         raise HTTPException(404, "unknown event")
     state = _load_and_refresh(event_id)
+    if config.DEMO_MODE:
+        if limit > 50:
+            raise HTTPException(422, "Public demo batches are limited to 50 issues.")
+        return _demo_run(state, limit, issue_id)
     if runnable_issues(state, issue_id) and not config.OPENAI_API_KEY:
         raise HTTPException(503, "OPENAI_API_KEY is not set")
     result = run_pending(state, issue_id=issue_id, limit=limit, verbose=False)
@@ -149,6 +162,32 @@ def run_agent(event_id: str, limit: int = Query(5, ge=1), issue_id: str | None =
     summary["remaining"] = result.remaining
     summary["errors"] = result.errors
     return summary
+
+
+def _demo_run(state, limit, issue_id):
+    replay = False
+    reason = ""
+    errors = []
+    for issue in runnable_issues(state, issue_id)[:limit]:
+        try:
+            ensure_available()
+            result = run_pending(state, issue_id=issue.id, limit=1, verbose=False)
+            errors.extend(result.errors)
+        except LiveUnavailable as exc:
+            reason = str(exc)
+            try:
+                action = mark_replay(issue_example(state, issue), reason)
+            except NoSavedExample as missing:
+                # Earlier proposals in a batch are persisted and remain visible.
+                raise HTTPException(429, f"Live agent unavailable ({reason}). {missing}") from missing
+            state.actions = [a for a in state.actions if a.issue_id != issue.id] + [action]
+            # run_pending refreshes issue objects before a mid-loop cap occurs.
+            state.issue(issue.id).status = "needs_human" if action.action_type == "ESCALATE" else "proposed"
+            store.save_state(state)
+            store.append_log(state.id, {"type": "replay", "issue_id": issue.id, "reason": reason})
+            replay = True
+    return {**_event_summary(state), "remaining": len(runnable_issues(state, issue_id)),
+            "errors": errors, "replay": replay, "replay_reason": reason}
 
 
 def _planner_client():
@@ -159,7 +198,7 @@ def _planner_client():
     if not config.OPENAI_API_KEY:
         return None
     from openai import OpenAI
-    return OpenAI(api_key=config.OPENAI_API_KEY, timeout=45, max_retries=2)
+    return OpenAI(api_key=config.OPENAI_API_KEY, timeout=45, max_retries=0 if config.DEMO_MODE else 2)
 
 
 @app.post("/api/events/{event_id}/plan")
@@ -181,6 +220,15 @@ def run_planner(event_id: str, body: PlanRequest | None = None):
     for key, value in (body.overrides or {}).items():
         if key not in HARD_KEYS or type(value) is not HARD_KEYS[key]:
             raise HTTPException(422, f"unsupported override: {key}={value!r}")
+        if ((type(value) is int and not 0 <= value <= 1000000) or
+                (key == "participants" and value < 1)):
+            raise HTTPException(422, f"invalid override: {key}")
+        if key == "arrive_before":
+            import re
+            if not re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", value):
+                raise HTTPException(422, "arrive_before must be HH:MM")
+    if config.DEMO_MODE:
+        return _demo_plan(state, issue, body)
     req = request_from_state(state, text=body.text)
     client = None if body.recorded else _planner_client()
     if body.recorded:
@@ -207,6 +255,41 @@ def run_planner(event_id: str, body: PlanRequest | None = None):
     return summary
 
 
+def _save_demo_plan(state, issue, action, reason=""):
+    if reason:
+        mark_replay(action, reason)
+    state.actions = [a for a in state.actions if a.issue_id != issue.id] + [action]
+    issue.status = "proposed" if action.action_type == "SELECT_TRAVEL_PLAN" else "needs_human"
+    store.save_state(state)
+    return {**_event_summary(state), "action_id": action.id, "replay": bool(reason), "replay_reason": reason}
+
+
+def _demo_plan(state, issue, body):
+    try:
+        if body.recorded:
+            raise LiveUnavailable("saved example requested")
+        ensure_available()
+        client = _planner_client()
+        req = request_from_state(state, text=body.text)
+        constraints = extract_constraints(req, client=client)
+        constraints.hard.update(body.overrides or {})
+        action = plan_trip(req, constraints, client=client, search=state.travel.get("search"))
+        action.payload.update(constraints=asdict(constraints), request_text=req.text, constraints_source="llm")
+        return _save_demo_plan(state, issue, action)
+    except LiveUnavailable as exc:
+        try:
+            action = planner_example(state, body.text, body.overrides, recorded=body.recorded)
+        except NoSavedExample as missing:
+            raise HTTPException(429, f"Live planner unavailable ({exc}). {missing}") from missing
+        return _save_demo_plan(state, issue, action, str(exc))
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(502, "Live planning failed. Retry or skip this step.") from exc
+
+
 @app.post("/api/events/{event_id}/messages", status_code=201)
 def add_message(event_id: str, body: NewMessage):
     """Add an incoming message to the runtime state; detection turns it into a `message:<id>` issue.
@@ -218,6 +301,8 @@ def add_message(event_id: str, body: NewMessage):
     if not body.text.strip() or not body.sender.strip():
         raise HTTPException(422, "sender and text must not be blank")
     state = _load_and_refresh(event_id)
+    if config.DEMO_MODE and sum(m.id.startswith("live") for m in state.messages) >= 50:
+        raise HTTPException(429, "This sandbox has 50 added messages. Reset the event to start again.")
     existing = {m.id for m in state.messages}
     n = 1
     while f"live{n:02d}" in existing:

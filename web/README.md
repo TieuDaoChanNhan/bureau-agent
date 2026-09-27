@@ -75,3 +75,15 @@ Add an object to `STEPS` in `tour.js`:
 - `id`: needed only if the quick tour reuses the step. `QUICK` entries spread a step (`{ ...step("id"), ch, text }`) and override its copy; the full tour's chapters are set by index after `STEPS`.
 
 Keep steps short enough to be read in about ten seconds; quick-tour steps stay under about 45 words plus the click instruction.
+
+## Public demo and bundled fonts
+
+Saved server proposals carry a replay marker. `app.js` displays a persistent
+source badge, including `Saved example (live limit reached)`, which survives
+reloading the action. The 30-step tour also works when the API uses replay.
+
+`vendor/fonts.css`, `geist.ttf` and `geist-mono.ttf` bundle the variable fonts
+from the official Google Fonts repository (`ofl/geist` and `ofl/geistmono`).
+The accompanying `GEIST_OFL.txt` and `GEIST_MONO_OFL.txt` are their SIL licenses.
+Both live and static builds load these fonts locally and retain the real 90%
+evaluation metric. No Google Fonts network request is needed.

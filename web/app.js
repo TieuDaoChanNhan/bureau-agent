@@ -33,7 +33,20 @@ async function api(path, options = {}) {
     const detail = body && body.detail ? (typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail)) : res.statusText;
     throw new Error(`${res.status}: ${detail}`);
   }
+  if (typeof body?.replay === "boolean") {
+    const notice = $("#demoModeNotice");
+    notice.hidden = !body.replay;
+    notice.textContent = body.replay ? replayLabel(body.replay_reason) + ". This proposal uses saved sample data." : "";
+  }
   return body;
+}
+
+function replayLabel(reason) {
+  return reason === "live limit reached" ? "Saved example (live limit reached)" : "Saved example (" + (reason || "replay") + ")";
+}
+
+function replayBadge(action) {
+  return action?.payload?.replay ? `<p class="demo-status">${esc(replayLabel(action.payload.replay_reason))}</p>` : "";
 }
 
 function setRun(text, mode = "") {
@@ -321,7 +334,7 @@ function renderDetail() {
   if (type === "action") {
     const action = s.actions.find(a => a.id === id);
     if (!action) { el.innerHTML = '<p class="note">Select an issue.</p>'; return; }
-    el.innerHTML = header({ blocking: false, kind: (s.issues.find(i => i.id === action.issue_id) || {}).kind || "", title: action.title }, action)
+    el.innerHTML = replayBadge(action) + header({ blocking: false, kind: (s.issues.find(i => i.id === action.issue_id) || {}).kind || "", title: action.title }, action)
       + proposalCard(action, false, '<span class="note">Approved. The data was updated and this issue is no longer detected.</span>')
       + ((action.trace || []).length ? section("steps", "Agent steps", `${action.trace.length} tool calls`, stepsList(action), true) : "")
       + section("evidence", "Evidence", "decision trace and checks", evidenceBody(action), false);
@@ -333,7 +346,7 @@ function renderDetail() {
   const byIssue = actionsByIssue(s);
   const action = byIssue[issue.id];
   const st = viewStatus(issue, s, byIssue);
-  if (issue.kind === "no_logistics_plan") { el.innerHTML = planDetail(issue, action, st); return; }
+  if (issue.kind === "no_logistics_plan") { el.innerHTML = replayBadge(action) + planDetail(issue, action, st); return; }
   const editable = st === "proposed" || st === "human";
   let top;
   if (ui.running === issue.id) {
@@ -364,7 +377,7 @@ function renderDetail() {
       <div class="actions"><button class="btn primary" type="button" data-act="retry">Run agent on this issue</button></div></div>`;
   }
   const hasSteps = action && (action.trace || []).length;
-  el.innerHTML = header(issue, action) + top
+  el.innerHTML = replayBadge(action) + header(issue, action) + top
     + (hasSteps && ui.running !== issue.id ? section("steps", "Agent steps", `${action.trace.length} tool calls, chosen by the model`, stepsList(action), true) : "")
     + (action && ui.running !== issue.id ? section("evidence", "Evidence", "decision trace and checks", evidenceBody(action), false) : "")
     + section("input", "Input", "what the fixed checks detected", inputBody(issue), !action);
@@ -544,7 +557,7 @@ function planDetail(issue, action, st) {
       <div class="question"><span class="qlabel">Question for the organizers</span>${questions.map(q => esc(q)).join("<br>")}</div>
       <p class="note">Nothing is searched until the request is clear. Your answer is added to the request and the constraints are extracted again.</p>
       <form class="compose" id="answerForm"><label>Your answer <textarea name="answer" required maxlength="1000" rows="3"
-        placeholder="No, the budget covers travel and lodging only."></textarea></label>
+        placeholder="Confirm what the budget includes."></textarea></label>
         <div class="actions"><button class="btn primary" type="submit">Answer and plan again</button></div></form></div>`;
   }
   const c = (action.payload && action.payload.constraints) || { hard: {}, soft: [], organizer_verified: [] };

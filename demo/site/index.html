@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bureau Agent · Interactive customer demo</title>
+  <meta name="description" content="An operations agent for volunteer-run associations: it finds what needs attention, investigates, and proposes. You approve.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M10 9h8a4 4 0 0 1 0 8h-8zm0 8h9a4 4 0 0 1 0 8h-9z' fill='none' stroke='white' stroke-width='2.5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./vendor/fonts.css">
+  <link rel="stylesheet" href="./vendor/driver.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="#top" aria-label="Bureau Agent, back to top">
+        <span class="logo" aria-hidden="true">B</span><b>Bureau Agent</b>
+      </a>
+      <nav class="topnav">
+        <a href="#console">Console</a>
+        <button class="btn ghost" id="themeBtn" type="button" aria-label="Switch to dark theme">Dark</button>
+        <button class="btn" id="tourBtn" type="button">Demo tour</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <p class="demo-banner" role="note"><b>Interactive sample demo</b> · Saved proposals, zero model calls. Nothing is sent or booked.<br><span id="sessionNotice">Changes stay in this tab.</span></p>
+    <noscript>This demo needs JavaScript enabled. It runs entirely in your browser.</noscript>
+    <p id="demoModeNotice" class="demo-status" role="status" hidden></p>
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="eyebrow">Agentic operations · for volunteer-run associations</p>
+      <h1 id="hero-title">Your association's busywork, investigated by an agent.<br><span>Every decision stays yours.</span></h1>
+      <p class="lede">Boards run events on top of their studies: registrations, fees, teams, rooms, trips and dozens of messages.
+        Bureau Agent finds what needs attention, investigates it with tools, and proposes one action with its evidence.
+        Review the evidence, edit the reply, and approve the next step. This demo applies your decisions only to fictional data in your browser.</p>
+      <div class="hero-cta">
+        <button class="btn primary big" id="heroTourBtn" type="button">Start the guided demo</button>
+        <a class="btn big" id="videoBtn" href="#" target="_blank" rel="noopener" hidden>Watch the 2-min video</a>
+        <a class="btn big" href="#console">Explore on my own</a>
+      </div>
+      <p class="hero-note">About 5 minutes · 30 guided steps · No signup, installation or API credit needed. Or <a href="#" id="fullTourLink">see every feature</a> (6 min).</p>
+      <div class="metrics" aria-label="Key numbers">
+        <div class="metric"><span class="mv" id="mIssues">32</span><span class="mk">issues detected automatically in the sample hackathon</span></div>
+        <div class="metric"><span class="mv">90%</span><span class="mk">correct action type on 50 labeled messages (gpt-4.1)</span></div>
+        <div class="metric"><span class="mv">0</span><span class="mk">actions taken without an organizer's approval</span></div>
+      </div>
+      <ol class="how">
+        <li><span class="how-n">1</span><div><b>Detect</b><p>Fixed checks read registrations, payments, teams and the inbox, and list what needs attention, blocking first.</p></div></li>
+        <li><span class="how-n">2</span><div><b>Investigate</b><p>An AI agent chooses tools, looks up records and rules, and proposes one action with evidence. Rules that must hold are enforced in code.</p></div></li>
+        <li><span class="how-n">3</span><div><b>You decide</b><p>Approve, edit or dismiss. The approval is what changes data or sends a reply, and it is logged.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="band" id="problem" aria-labelledby="problem-title">
+      <p class="eyebrow">The problem</p>
+      <h2 id="problem-title">Student boards run real operations with no operations team.</h2>
+      <div class="cards">
+        <div class="card-s"><b>Scattered records</b><p>Registrations in a form, fees in a bank export, teams in a spreadsheet, questions in the inbox. Nobody sees the whole event.</p></div>
+        <div class="card-s"><b>Mistakes found too late</b><p>An unpaid fee, a member in two teams or a missing room shows up on the day, when fixing it costs the most.</p></div>
+        <div class="card-s"><b>Every answer needs a lookup</b><p>"Can my friend from another school join?" means reading the rules and the records before replying, dozens of times a week.</p></div>
+      </div>
+    </section>
+
+    <section class="console" id="console" aria-label="Operations console">
+      <div class="console-head">
+        <div class="console-title">
+          <h2>Operations console</h2>
+          <div class="toolbar">
+            <button class="btn" id="composeBtn" type="button">New message</button>
+            <button class="btn" id="auditBtn" type="button">Activity</button>
+            <button class="btn" id="outboxBtn" type="button">Outbox</button>
+            <button class="btn" id="resetBtn" type="button">Reset demo</button>
+            <button class="btn primary" id="runBtn" type="button">Run agent</button>
+          </div>
+        </div>
+        <div id="eventbar">
+          <div class="evtabs" id="events" role="tablist" aria-label="Events"></div>
+          <div class="kpis" id="kpis" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="run" id="run" role="status" aria-live="polite"><span class="dot"></span><span id="runText">Loading…</span></div>
+      <div class="main">
+        <div class="issues" id="issues" aria-label="Issues"></div>
+        <div class="detail" id="detail" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="band" id="trust" aria-labelledby="trust-title">
+      <p class="eyebrow">Why you can trust it</p>
+      <h2 id="trust-title">The AI investigates. Code enforces the rules. People decide.</h2>
+      <div class="cards">
+        <div class="card-s"><span class="card-ic" aria-hidden="true">✓</span><b>Nothing happens without approval</b><p>The agent only proposes. Every data change, reply and payment link waits for an organizer, and each approval is logged.</p></div>
+        <div class="card-s"><span class="card-ic" aria-hidden="true">§</span><b>Rules checked in code</b><p>Eligibility, team sizes and budgets are verified by code, not by the model. Below a 0.70 identity match the agent must ask instead of acting.</p></div>
+        <div class="card-s"><span class="card-ic" aria-hidden="true">i</span><b>Transparent by default</b><p>Each proposal shows the tools used and the evidence found. Drafted replies say they were written with AI assistance (EU AI Act, Art. 50).</p></div>
+      </div>
+    </section>
+
+  </main>
+  <footer class="sitefoot">
+    <div class="sitefoot-in">
+      <div>
+        <span class="brand"><span class="logo" aria-hidden="true">B</span><b>Bureau Agent</b></span>
+        <p>Built in 48 hours at X-IA Hackathon #1 "Rise of Agents X" by Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH and Huy PHAN.</p>
+      </div>
+      <nav class="footlinks" aria-label="Project links">
+        <a href="https://github.com/TieuDaoChanNhan/bureau-agent" target="_blank" rel="noopener">Source code</a>
+        <a id="videoLink" href="#" target="_blank" rel="noopener" hidden>Demo video</a>
+        <a href="#console">Console</a>
+      </nav>
+    </div>
+    <p class="foot">All names, emails and payments are fictional sample data. Drafted replies end with "Drafted with AI assistance, approved by the organizers."</p>
+  </footer>
+  <script src="./vendor/driver.js.iife.js"></script>
+  <script src="./fixtures.js"></script>
+  <script src="./session.js"></script>
+  <script src="./offline.js"></script>
+  <script src="./customer-ui.js"></script>
+  <script src="./app.js"></script>
+  <script src="./tour.js"></script>
+</body>
+</html>

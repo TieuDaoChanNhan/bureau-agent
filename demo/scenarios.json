@@ -1,0 +1,15 @@
+{
+  "m02": {"rule": "§7", "title": "Explain the existing-project rule", "text": "You may build on an existing project if you declare it at submission. Only work created during the hackathon will be evaluated."},
+  "m03": {"rule": "§4", "title": "Clarify the final date", "text": "La finale a été déplacée du 15 octobre à novembre, lors d'un événement X-IA. La date précise doit être confirmée par les organisateurs."},
+  "m06": {"rule": "§3", "title": "Explain the two participation requirements", "text": "La cotisation X-IA 2026 est de 10 €. L'inscription sur la page Luma officielle est également obligatoire."},
+  "m07": {"rule": "§6", "title": "Share the submission checklist", "text": "Please submit a demo video of at most two minutes, a short project description, a repository link with testing instructions, and the names of your team members."},
+  "m08": {"rule": "§3", "title": "Explain the team-size limit", "text": "Une équipe peut compter au maximum quatre personnes, y compris la personne chargée du pitch. Merci d'adapter la composition de votre équipe."},
+  "m09": {"rule": "§3", "title": "Ask Léa to choose one team", "text": "You may belong to only one team. Please tell the organizers whether you want to stay in Orbit or NeuralNomads. This reply does not change either team."},
+  "m15": {"rule": "§5", "title": "Explain the partner-credit rules", "text": "Partner credits may not be resold or transferred to another participant. They are reserved for work during this hackathon."},
+  "m16": {"rule": "§5", "title": "Clarify permitted use of partner credits", "text": "Les crédits partenaires sont réservés au hackathon. Ils ne peuvent pas être utilisés pour une mission personnelle ou commerciale."},
+  "m17": {"rule": "§3", "title": "Explain why Luma registration is needed", "text": "Payment of the membership fee alone is not enough. Participants must also register on the official Luma page."},
+  "m18": {"rule": "§4", "title": "Confirm the submission deadline", "text": "La phase de réalisation se termine le dimanche 27 septembre 2026 à 23 h 59, heure de Paris (UTC+02:00)."},
+  "m19": {"rule": "§6", "title": "Explain the deadline policy", "text": "The sample rules do not allow late submissions. Please allow time for the upload and submit the complete package before the deadline."},
+  "m24": {"rule": "§3", "title": "Confirm individual participation", "text": "Oui, la participation individuelle est autorisée. Vous devez être à jour de votre cotisation et inscrite sur la page Luma officielle."},
+  "m25": {"rule": "§2", "title": "Explain the agentic-project requirement", "text": "The project must use one or more LLMs and implement real agent logic. A dashboard containing only fixed scripts would not meet that requirement."}
+}

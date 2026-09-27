@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass, replace
 
 from .. import config
 from ..core.detect import detect_issues
+from ..core.llm_usage import LiveUnavailable, create_completion
 from ..core.models import Check, EventState, Evidence, Group, Issue, ProposedAction
 from ..core.store import append_log, merge_issue_status, save_state
 from ..tools.groups import check_groups
@@ -190,7 +191,7 @@ def _default_client():
     if not config.OPENAI_API_KEY:
         raise RuntimeError("OPENAI_API_KEY is not set (add it to .env).")
     from openai import OpenAI  # keep offline tools/tests independent of the SDK
-    return OpenAI(api_key=config.OPENAI_API_KEY)
+    return OpenAI(api_key=config.OPENAI_API_KEY, timeout=45, max_retries=0 if config.DEMO_MODE else 2)
 
 
 def resolve_issue(state: EventState, issue: Issue, max_steps: int = MAX_STEPS,
@@ -227,7 +228,7 @@ def resolve_issue(state: EventState, issue: Issue, max_steps: int = MAX_STEPS,
             })
         # The model selects investigation tools and the final action type.
         # Reserve the last turn for a proposal instead of another unbounded lookup.
-        resp = client.chat.completions.create(
+        resp = create_completion(client, purpose=f"agent:{state.id}:{issue.id}",
             model=config.OPENAI_MODEL, messages=messages, tools=TOOLS,
             parallel_tool_calls=not final_turn,
             tool_choice={"type": "function", "function": {"name": "propose_action"}} if final_turn else "auto",
@@ -347,6 +348,8 @@ def run_pending(state: EventState, issue_id: str | None = None, *, limit: int | 
     for issue in targets:
         try:
             action = resolve_issue(state, issue, client=client, verbose=verbose)
+        except LiveUnavailable:
+            raise  # the HTTP boundary selects a saved example; never hide a cap
         except Exception as exc:
             error = {"issue_id": issue.id, "error": str(exc)}
             append_log(state.id, {"type": "agent_error", **error})

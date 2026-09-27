@@ -23,6 +23,7 @@ from typing import Any
 
 from ..config import RUNTIME_DIR
 from .loader import load_event
+from .session import current_session
 from .models import Check, EventState, Evidence, Group, Issue, Message, Participant, Payment, ProposedAction
 
 
@@ -43,7 +44,8 @@ def _dt(value: str | None) -> datetime | None:
 
 
 def _event_dir(event_id: str) -> Path:
-    return RUNTIME_DIR / event_id
+    session = current_session.get()
+    return (RUNTIME_DIR / session if session else RUNTIME_DIR) / event_id
 
 
 def _write_json(path: Path, data: Any) -> None:

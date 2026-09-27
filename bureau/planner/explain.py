@@ -16,6 +16,7 @@ import json
 
 from .. import config
 from ..core.models import Check
+from ..core.llm_usage import LiveUnavailable, create_completion
 from .constraints import eur
 from .interface import Constraints, TravelOption
 
@@ -94,7 +95,7 @@ def explain(ranked: list[TravelOption], checks: dict[str, list[Check]], c: Const
     prose = _template(ranked, c)
     if client is not None:
         try:
-            resp = client.chat.completions.create(
+            resp = create_completion(client, purpose="explain",
                 model=config.OPENAI_MODEL,
                 messages=[{"role": "system", "content": SYSTEM},
                           {"role": "user", "content": json.dumps(_facts(ranked, checks, c), ensure_ascii=False,
@@ -104,6 +105,8 @@ def explain(ranked: list[TravelOption], checks: dict[str, list[Check]], c: Const
             # The top option must be named; otherwise keep the template.
             if text and f"Option {ranked[0].id}" in text:
                 prose = text
+        except LiveUnavailable:
+            raise
         except Exception:  # an explanation is optional; the ranking stands without it
             pass
     return " ".join(x for x in [prose, rejection_line(checks, ranked)] if x)

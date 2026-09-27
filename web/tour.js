@@ -49,8 +49,9 @@ const STEPS = [
     text: `<p>Volunteer boards run events on top of their studies: registrations, fees, teams, rooms, trips and dozens of messages.
       Bureau Agent keeps an event consistent. <b>Code</b> detects what needs attention, an <b>AI agent</b> investigates with tools and
       proposes one action with its evidence, and <b>you</b> approve, edit or dismiss it.</p>
-      <p>This tour takes about 5 minutes and shows every feature on two sample events. It uses the live agent (a few cents of API
-      credit). <b>Clicking Next resets the sample data</b> so the tour starts clean. Press Esc at any time to leave.</p>`,
+      <p>This tour takes about 5 minutes and shows every feature on two sample events. The public demo uses the live agent within
+      a shared call allowance, then clearly labeled saved examples. Nothing is sent or booked.
+      <b>Clicking Next resets your sample data</b> so the tour starts clean. Press Esc at any time to leave.</p>`,
     next: tourResetAll,
   },
   {
@@ -200,7 +201,8 @@ const STEPS = [
     el: "#clarify", title: "The planner asks before searching", action: true, side: "left",
     prepare: () => {
       const form = $("#answerForm");
-      if (form) form.answer.value = "Yes, the €150 covers the complete package: coaches, lodging and meals.";
+      // The exact sample answer, which the public demo can also replay when the live limit is reached (demo/replay.py).
+      if (form) form.answer.value = "Yes, the €150 per person includes round-trip coach hire, lodging, groceries and food transport.";
     },
     text: `<p>The organizers say meals are included but are unsure whether the €150 also covers ${b("coach hire")}. The planner
       ${b("asks")} instead of assuming, and nothing is searched yet. We filled in an answer; you can change it.</p>${CLICK("Answer and plan again")}<p class="tour-wait">About 10 seconds.</p>`,
@@ -394,6 +396,7 @@ function startTour(mode = "quick") {
   const steps = tourState.steps = mode === "full" ? STEPS : QUICK;
   const d = window.driver.js.driver({
     showProgress: true,
+    animate: false,
     progressText: "Step {{current}} of {{total}}",
     allowClose: true,
     overlayOpacity: 0.62,

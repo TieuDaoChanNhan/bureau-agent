@@ -26,3 +26,10 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 # gpt-4.1 is the model the agent was validated with (T04 live run, T08 evaluation).
 # Another model needs its own run: OPENAI_MODEL=<model> python -m eval.run_eval
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4.1")
+
+# Enabled by the public Render Blueprint; CLI/development keep their usual state.
+DEMO_MODE = os.environ.get("DEMO_MODE", "0").lower() in ("1", "true", "yes")
+DEMO_COOKIE_SECURE = os.environ.get("RENDER", "").lower() == "true"
+DEMO_DAILY_LLM_LIMIT = max(0, int(os.environ.get("DEMO_DAILY_LLM_LIMIT", "400")))
+DEMO_SESSION_LLM_LIMIT = max(0, int(os.environ.get("DEMO_SESSION_LLM_LIMIT", "60")))
+DEMO_MAX_OUTPUT_TOKENS = max(1, int(os.environ.get("DEMO_MAX_OUTPUT_TOKENS", "2048")))

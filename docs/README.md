@@ -2,6 +2,7 @@
 
 | File | Content | Language |
 |---|---|---|
+| `DEPLOY.md` | Free Render live demo, quotas and replay, judging keep-alive, static Space backup | English |
 | `product-proposal.md` | Product proposal v3: problem, users, the event-state loop, two demo flows, competitors, evaluation, demo script | Vietnamese |
 | `api-examples/` | Example JSON for every API route, generated from the code | English |
 | `demo-script.md` | The 2-minute video script: timeline, clicks and voice-over | English |
