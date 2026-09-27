@@ -1,11 +1,59 @@
-# Demo verification — 26 September 2026
+# Demo verification
+
+## Static backup refresh — 27 September 2026
+
+[T45 / #82](https://github.com/TieuDaoChanNhan/bureau-agent/issues/82) is verified
+on the [public Space](https://huggingface.co/spaces/bachbeo2007/bureau) and its
+[direct app URL](https://bachbeo2007-bureau.static.hf.space).
+
+- Built and published from `t45-backup` at source commit
+  `eec1309636da3074f7e124777f3442a667613bbd`, which incorporates the fetched `main`.
+  The task stayed on this branch; `main` was not changed.
+- Published Space revision:
+  [`113d71c9c93f6a27355f8e70526c8f1b17fc0852`](https://huggingface.co/spaces/bachbeo2007/bureau/commit/113d71c9c93f6a27355f8e70526c8f1b17fc0852).
+  The Space remains public and uses the Static SDK.
+- `demo/publish.py` rebuilt, checked and uploaded all 15 allowlisted files.
+  The generated content already matched the committed build; no generated
+  content changes were needed.
+- All 14 app assets matched the upload's SHA-256 hashes after removing the
+  platform-injected public-variable script from `index.html`. The raw Space
+  README also matched; the app host renders Markdown as HTML.
+- Every sample email domain in the served fixtures ends in `.example`.
+  Scanning all uploaded text assets found only reserved example domains,
+  including the `example.org` input placeholder. The public-asset credential
+  scan passed.
+- **227 Python tests and 10 local static browser tests passed.**
+- **All 10 static browser tests passed against the public URL**, including
+  the full tour, independent tabs/private contexts, approvals, Reset and fonts.
+- Additional fresh private-context checks completed **all 30 steps from each
+  entry point**: **Start the guided demo** and **Demo tour**. Neither run
+  produced console errors, JavaScript exceptions, external requests or API calls.
+- The public Hugging Face landing page successfully loaded the embedded demo.
+- Ten fresh-context page-ready measurements ranged from **1.608 to 3.253 seconds**;
+  the first was **2.590 seconds**. These are static-page loads, not Render
+  wake-up measurements.
+
+Public screenshots: [tour step 30](../docs/screenshots/t45-public-static-tour.png),
+[browser one](../docs/screenshots/t45-public-static-session-one.png),
+[browser two](../docs/screenshots/t45-public-static-session-two.png),
+[Space landing page](../docs/screenshots/t45-public-static-landing.png).
+
+The upload manifest, deployment revision, detailed acceptance report and load
+measurements are retained locally in ignored `demo/artifacts/` as
+`deployment.json`, `t45-public-verification.json` and `static-load-times.json`.
+This refresh makes no model calls and changes no Render configuration.
+
+## Historical verification — 26 September 2026
+
+The following report records the earlier deployment and its then-outstanding
+Render checks. It does not describe the current status of the live service.
 
 This branch incorporates `main` at `b150cf1` (T16's 100-student WEI with meals
 included, and T36's product page). The complete budget is €150 per person;
 the clarification asks whether coach hire is included. Recorded packages retain
 itemized coach, lodging, groceries and food-transport costs.
 
-## Local checks
+### Local checks
 
 Python 3.14 and installed Chrome on Windows:
 
@@ -33,7 +81,7 @@ Local server evidence (fake providers, **not public Render acceptance**):
 [browser two](../docs/screenshots/t20-local-server-session-two.png),
 [zero-limit replay](../docs/screenshots/t20-local-server-replay.png).
 
-## Public static backup — passed
+### Public static backup — passed
 
 - [Public Space](https://huggingface.co/spaces/bachbeo2007/bureau)
 - [Direct demo](https://bachbeo2007-bureau.static.hf.space)
@@ -50,7 +98,7 @@ Public evidence: [browser one](../docs/screenshots/t20-public-static-session-one
 The raw local run report is in ignored `demo/artifacts/static-load-times.json`.
 Rebuild from reviewed `main` after merge and after future fixture/UI changes.
 
-## Outstanding release checks
+### Outstanding release checks at that time
 
 - Create the one free Render service and record its assigned URL in the README.
 - Set the project-scoped OpenAI key and confirm the team's monthly **hard** limit.
