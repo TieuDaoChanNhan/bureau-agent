@@ -1,7 +1,12 @@
 #!/bin/sh
 # Run the test suite before each commit. Enable once with: git config core.hooksPath .githooks
 # Skip in an emergency with: git commit --no-verify
-PY=python
-command -v "$PY" >/dev/null 2>&1 || PY=python3
+# Prefer the project environment (.venv from `python -m venv` or `uv sync`) so the hook never
+# picks another interpreter on PATH (for example MSYS Python on Windows).
+if [ -x .venv/Scripts/python.exe ]; then PY=.venv/Scripts/python.exe
+elif [ -x .venv/bin/python ]; then PY=.venv/bin/python
+elif command -v python >/dev/null 2>&1; then PY=python
+else PY=python3
+fi
 PYTHONIOENCODING=utf-8 "$PY" -m unittest discover -s tests -t . -q || {
   echo "Tests failed: commit aborted (use --no-verify to skip)."; exit 1; }
