@@ -15,7 +15,7 @@ def response(**hard):
     return {
         "hard": {"participants": 40, "max_cost_per_person_cents": None,
                  "arrive_before": None, "no_overnight": None, "step_free_rooms": None, **hard},
-        "soft": [], "organizer_verified": [], "clarifications": [],
+        "soft": [], "organizer_verified": [], "clarifications": [], "unsupported_requirements": [],
     }
 
 
@@ -51,6 +51,32 @@ class ExtractionTests(unittest.TestCase):
     def test_accessibility_cannot_lose_organizer_verification(self):
         c = extract_constraints(self.request, client=FakeStructuredClient(response(step_free_rooms=2)))
         self.assertEqual(c.organizer_verified, ["step_free_rooms"])
+
+    def test_unsupported_requirement_becomes_a_question_even_without_model_clarification(self):
+        payload = response(max_cost_per_person_cents=16000)
+        payload["unsupported_requirements"] = ["A private kitchen exclusively for our group"]
+        req = replace(self.request, text="EUR 160 each including meals. A private kitchen is mandatory.")
+        constraints = extract_constraints(req, client=FakeStructuredClient(payload))
+        self.assertEqual(constraints.hard["max_cost_per_person_cents"], 16000)
+        self.assertIn("private kitchen", constraints.clarifications[0])
+        with patch("bureau.planner.planner.search_options") as search:
+            action = plan_trip(req, constraints)
+        search.assert_not_called()
+        self.assertEqual(action.action_type, "ESCALATE")
+
+    def test_train_only_cannot_disappear_when_model_omits_the_restriction(self):
+        req = replace(self.request, participants=100, text=(
+            "For 100 students, max EUR 160 per person including transport, lodging, groceries and food transport. "
+            "Arrive by 21:00; no overnight travel. Trains only: coaches are forbidden. "
+            "Ask us before proceeding if that transport restriction cannot be enforced."))
+        c = extract_constraints(req, client=FakeStructuredClient(response(
+            participants=100, max_cost_per_person_cents=16000, arrive_before="21:00", no_overnight=True)))
+        self.assertTrue(c.clarifications)
+        with patch("bureau.planner.planner.search_options") as search:
+            action = plan_trip(req, c)
+        search.assert_not_called()
+        self.assertEqual(action.action_type, "ESCALATE")
+        self.assertNotIn("ranked_valid", action.payload)
 
     def test_clarification_stops_search_and_is_not_replaced_by_sample(self):
         payload = response()
@@ -104,7 +130,9 @@ class ExtractionTests(unittest.TestCase):
         extra_hard["hard"]["made_up"] = 1
         invalid = [None, "not JSON", "[]", {**valid, "extra": True}, missing, extra_hard,
                    {**valid, "soft": ["invented"]}, {**valid, "organizer_verified": ["budget"]},
-                   {**valid, "clarifications": ["  "]}, {**valid, "clarifications": "question?"}]
+                   {**valid, "clarifications": ["  "]}, {**valid, "clarifications": "question?"},
+                   {**valid, "unsupported_requirements": "train only"},
+                   {**valid, "unsupported_requirements": [""]}]
         for payload in invalid:
             with self.subTest(payload=payload), self.assertRaises(ConstraintExtractionError):
                 extract_constraints(self.request, client=FakeStructuredClient(payload))

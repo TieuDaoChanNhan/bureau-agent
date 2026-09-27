@@ -14,6 +14,7 @@ from typing import Any
 from .. import config
 from ..core.llm_usage import create_completion
 from .interface import Constraints, TravelRequest
+from .requirements import unsupported_request_questions
 
 SOFT_KEYS = ("fewer_changes", "near_station", "early_return", "lower_cost")
 HARD_FIELDS = {
@@ -32,8 +33,9 @@ CONSTRAINTS_SCHEMA = {
         "soft": {"type": "array", "items": {"type": "string", "enum": list(SOFT_KEYS)}},
         "organizer_verified": {"type": "array", "items": {"type": "string", "enum": ["step_free_rooms"]}},
         "clarifications": {"type": "array", "items": {"type": "string"}},
+        "unsupported_requirements": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["hard", "soft", "organizer_verified", "clarifications"],
+    "required": ["hard", "soft", "organizer_verified", "clarifications", "unsupported_requirements"],
 }
 
 SYSTEM_PROMPT = """You extract constraints for an association's trip planner.
@@ -90,6 +92,15 @@ Ask for a maximum budget when the organizer requests one or only says 'cheap'.
 Do not ask about optional constraints that are simply absent. Origin, destination,
 departure and return context belong to TravelRequest, not additional hard keys.
 If the request is clear, clarifications is empty.
+
+Account for every stated hard requirement. Put requirements that cannot be
+represented and checked by the supported fields into unsupported_requirements,
+using a short faithful description in the organizer's language. In particular,
+transport-mode restrictions, required kitchen facilities, hotel ratings and room
+types are unsupported. Never drop them just because hard has a fixed schema.
+Do not put ordinary trip context, stated soft preferences, or supported fields
+(including organizer-verified step_free_rooms) in unsupported_requirements.
+An empty list means there are no additional hard requirements to verify.
 """
 
 
@@ -121,7 +132,7 @@ def _constraints_from_json(content: str) -> Constraints:
             raise ConstraintExtractionError(f"Constraint extraction returned invalid {key}.")
         hard[key] = item
     for key, allowed in (("soft", SOFT_KEYS), ("organizer_verified", ("step_free_rooms",)),
-                         ("clarifications", None)):
+                         ("clarifications", None), ("unsupported_requirements", None)):
         items = value[key]
         if (not isinstance(items, list) or
                 any(not isinstance(item, str) or not item.strip() or
@@ -131,6 +142,11 @@ def _constraints_from_json(content: str) -> Constraints:
     # This boundary invariant must hold even if a provider omits the marker.
     if "step_free_rooms" in hard and "step_free_rooms" not in value["organizer_verified"]:
         value["organizer_verified"].append("step_free_rooms")
+    # Unsupported requirements cannot vanish just because the model returned no questions.
+    for requirement in value["unsupported_requirements"]:
+        value["clarifications"].append(
+            f"The planner cannot verify this requirement: {requirement}. "
+            "How should the organizers resolve it before searching?")
     return Constraints(hard=hard, soft=value["soft"],
                        organizer_verified=value["organizer_verified"], clarifications=value["clarifications"])
 
@@ -163,4 +179,8 @@ def extract_constraints(req: TravelRequest, *, client: Any = None) -> Constraint
         raise ConstraintExtractionError("The model refused to extract travel constraints.")
     if choice.finish_reason != "stop":
         raise ConstraintExtractionError("Constraint extraction did not finish.")
-    return _constraints_from_json(choice.message.content)
+    constraints = _constraints_from_json(choice.message.content)
+    for question in unsupported_request_questions(req.text):
+        if question not in constraints.clarifications:
+            constraints.clarifications.append(question)
+    return constraints

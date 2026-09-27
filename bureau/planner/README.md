@@ -43,6 +43,18 @@ The default extracts the organizer's text using `OPENAI_API_KEY` and
 for extraction. Null hard fields are omitted, cents remain integers, arrival
 times use `HH:MM`, and preference order is preserved. Accessibility always
 requires organizer verification. Questions stop the planner before searching.
+Unsupported hard requirements are retained in the extractor's required
+`unsupported_requirements` list and converted to organizer questions in code,
+even if the model supplies no clarification. Unknown hard keys passed directly
+to `plan_trip` also stop search. A separate EN/FR text guard catches explicit
+transport-mode restrictions (for example, train only or no coaches) at both
+extraction and planning, including when extraction omits the restriction. Mode
+preferences alone do not trigger that guard. The planner currently asks for
+verification or an explicit revised request; it does not claim to filter by mode.
+This lexical guard covers documented direct wording, not every paraphrase or
+language; other unsupported requirements still depend on extraction. None of
+these checks establishes supplier availability or authorizes a booking.
+
 The WEI briefing describes a neutral student association's 100-person demo, charter coaches and a group
 venue with cooking and activity spaces. Meals and grocery transport are included
 in the EUR 150 provisional student fee: the association buys groceries and transports

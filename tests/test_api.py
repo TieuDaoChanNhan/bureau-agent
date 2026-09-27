@@ -120,7 +120,7 @@ class ApiTests(unittest.TestCase):
     WEI_EXTRACTED = {"hard": {"participants": 100, "max_cost_per_person_cents": 15000, "arrive_before": "21:00",
                               "no_overnight": True, "step_free_rooms": 2},
                      "soft": ["fewer_changes", "early_return", "lower_cost"],
-                     "organizer_verified": ["step_free_rooms"], "clarifications": []}
+                     "organizer_verified": ["step_free_rooms"], "clarifications": [], "unsupported_requirements": []}
     WEI_ANSWER = ("The EUR150 ceiling includes round-trip coach hire, lodging, groceries "
                   "and food transport.")
 
