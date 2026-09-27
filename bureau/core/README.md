@@ -9,6 +9,7 @@ The event state and everything that reads or changes it.
 | `detect.py` | Finds issues with fixed code; issue ids are deterministic fingerprints | done |
 | `store.py` | Runtime persistence under `runtime/<event>/`, status merge after re-detection | done |
 | `executor.py` | Applies an **approved** action; re-checks invariants | done |
+| `bulk_approval.py` | The authoritative eligibility filter and snapshot revision for human-confirmed bulk replies (T24) | done |
 
 ## Rules of this layer
 - Only `executor.apply` changes state. Nothing else writes.
@@ -45,6 +46,15 @@ state and save it once, rather than saving a new action then writing an old stat
 | `no_logistics_plan`, `rooms_unassigned` | yes | `<kind>` |
 | `solo_participants` | no | `solo_participants` |
 | `unprocessed_message` | no | `message:<message_id>` |
+
+Bulk approval uses the conservative rule documented in
+[web/README.md](../../web/README.md#bulk-reply-eligibility-t24). It requires passed,
+verified checks and reviewed public rule citations, excludes inferences and
+sensitive subjects, and returns a read-only preview. The API rechecks each
+snapshot before calling the existing executor; the policy itself never writes.
+The static builder certifies its exact saved samples with the same function.
+Legacy stored checks without an explicit `verified` field load as unverified,
+so old incomplete proposals cannot silently qualify for bulk approval.
 
 ## Browser sandboxes and model budgets
 

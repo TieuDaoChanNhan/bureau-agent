@@ -13,9 +13,19 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "demo/artifacts"
+sys.path.insert(0, str(ROOT))
+from tests.test_web_filters import IssueFilterChecks
 
 
-class LiveConsoleTests(unittest.TestCase):
+class LiveConsoleTests(IssueFilterChecks, unittest.TestCase):
+    filter_artifacts = ARTIFACTS
+
+    def filter_page(self):
+        url, _ = self.server('live')
+        page = self.page(url)
+        self.wait_for_filter_console(page)
+        return page
+
     @classmethod
     def setUpClass(cls):
         cls.pw = sync_playwright().start()
@@ -132,6 +142,93 @@ class LiveConsoleTests(unittest.TestCase):
                 page.locator(".driver-popover-close-btn").click()
                 page.wait_for_function("tourState.driver === null")
 
+    def test_bulk_preview_cancel_edits_and_partial_failure(self):
+        url, _ = self.server("live")
+        page = self.page(url)
+        for mid in ("m02", "m07", "m18", "m01", "m05"):
+            page.evaluate("async mid => {store(await api('/api/events/hackathon/run?issue_id=message:'+mid, {method:'POST'})); render();}", mid)
+        self.assertEqual("Approve safe replies (3)", page.locator("#bulkApproveBtn").inner_text())
+        page.locator("#bulkApproveBtn").click()
+        page.locator("#bulkDialog[open]").wait_for()
+        self.assertEqual(3, page.locator(".bulk-item").count())
+        self.assertIn("existing project", page.locator("#bulkContent").inner_text())
+        self.assertEqual([], page.evaluate("api('/api/events/hackathon/outbox')"))
+        page.locator('[data-bulk="close"]').click()
+        self.assertEqual([], page.evaluate("api('/api/events/hackathon/outbox')"))
+        # Unsaved local edits must not be silently discarded by a bulk approval.
+        page.evaluate("tourShow('hackathon', 'issue:message:m02')")
+        page.locator('[data-act="edit"]').click()
+        page.locator("#draft").fill("An organizer's personal edit.")
+        page.locator("#bulkApproveBtn").click()
+        page.locator("#bulkDialog[open]").wait_for()
+        self.assertEqual(2, page.locator(".bulk-item").count())
+        # Simulate a decision made after preview, without refreshing its snapshot.
+        page.evaluate("api('/api/actions/hackathon:message:m07/dismiss', {method:'POST'})")
+        page.screenshot(path=str(ARTIFACTS / "bulk-preview.png"))
+        page.locator('[data-bulk="confirm"]').click()
+        page.wait_for_function("!ui.busy && document.querySelector('#bulkTitle').textContent === '1 approved, 1 failed.'")
+        self.assertIn("submission checklist", page.locator(".bulk-failures").inner_text())
+        self.assertEqual(1, len(page.evaluate("api('/api/events/hackathon/outbox')")))
+        self.assertEqual("An organizer's personal edit.", page.evaluate("ui.drafts['hackathon:message:m02']"))
+        self.assertEqual("proposed", page.evaluate("summary().issues.find(i => i.id === 'message:m01').status"))
+        page.screenshot(path=str(ARTIFACTS / "bulk-result.png"))
+
+    def test_bulk_confirmation_is_single_submit_and_reports_transport_failure(self):
+        url, _ = self.server("limit")
+        page = self.page(url)
+        page.evaluate("async () => {store(await api('/api/events/hackathon/run?issue_id=message:m07', {method:'POST'})); render();}")
+        page.locator("#bulkApproveBtn").click()
+        page.locator("#bulkDialog[open]").wait_for()
+        requests = []
+        def unavailable(route):
+            requests.append(route.request.url)
+            route.fulfill(status=503, body="")
+        page.route("**/api/events/hackathon/approve-safe-replies", unavailable)
+        page.evaluate("() => {confirmSafeReplies(); confirmSafeReplies();}")
+        page.wait_for_function("!ui.busy && document.querySelector('#bulkTitle').textContent === 'Approval result unavailable'")
+        self.assertEqual(1, len(requests))
+        self.assertIn("check the outbox", page.locator("#bulkContent").inner_text())
+        self.assertEqual(0, page.locator('[data-bulk="confirm"]').count())
+        page.locator('[data-bulk="close"]').click()
+        self.assertTrue(page.locator("#bulkApproveBtn").is_enabled())
+
+    def test_bulk_preview_escapes_content_and_fits_mobile(self):
+        url, _ = self.server("limit")
+        page = self.page(url)
+        page.evaluate("async () => {store(await api('/api/events/hackathon/run?issue_id=message:m07', {method:'POST'})); render();}")
+        def preview(route):
+            response = route.fetch()
+            data = response.json()
+            data["replies"][0].update(title='<img src=x onerror="window.injected=true">', text='<script>window.injected=true</script>')
+            route.fulfill(response=response, json=data)
+        page.route("**/safe-replies", preview)
+        page.set_viewport_size({"width": 400, "height": 850})
+        page.locator("#bulkApproveBtn").click()
+        page.locator("#bulkDialog[open]").wait_for()
+        self.assertEqual(0, page.locator("#bulkContent img, #bulkContent script").count())
+        self.assertIsNone(page.evaluate("window.injected"))
+        self.assertTrue(page.evaluate("document.documentElement.scrollWidth <= innerWidth"))
+        self.assertTrue(page.evaluate("document.querySelector('#bulkDialog').scrollWidth <= document.querySelector('#bulkDialog').clientWidth"))
+        page.keyboard.press("Escape")
+        self.assertFalse(page.locator("#bulkDialog").is_visible())
+
+    def test_bulk_preview_respects_the_server_batch_limit(self):
+        url, _ = self.server("limit")
+        page = self.page(url)
+        page.evaluate("async () => {store(await api('/api/events/hackathon/run?issue_id=message:m07', {method:'POST'})); render();}")
+        def preview(route):
+            response = route.fetch()
+            data = response.json()
+            data["replies"] = [{**data["replies"][0], "id": f"example:{i}"} for i in range(101)]
+            route.fulfill(response=response, json=data)
+        page.route("**/safe-replies", preview)
+        page.locator("#bulkApproveBtn").click()
+        page.locator("#bulkDialog[open]").wait_for()
+        self.assertEqual(100, page.locator(".bulk-item").count())
+        self.assertIn("Showing 100 of 101", page.locator("#bulkContent").inner_text())
+        page.locator('[data-bulk="close"]').click()
+        self.assertEqual([], page.evaluate("api('/api/events/hackathon/outbox')"))
+
     def test_failed_plan_request_is_reported_and_the_button_works_again(self):
         """T52: a restarting server must not leave the console unresponsive."""
         url, _ = self.server("limit")
@@ -157,6 +254,7 @@ class LiveConsoleTests(unittest.TestCase):
     def test_quick_tour_with_fake_live_agent(self):
         url, runtime = self.server("live")
         page = self.page(url)
+        page.locator('#issueSearch').fill('no-results-t25')
         self.quick_tour(page)
         self.assertTrue((runtime / "fake_calls.jsonl").exists())
         self.assertTrue(page.locator("#demoModeNotice").is_hidden())
@@ -171,6 +269,7 @@ class LiveConsoleTests(unittest.TestCase):
     def test_full_tour_with_fake_live_agent_and_second_browser(self):
         url, runtime = self.server("live")
         first, second = self.page(url), self.page(url)
+        first.locator('#issueSearch').fill('no-results-t25')
         pristine = second.evaluate("JSON.stringify(ui.summaries)")
         self.tour(first, "server-fake-live")
         self.assertTrue((runtime / "fake_calls.jsonl").exists())

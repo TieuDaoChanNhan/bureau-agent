@@ -131,9 +131,10 @@ def _action_from_args(state: EventState, issue: Issue, args: dict) -> ProposedAc
         raise ValueError(problem)
     evidence = [Evidence(e["source_type"], e["source_id"], e.get("description", ""))
                 for e in args.get("evidence", [])]
-    checks = [Check(c["name"], c["passed"], c.get("detail", "")) for c in args.get("checks", [])]
-    if any(type(check.passed) is not bool for check in checks):
-        raise ValueError("Each check.passed must be a boolean")
+    checks = [Check(c["name"], c["passed"], c.get("detail", ""), c.get("verified", False))
+              for c in args.get("checks", [])]
+    if any(type(check.passed) is not bool or type(check.verified) is not bool for check in checks):
+        raise ValueError("Each check.passed and check.verified must be a boolean")
     return ProposedAction(
         id=f"{state.id}:{issue.id}", event_id=state.id, issue_id=issue.id,
         action_type=action_type, title=args["title"], description=args["description"],

@@ -63,8 +63,9 @@ TOOLS = [
                          "description": {"type": "string"}},
                          "required": ["source_type", "source_id", "description"]}},
         "checks": {"type": "array", "items": {"type": "object", "properties": {
-            "name": {"type": "string"}, "passed": {"type": "boolean"}, "detail": {"type": "string"}},
-            "required": ["name", "passed"]}},
+            "name": {"type": "string"}, "passed": {"type": "boolean"}, "detail": {"type": "string"},
+            "verified": {"type": "boolean", "description": "False if the evidence cannot confirm this check."}},
+            "required": ["name", "passed", "verified"]}},
         "confidence": {"type": "number", "description": "Only for inferences. Omit for deterministic facts."},
         "payload": {
             "type": "object",

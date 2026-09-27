@@ -15,6 +15,9 @@ const ui = {
   runStart: null,     // when the current agent call started (thinking panel)
   reveal: null,       // action id whose agent steps are revealed one by one on next render
   stopRequested: false,
+  bulkPreview: null,
+  bulkSubmitting: false,
+  filtersSuspended: false, // tours temporarily show every issue without replacing saved preferences
 };
 
 const $ = s => document.querySelector(s);
@@ -156,12 +159,74 @@ function issueMeta(issue) {
   return KIND_LABEL[issue.kind] || issue.kind;
 }
 
-const LEGEND = ["new", "human", "proposed", "waiting", "resolved"];
+// Filters are a view preference only. Never pass their results to agent or approval actions.
+const FILTER_KEY = "bureau-issue-filters-v1";
+const FILTER_STATUSES = {all: "All", human: "Needs you", proposed: "Proposed", new: "Not analysed", waiting: "Waiting", failed: "Failed", done: "Done"};
+const FILTER_KINDS = ["all", "payments", "teams", "messages", "logistics", "other"];
+const defaultIssueFilters = () => ({status: "all", kind: "all", search: ""});
+function validIssueFilters(value) {
+  return {
+    status: Object.hasOwn(FILTER_STATUSES, value?.status) ? value.status : "all",
+    kind: FILTER_KINDS.includes(value?.kind) ? value.kind : "all",
+    search: typeof value?.search === "string" ? value.search.slice(0, 200) : "",
+  };
+}
+ui.issueFilters = defaultIssueFilters();
+try { ui.issueFilters = validIssueFilters(JSON.parse(localStorage.getItem(FILTER_KEY))); } catch { /* use defaults */ }
+const searchText = value => String(value ?? "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+function issueKind(kind) {
+  if (["unmatched_payment", "unpaid_membership", "unpaid_participation"].includes(kind)) return "payments";
+  if (["multiple_group_membership", "group_over_capacity", "solo_participants"].includes(kind)) return "teams";
+  if (kind === "unprocessed_message") return "messages";
+  if (["no_logistics_plan", "rooms_unassigned"].includes(kind)) return "logistics";
+  return "other";
+}
+function completedKind(action) {
+  const kind = (action.issue_id || "").split(":")[0];
+  if (kind === "message") return "messages";
+  if (Object.hasOwn(KIND_LABEL, kind)) return issueKind(kind);
+  return {LINK_PAYMENT: "payments", SEND_MESSAGE: "messages", MOVE_MEMBER: "teams", UPDATE_GROUPS: "teams", SELECT_TRAVEL_PLAN: "logistics"}[action.action_type] || "other";
+}
+function filteredIssues(s) {
+  const filters = ui.filtersSuspended ? defaultIssueFilters() : ui.issueFilters;
+  const terms = searchText(filters.search).trim().split(/\s+/).filter(Boolean);
+  const byIssue = actionsByIssue(s);
+  const matches = (status, kind, text) =>
+    (filters.status === "all" || (filters.status === "done" ? TERMINAL.includes(status) : filters.status === status)) &&
+    (filters.kind === "all" || filters.kind === kind) && terms.every(term => searchText(text).includes(term));
+  return {
+    active: filters.status !== "all" || filters.kind !== "all" || terms.length > 0,
+    issues: s.issues.filter(i => matches(viewStatus(i, s, byIssue), issueKind(i.kind),
+      [i.title, i.details?.text, i.details?.sender, i.details?.channel].filter(Boolean).join(" "))),
+    vanished: vanishedActions(s).filter(a => matches("resolved", completedKind(a),
+      [a.title, a.description, a.payload?.text, a.payload?.to].filter(Boolean).join(" "))),
+  };
+}
+function renderIssueFilters() {
+  const f = ui.filtersSuspended ? defaultIssueFilters() : ui.issueFilters;
+  $("#issueFilters").disabled = ui.filtersSuspended;
+  // Keep the input node and caret while results update on every keystroke.
+  if ($("#issueSearch").value !== f.search) $("#issueSearch").value = f.search;
+  $("#issueKind").value = f.kind;
+  for (const button of document.querySelectorAll("[data-filter-status]")) {
+    button.setAttribute("aria-pressed", String(button.dataset.filterStatus === f.status));
+  }
+  $("#clearIssueFilters").disabled = f.status === "all" && f.kind === "all" && !f.search;
+}
+function setIssueFilters(changes) {
+  if (ui.filtersSuspended) return;
+  ui.issueFilters = validIssueFilters({...ui.issueFilters, ...changes});
+  try { localStorage.setItem(FILTER_KEY, JSON.stringify(ui.issueFilters)); } catch { /* keep preferences for this page */ }
+  // Do not rerender detail: an unsaved draft or new-message form must stay intact.
+  if (summary()) renderIssues();
+}
 
 function renderIssues() {
   const s = summary();
   const byIssue = actionsByIssue(s);
   const sel = ui.sel[ui.current];
+  const filtered = filteredIssues(s);
+  renderIssueFilters();
   const row = issue => {
     const st = ui.running === issue.id ? "running" : viewStatus(issue, s, byIssue);
     const [cls, label] = PILL[st];
@@ -177,18 +242,22 @@ function renderIssues() {
       <span><span class="t">${esc(a.title)}</span><span class="m">${esc(ACTION_LABEL[a.action_type] || a.action_type)}</span></span>
       <span class="chip p-res">Resolved</span></button>`;
 
-  const open = s.issues.filter(i => !TERMINAL.includes(i.status));
+  const open = filtered.issues.filter(i => !TERMINAL.includes(i.status));
   const blocking = open.filter(i => i.blocking), nonBlocking = open.filter(i => !i.blocking);
-  const doneIssues = s.issues.filter(i => TERMINAL.includes(i.status));
-  const vanished = vanishedActions(s);
+  const doneIssues = filtered.issues.filter(i => TERMINAL.includes(i.status));
+  const vanished = filtered.vanished;
   const doneCount = doneIssues.length + vanished.length;
   const group = (label, items) => `<div class="grouphead"><span>${label}</span><span>${items.length}</span></div>
     ${items.length ? items.map(row).join("") : '<p class="note empty">Nothing here.</p>'}`;
-  const legend = `<div class="legend" aria-label="Status legend">${LEGEND.map(k =>
-    `<span class="chip ${PILL[k][0]}">${PILL[k][1]}</span>`).join("")}</div>`;
-
-  $("#issues").innerHTML = legend + group("Blocking", blocking) + group("Non-blocking", nonBlocking) +
-    (doneCount ? `<details class="done" ${ui.doneOpen ? "open" : ""}><summary><div class="grouphead"><span>Done ▾</span><span>${doneCount}</span></div></summary>
+  const total = s.issues.length + vanishedActions(s).length;
+  const count = filtered.issues.length + vanished.length;
+  $("#filterCount").textContent = `Showing ${count} of ${total} issues`;
+  $("#filteredSelection").hidden = ui.view !== "issue" || !sel ||
+    filtered.issues.some(i => `issue:${i.id}` === sel) || vanished.some(a => `action:${a.id}` === sel);
+  $("#issues").innerHTML = !count ? `<p class="note empty">${filtered.active ? "No issues match these filters. Change a filter or use Clear filters." : "No issues for this event."}</p>` :
+    (blocking.length || !filtered.active ? group("Blocking", blocking) : "") +
+    (nonBlocking.length || !filtered.active ? group("Non-blocking", nonBlocking) : "") +
+    (doneCount ? `<details class="done" ${ui.doneOpen || filtered.active ? "open" : ""}><summary><div class="grouphead"><span>Done ▾</span><span>${doneCount}</span></div></summary>
       ${vanished.map(doneRow).join("")}${doneIssues.map(row).join("")}</details>` : "");
 }
 // Display name of a participant, group or payment id (T23, T33); null when unknown.
@@ -656,7 +725,67 @@ function outboxHTML() {
     <div class="actions"><button class="btn" type="button" data-act="back">Back to issues</button></div>`;
 }
 
-function render() { renderEvents(); renderIssues(); renderDetail(); }
+function render() { renderEvents(); renderIssues(); renderDetail(); renderBulkButton(); }
+
+function renderBulkButton() {
+  const count = (summary()?.safe_replies || []).filter(a => !Object.hasOwn(ui.drafts, a.id)).length;
+  $("#bulkApproveBtn").textContent = `Approve safe replies (${count})`;
+  $("#bulkApproveBtn").disabled = ui.busy || count === 0;
+}
+
+async function previewSafeReplies() {
+  if (ui.busy) return;
+  const { action } = currentAction();
+  if (action) captureDraft(action);
+  const eventId = ui.current;
+  await busy("Preparing replies for review…", async () => {
+    const data = await api(`/api/events/${encodeURIComponent(eventId)}/safe-replies`);
+    const eligible = data.replies.filter(a => !Object.hasOwn(ui.drafts, a.id));
+    const replies = eligible.slice(0, data.limit);
+    ui.bulkPreview = {eventId, replies};
+    $("#bulkContent").innerHTML = `<h2 id="bulkTitle" tabindex="-1" autofocus>Review ${replies.length} safe ${replies.length === 1 ? "reply" : "replies"}</h2>
+      <p class="note">Review each draft and its cited rules. Confirming adds these replies to the simulated outbox. Edited drafts and other proposals stay under individual review.</p>
+      ${eligible.length > replies.length ? `<p class="note">Showing ${replies.length} of ${eligible.length} eligible replies. The remaining replies can be reviewed in the next batch.</p>` : ""}
+      ${replies.length ? replies.map(a => `<article class="bulk-item"><b>${esc(a.title)}</b>
+        <p class="note">To ${esc(Array.isArray(a.to) ? a.to.join(", ") : a.to)} · Rules ${esc(a.rules.join(", "))}</p>
+        <p class="bulk-draft">${esc(a.text)}</p></article>`).join("") : '<p class="bulk-item">No unchanged replies currently qualify. Review proposals individually or run the agent first.</p>'}
+      <div class="actions"><button class="btn" type="button" data-bulk="close">Cancel</button>
+      ${replies.length ? `<button class="btn ok" type="button" data-bulk="confirm">Approve ${replies.length} ${replies.length === 1 ? "reply" : "replies"}</button>` : ""}</div>`;
+    $("#bulkDialog").showModal();
+    setRun("Preview ready. Nothing has been approved yet.");
+  });
+}
+
+async function confirmSafeReplies() {
+  const snapshot = ui.bulkPreview;
+  if (ui.busy || !snapshot?.replies.length || snapshot.eventId !== ui.current) return;
+  ui.bulkSubmitting = true;
+  // Consume this preview before sending. A second click cannot submit it again.
+  ui.bulkPreview = null;
+  await busy(`Approving ${snapshot.replies.length} reviewed replies…`, async () => {
+    try {
+      const data = await api(`/api/events/${encodeURIComponent(snapshot.eventId)}/approve-safe-replies`, {
+        method: "POST", body: JSON.stringify({replies: snapshot.replies.map(({id, revision}) => ({id, revision}))}),
+      });
+      store(data);
+      ui.outbox = data.outbox;
+      keepSelection();
+      const result = data.bulk_approval;
+      const message = `${result.approved_count} approved, ${result.failed_count} failed.`;
+      $("#bulkContent").innerHTML = `<h2 id="bulkTitle">${esc(message)}</h2>
+        <p class="note">Approved replies are in the simulated outbox. Other proposals remain under individual review.</p>
+        ${result.failed.length ? `<ul class="bulk-failures">${result.failed.map(a => `<li><b>${esc(a.title)}</b>: ${esc(a.reason)}</li>`).join("")}</ul>` : ""}
+        <div class="actions"><button class="btn" type="button" data-bulk="close">Done</button></div>`;
+      setRun(message, result.failed_count ? "error" : "");
+    } catch (err) {
+      $("#bulkContent").innerHTML = `<h2 id="bulkTitle">Approval result unavailable</h2>
+        <p>${esc(err.message)}</p><p class="note">Some replies may have been approved. Close this window and check the outbox before opening a fresh preview.</p>
+        <div class="actions"><button class="btn" type="button" data-bulk="close">Close</button></div>`;
+      setRun(err.message, "error");
+    } finally { ui.bulkSubmitting = false; }
+  });
+  $("#bulkDialog [data-bulk='close']")?.focus();
+}
 
 // ---------- selection ----------
 
@@ -683,7 +812,7 @@ function store(data) {
   ui.summaries[data.id] = { id: data.id, name: data.name, counts: data.counts, issues: data.issues, actions: data.actions,
                             travel: data.travel || null, logistics: data.logistics || null,
                             records: data.records || { participants: {}, groups: {}, payments: {} },
-                            meta: data.meta || {} };
+                            meta: data.meta || {}, safe_replies: data.safe_replies || [] };
 }
 
 async function selectEvent(id) {
@@ -724,6 +853,7 @@ async function busy(label, fn) {
     ui.busy = false;
     render();
     document.querySelectorAll(".btn").forEach(b => { b.disabled = false; });
+    renderBulkButton();
     $("#run").classList.remove("busy");
   }
 }
@@ -834,6 +964,19 @@ async function resetDemo() {
 
 // ---------- events ----------
 
+$("#issueStatuses").innerHTML = Object.entries(FILTER_STATUSES).map(([key, label]) =>
+  `<button type="button" class="filter-chip" data-filter-status="${key}" aria-pressed="false" aria-controls="issues">${label}</button>`).join("");
+$("#issueStatuses").addEventListener("click", e => {
+  const button = e.target.closest("[data-filter-status]");
+  if (button) setIssueFilters({status: button.dataset.filterStatus});
+});
+$("#issueSearch").addEventListener("input", e => setIssueFilters({search: e.target.value}));
+$("#issueKind").addEventListener("change", e => setIssueFilters({kind: e.target.value}));
+$("#clearIssueFilters").addEventListener("click", () => {
+  setIssueFilters(defaultIssueFilters());
+  $("#issueSearch").focus();
+});
+
 $("#events").addEventListener("click", e => {
   const card = e.target.closest(".evtab");
   if (card && !ui.busy) selectEvent(card.dataset.ev).catch(err => setRun(err.message, "error"));
@@ -846,7 +989,9 @@ $("#issues").addEventListener("click", e => {
   ui.view = "issue";
   renderIssues(); renderDetail();
 });
-$("#issues").addEventListener("toggle", e => { if (e.target.matches("details.done")) ui.doneOpen = e.target.open; }, true);
+$("#issues").addEventListener("toggle", e => {
+  if (e.target.matches("details.done") && e.target.isConnected && !filteredIssues(summary()).active) ui.doneOpen = e.target.open;
+}, true);
 $("#detail").addEventListener("toggle", e => {
   if (e.target.matches("details.sec")) ui.open[e.target.dataset.sec] = e.target.open;
 }, true);
@@ -893,6 +1038,7 @@ $("#detail").addEventListener("click", e => {
     if (box.getAttribute("contenteditable") === "true") {
       captureDraft(action);
       renderDetail();
+      renderBulkButton();
     } else {
       box.setAttribute("contenteditable", "true");
       box.focus();
@@ -934,6 +1080,15 @@ $("#detail").addEventListener("submit", e => {
   if (!ui.busy) submitMessage(e.target);
 });   // doubles as Stop during a run
 $("#resetBtn").addEventListener("click", () => resetDemo());
+$("#bulkApproveBtn").addEventListener("click", previewSafeReplies);
+$("#bulkDialog").addEventListener("click", e => {
+  const button = e.target.closest("[data-bulk]");
+  if (!button || ui.busy) return;
+  if (button.dataset.bulk === "confirm") confirmSafeReplies();
+  else $("#bulkDialog").close();
+});
+$("#bulkDialog").addEventListener("cancel", e => { if (ui.bulkSubmitting) e.preventDefault(); });
+$("#bulkDialog").addEventListener("close", () => { ui.bulkPreview = null; });
 $("#outboxBtn").addEventListener("click", async () => {
   if (ui.busy) return;
   try {

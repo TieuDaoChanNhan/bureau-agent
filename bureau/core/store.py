@@ -64,7 +64,7 @@ def _action_from_dict(a: dict) -> ProposedAction:
         id=a["id"], event_id=a["event_id"], issue_id=a["issue_id"], action_type=a["action_type"],
         title=a["title"], description=a["description"],
         evidence=[Evidence(**e) for e in a.get("evidence", [])],
-        checks=[Check(**c) for c in a.get("checks", [])],
+        checks=[Check(**{"verified": False, **c}) for c in a.get("checks", [])],
         confidence=a.get("confidence"), requires_approval=a.get("requires_approval", True),
         payload=a.get("payload", {}), trace=a.get("trace", []),
     )

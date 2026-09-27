@@ -178,6 +178,8 @@ const QUICK = STEPS;
 function startTour(mode = "quick") {
   if (!window.driver || !window.driver.js) { setRun("The tour library did not load.", "error"); return; }
   if (tourState.driver) tourState.driver.destroy();
+  ui.filtersSuspended = true;
+  if (summary()) renderIssues();
   const steps = tourState.steps = mode === "full" ? STEPS : QUICK;
   const d = window.driver.js.driver({
     showProgress: true,
@@ -218,7 +220,11 @@ function startTour(mode = "quick") {
     // and Esc still do. Driver calls onDestroyStarted for overlay clicks and Esc, not for destroy().
     onDestroyStarted: () => {},
     onCloseClick: () => d.destroy(),
-    onDestroyed: () => { tourStopPolling(); tourState.driver = null; },
+    onDestroyed: () => {
+      tourStopPolling(); tourState.driver = null;
+      ui.filtersSuspended = false;
+      if (summary()) renderIssues();
+    },
   });
   tourState.driver = d;
   d.drive(0);

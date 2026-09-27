@@ -72,6 +72,7 @@
             <button class="btn" id="auditBtn" type="button">Activity</button>
             <button class="btn" id="outboxBtn" type="button">Outbox</button>
             <button class="btn" id="resetBtn" type="button">Reset demo</button>
+            <button class="btn ok" id="bulkApproveBtn" type="button" disabled>Approve safe replies (0)</button>
             <button class="btn primary" id="runBtn" type="button">Run agent</button>
           </div>
         </div>
@@ -82,7 +83,30 @@
       </div>
       <div class="run" id="run" role="status" aria-live="polite"><span class="dot"></span><span id="runText">Loading…</span></div>
       <div class="main">
-        <div class="issues" id="issues" aria-label="Issues"></div>
+        <section class="issue-panel" aria-label="Issue list">
+          <fieldset class="issue-filters" id="issueFilters">
+            <legend class="sr-only">Filter issues</legend>
+            <label for="issueSearch">Search issues</label>
+            <input id="issueSearch" type="search" maxlength="200" placeholder="Title, message, sender or channel" aria-controls="issues" autocomplete="off">
+            <div id="issueStatuses" class="filter-statuses" role="group" aria-label="Issue status"></div>
+            <div class="filter-kind">
+              <label for="issueKind">Kind</label>
+              <select id="issueKind" aria-controls="issues">
+                <option value="all">All kinds</option>
+                <option value="payments">Payments</option>
+                <option value="teams">Teams</option>
+                <option value="messages">Messages</option>
+                <option value="logistics">Trip / rooms</option>
+                <option value="other">Other</option>
+              </select>
+              <button id="clearIssueFilters" class="filter-clear" type="button">Clear filters</button>
+            </div>
+            <p id="filterCount" class="note" role="status" aria-live="polite" aria-atomic="true"></p>
+            <p class="filter-scope note">Filters change this list only. Event totals and toolbar actions cover the whole event.</p>
+            <p id="filteredSelection" class="note" hidden>The selected issue is outside these filters. Its detail stays open.</p>
+          </fieldset>
+          <div class="issues" id="issues" aria-label="Issues"></div>
+        </section>
         <div class="detail" id="detail" aria-live="polite"></div>
       </div>
     </section>
@@ -112,6 +136,9 @@
     </div>
     <p class="foot">All names, emails and payments are fictional sample data. Drafted replies end with "Drafted with AI assistance, approved by the organizers."</p>
   </footer>
+  <dialog id="bulkDialog" class="bulk-dialog" aria-labelledby="bulkTitle">
+    <div id="bulkContent"></div>
+  </dialog>
   <script src="./vendor/driver.js.iife.js"></script>
   <script src="./fixtures.js"></script>
   <script src="./session.js"></script>

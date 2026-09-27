@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from datetime import datetime
+import logging
+import threading
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query
@@ -16,7 +18,7 @@ from pydantic import BaseModel, Field, StrictStr
 
 from bureau import config
 from bureau.agent.loop import run_pending, runnable_issues
-from bureau.core import store
+from bureau.core import bulk_approval, store
 from bureau.core.detect import detect_issues
 from bureau.core.executor import InvariantViolation, apply
 from bureau.core.models import EventState, Issue, Message, ProposedAction
@@ -29,6 +31,10 @@ from .sessions import DemoSessions
 
 app = FastAPI(title="Bureau Agent API")
 app.add_middleware(DemoSessions)
+logger = logging.getLogger(__name__)
+# The JSON store supports one worker. Serialize overlapping bulk submissions also
+# outside public demo mode; DemoSessions already serializes each public visitor.
+_bulk_lock = threading.Lock()
 
 
 @app.get("/health")
@@ -52,6 +58,15 @@ class PlanRequest(BaseModel):
 class ApprovalRequest(BaseModel):
     edited_description: StrictStr | None = Field(default=None, max_length=8000)
     option_id: StrictStr | None = None
+
+
+class BulkReply(BaseModel):
+    id: StrictStr = Field(min_length=1, max_length=250)
+    revision: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+class BulkApprovalRequest(BaseModel):
+    replies: list[BulkReply] = Field(min_length=1, max_length=bulk_approval.MAX_BATCH)
 
 
 def _events() -> list[str]:
@@ -97,7 +112,8 @@ def _event_summary(state: EventState) -> dict:
     return {"id": state.id, "name": state.name, "counts": _counts(issues),
             "issues": [asdict(i) for i in issues], "actions": [asdict(a) for a in state.actions],
             "travel": state.travel, "logistics": state.logistics, "records": _records(state),
-            "meta": {**state.settings.get("display", {}), "participants": len(state.participants)}}
+            "meta": {**state.settings.get("display", {}), "participants": len(state.participants)},
+            "safe_replies": bulk_approval.preview(state)}
 
 
 def _event_id_of_action(action_id: str) -> str:
@@ -353,6 +369,53 @@ def dismiss(action_id: str):
     issue.resolved_by_action_id = action.id
     store.save_state(state)
     return _event_summary(state)
+
+
+@app.get("/api/events/{event_id}/safe-replies")
+def safe_replies(event_id: str):
+    if event_id not in _events():
+        raise HTTPException(404, "unknown event")
+    return {"event_id": event_id, "replies": bulk_approval.preview(_load_and_refresh(event_id)),
+            "limit": bulk_approval.MAX_BATCH}
+
+
+@app.post("/api/events/{event_id}/approve-safe-replies")
+def approve_safe_replies(event_id: str, body: BulkApprovalRequest):
+    """Confirm only the reviewed snapshot; report failures and keep processing."""
+    if event_id not in _events():
+        raise HTTPException(404, "unknown event")
+    approved, failed = [], []
+    with _bulk_lock:
+        for item in body.replies:
+            title = item.id
+            try:
+                state = _load_and_refresh(event_id)
+                action = _find_action(state, item.id)
+                title = action.title
+                current = next((a for a in reversed(state.actions) if a.issue_id == action.issue_id), None)
+                if current is not action:
+                    raise HTTPException(409, "A newer proposal replaced this reply.")
+                problem = bulk_approval.reply_problem(state, action)
+                if problem:
+                    raise HTTPException(409, problem)
+                if bulk_approval.revision(state, action) != item.revision:
+                    raise HTTPException(409, "This reply changed after the preview. Review it again.")
+                if any(row.get("action_id") == action.id for row in store.load_outbox(event_id)):
+                    raise HTTPException(409, "This reply is already in the outbox; it was not sent again.")
+                store.save_state(apply(state, action))
+                approved.append({"id": item.id, "title": title})
+            except HTTPException as exc:
+                failed.append({"id": item.id, "title": title, "reason": str(exc.detail)})
+            except (InvariantViolation, ValueError, KeyError) as exc:
+                failed.append({"id": item.id, "title": title, "reason": str(exc)})
+            except Exception:
+                logger.exception("Bulk reply approval failed for %s", item.id)
+                failed.append({"id": item.id, "title": title,
+                               "reason": "Could not finish approval. Check the outbox before retrying."})
+        result = {"approved": approved, "failed": failed,
+                  "approved_count": len(approved), "failed_count": len(failed)}
+        return {**_event_summary(_load_and_refresh(event_id)), "bulk_approval": result,
+                "outbox": store.load_outbox(event_id)}
 
 
 @app.get("/api/events/{event_id}/outbox")

@@ -18,7 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from bureau.core.detect import detect_issues
 from bureau.core.loader import load_event
-from demo.replay import payment_example, scenarios_and_rules, planner_example, BUDGET_ANSWER, BUDGET_QUESTION
+from bureau.core.bulk_approval import MAX_BATCH, preview as safe_reply_preview
+from demo.replay import issue_example, payment_example, scenarios_and_rules, planner_example, BUDGET_ANSWER, BUDGET_QUESTION
 
 DEMO = ROOT / "demo"
 SITE = DEMO / "site"
@@ -58,6 +59,24 @@ def build() -> None:
     fixtures["scenarios"], fixtures["rules"] = scenarios_and_rules()
     if any(s["rule"] not in fixtures["rules"] for s in fixtures["scenarios"].values()):
         raise ValueError("A curated scenario references an unknown rule.")
+    # Certify exact saved proposals with the live policy. The browser matches
+    # these snapshots; it does not reimplement eligibility for arbitrary text.
+    state = load_event("hackathon")
+    state.issues = detect_issues(state)
+    fixtures["rule_replies"] = {}
+    fixtures["bulk_replies"] = {}
+    fixtures["bulk_limit"] = MAX_BATCH
+    for issue in state.issues:
+        if issue.id.removeprefix("message:") not in fixtures["scenarios"]:
+            continue
+        action = issue_example(state, issue)
+        state.actions = [action]
+        issue.status = "proposed"
+        fixtures["rule_replies"][action.id] = asdict(action)
+        candidates = safe_reply_preview(state)
+        if candidates:
+            fixtures["bulk_replies"][action.id] = {
+                "action": asdict(action), "issue": asdict(issue), "preview": candidates[0]}
     fixtures["revision"] = hashlib.sha256(json.dumps(fixtures, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()[:16]
     write("fixtures.js", "// Generated from fictional repository samples; no live calls.\nwindow.DEMO_FIXTURES = " +
           json.dumps(fixtures, ensure_ascii=False, default=str, indent=2) + ";\n")
@@ -92,7 +111,7 @@ def build() -> None:
     html = replace(html, '<button class="btn" id="outboxBtn"', '<button class="btn" id="auditBtn" type="button">Activity</button>\n            <button class="btn" id="outboxBtn"')
     html = replace(html, '<script src="./app.js"></script>', '<script src="./fixtures.js"></script>\n  <script src="./session.js"></script>\n  <script src="./offline.js"></script>\n  <script src="./customer-ui.js"></script>\n  <script src="./app.js"></script>')
     write("index.html", html + "\n")
-    with (SITE / "style.css").open("a", encoding="utf-8") as f:
+    with (SITE / "style.css").open("a", encoding="utf-8", newline="\n") as f:
         f.write("\n/* Static customer demo notice. */\n.demo-banner{max-width:1200px;margin:20px auto 0;padding:12px 20px;border:1px solid var(--line);border-radius:12px;background:var(--accent-soft);color:var(--ink-2);font-size:13px}\n@media(max-width:600px){.demo-banner{margin:12px 14px 0}.toolbar{flex-wrap:wrap}.console-title{flex-wrap:wrap}}\n")
 
     app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
