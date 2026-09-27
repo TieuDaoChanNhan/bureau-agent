@@ -1,0 +1,25 @@
+# Dependencies: edit here, then run `uv lock` and
+#   uv export --no-hashes --no-dev --no-emit-project --format requirements-txt -o requirements.txt
+# so that `pip install -r requirements.txt` (used by Render and CI) installs the locked versions.
+
+[project]
+name = "bureau-agent"
+version = "0.1.0"
+description = "An operations agent for volunteer-run associations: it finds what needs attention, investigates with tools and proposes one action; organizers approve."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.40",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "httpx>=0.27",
+]
+
+[dependency-groups]
+# Browser tests in demo/ (CI installs Chromium with `playwright install`).
+browser = ["playwright>=1.44"]
+
+[tool.uv]
+# An application, not a library: uv installs the dependencies, not the project itself.
+package = false
