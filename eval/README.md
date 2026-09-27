@@ -497,3 +497,65 @@ Run the same comparison for any other model before switching:
 Dataset SHA-256: `1a2f1192229cc3d8ebfc9fa3debd80b661b007ffdf8230cedfee3eb5bed317eb`.
 Fixture and runtime file hashes were unchanged after the run. Results can vary
 between model calls; rerun this baseline when changing the agent, model or corpus.
+
+## Unsupported trip restrictions (#102)
+
+Explicit English/French transport restrictions have a deterministic guard before
+search, including direct/recorded planner calls. Unknown hard keys also block search.
+Other unsupported supplier details (kitchen, activity spaces, coach count, room
+amenities) are retained as visible organizer checks with `verified=false` and
+`passed=false`. They do not block a conditional comparison or imply availability.
+The extraction prompt asks blocking questions for unsupported eligibility limits.
+
+Final reviewed run: 2026-09-27, 14:06:24–14:06:46 UTC, `gpt-4.1`, Python 3.13.12,
+production commit `cdff50d487cfad1bc1d4275e3d5b3fac2a0a5136`. PR #100 is merged;
+the normal runner used all 20 unchanged cases and Jinko replay. Dataset SHA-256:
+`9c60b831b143f51d134573355c83a991a0c9378701149a0a77056ef8f29f6f12`.
+
+| Metric | Historical 8 cases | Current WEI 12 cases | Total |
+|---|---|---|---|
+| Supported hard fields | 8/8 | 12/12 | 20/20 |
+| Clarification presence | 8/8 | 10/12 | 18/20 |
+| Ordered preferences | 7/7 | 12/12 | 19/19 |
+| Organizer verification | 7/7 | 11/12 | 18/19 |
+| Feasibility after clarification gate | 5/5 | 7/7 | 12/12 |
+| Exact labeled ranking after gate | N/A | 6/6 | 6/6 |
+| API/execution errors | 0 | 0 | 0 |
+
+`p014` escalates with a transport-restriction question and no proposed coach
+options. It also retains a redundant transport note in `organizer_verified`, so
+that exact-set metric fails. `p015` and `p020` still ask unnecessary accessibility
+questions: they are not searched and remain outside feasibility/ranking denominators.
+The €140/€160 cases, total-budget conversion and preference ranking passed;
+`p017` returns F/C/E. These results preserve the labels, including residual failures.
+The text guard covers bounded direct wording; arbitrary unsupported requirements
+still depend on extraction. This is not a general natural-language guarantee.
+
+Review found the initial implementation also blocked the default demo on kitchen,
+activity-space and coach-count requirements after the budget answer. The revised
+code retains those requirements as unverified checks. A scripted regression covers
+both demo turns and checks every package's unverified notes. Three additional live
+two-turn demo extractions all returned F/C/E after the exact tour budget answer,
+with English confirmation notes for the English request. A real-model browser run
+completed all 15 quick-tour steps, displayed the shared organizer-confirmation
+notes, showed no valid option at €120, and selected F at €150 without replay fallback.
+The six offline browser tests also pass.
+
+Earlier development runs are retained for comparison: `ff83369` stopped `p014` but
+scored 18/20 hard fields and 13/20 clarification presence; `af286bd` improved those
+to 20/20 and 17/20, but still blocked the demo facilities. Review prompted the
+unverified-check revision above. No case text or labels changed in these iterations.
+Full local reports (Git-ignored):
+
+- Initial: `eval/results/20260927T133238.479047Z.json`.
+- Before review: `eval/results/20260927T133358.213408Z.json`, SHA-256
+  `adf0daec52c2bfef67999b6fd0c22c865f3b752e4207fefe3ecec7f75c055c3b`.
+- Reviewed: `eval/results/20260927T140624.606727Z.json`, SHA-256
+  `c26fa1aa224d2f772fec3810825baf586a9f71f536d1084ab2d64393f66e8021`.
+- Demo extraction: `eval/results/t51-102-demo-extraction.json`.
+- Live quick tour: `eval/results/t51-102-live-tour.json` and
+  `eval/results/t51-102-live-tour-options.png`.
+
+Reproduce with `OPENAI_MODEL=gpt-4.1 python -m eval.run_eval --suite planning`.
+The live command uses OpenAI credit; unit tests use scripted extraction and saved
+packages only. The demo evidence used an isolated local server and temporary state.
