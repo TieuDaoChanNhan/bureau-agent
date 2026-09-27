@@ -441,7 +441,12 @@ function payloadBlock(action) {
                                    ["To group", p.to_group ? named(p.to_group) : "none"]]);
     case "UPDATE_GROUPS": return `<div class="groups">${(p.groups || []).map(g =>
       `<div><b>${esc(g.name)}</b> <span class="src">${esc(g.id)}</span><br>${esc(g.members.map(id => (summary().records.participants || {})[id] || id).join(", "))}</div>`).join("")}</div>`;
-    case "ESCALATE": return p.note ? `<div class="question">${esc(p.note)}</div>` : "";
+    case "ESCALATE": {
+      // The model sometimes repeats its question as the note: show the note only when it adds something.
+      const same = t => String(t || "").replace(/\s+/g, " ").trim().toLowerCase();
+      return p.note && same(p.note) !== same(action.description)
+        ? `<div class="question"><span class="qlabel">Note for the organizers</span>${esc(p.note)}</div>` : "";
+    }
     case "SELECT_TRAVEL_PLAN": {
       const chosen = summary().logistics;
       return kv([["Valid options", (p.ranked_valid || []).join(", ")],
