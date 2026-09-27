@@ -49,7 +49,7 @@ const STEPS = [
     text: `<p>Volunteer boards run events on top of their studies: registrations, fees, teams, rooms, trips and dozens of messages.
       Bureau Agent keeps an event consistent. <b>Code</b> detects what needs attention, an <b>AI agent</b> investigates with tools and
       proposes one action with its evidence, and <b>you</b> approve, edit or dismiss it.</p>
-      <p>This tour takes about 5 minutes and shows every feature on two sample events. The public demo uses the live agent within
+      <p>This tour takes about 6 minutes and shows every feature on two sample events. The public demo uses the live agent within
       a shared call allowance, then clearly labeled saved examples. Nothing is sent or booked.
       <b>Clicking Next resets your sample data</b> so the tour starts clean. Press Esc at any time to leave.</p>`,
     next: tourResetAll,
@@ -260,7 +260,7 @@ const STEPS = [
     text: `<p>Code detects, the agent investigates and proposes with evidence, rules are enforced in code, and people approve
       everything that has consequences.</p>
       <p>Explore on your own: ${b("Run agent")} on other issues, send your own ${b("New message")}, or click ${b("Reset demo")} twice to
-      start again. The ${b("Demo tour")} button replays this tour.</p>`,
+      start again. The tour buttons at the top replay this tour.</p>`,
   },
 ];
 

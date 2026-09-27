@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from datetime import datetime
 import logging
+import re
 import threading
 from typing import Literal
 
@@ -159,7 +160,7 @@ def get_event(event_id: str):
 
 
 @app.post("/api/events/{event_id}/run")
-def run_agent(event_id: str, limit: int = Query(5, ge=1), issue_id: str | None = None):
+def run_agent(event_id: str, limit: int = Query(5, ge=1, le=100), issue_id: str | None = None):
     """Propose up to ``limit`` runnable issues and report the remaining backlog.
 
     ``issue_id`` runs one issue, including one whose previous agent run failed.
@@ -176,25 +177,34 @@ def run_agent(event_id: str, limit: int = Query(5, ge=1), issue_id: str | None =
     result = run_pending(state, issue_id=issue_id, limit=limit, verbose=False)
     summary = _event_summary(state)
     summary["remaining"] = result.remaining
-    summary["errors"] = result.errors
+    summary["errors"] = _public_errors(result.errors)
     return summary
+
+
+def _public_errors(errors):
+    """Issue ids of failed runs; the exception text stays in the event log."""
+    return [{"issue_id": e["issue_id"], "error": "The agent run failed. Details are in the server log."}
+            for e in errors]
 
 
 def _demo_run(state, limit, issue_id):
     replay = False
     reason = ""
     errors = []
+    skipped = []
     for issue in runnable_issues(state, issue_id)[:limit]:
         try:
             ensure_available()
             result = run_pending(state, issue_id=issue.id, limit=1, verbose=False)
-            errors.extend(result.errors)
+            errors.extend(_public_errors(result.errors))
         except LiveUnavailable as exc:
             reason = str(exc)
             try:
                 action = mark_replay(issue_example(state, issue), reason)
             except NoSavedExample as missing:
-                # Earlier proposals in a batch are persisted and remain visible.
+                if issue_id is None:  # a batch replays what it can and leaves the rest pending
+                    skipped.append(missing)
+                    continue
                 raise HTTPException(429, f"Live agent unavailable ({reason}). {missing}") from missing
             state.actions = [a for a in state.actions if a.issue_id != issue.id] + [action]
             # run_pending refreshes issue objects before a mid-loop cap occurs.
@@ -202,6 +212,8 @@ def _demo_run(state, limit, issue_id):
             store.save_state(state)
             store.append_log(state.id, {"type": "replay", "issue_id": issue.id, "reason": reason})
             replay = True
+    if skipped and not replay:
+        raise HTTPException(429, f"Live agent unavailable ({reason}). {skipped[0]}")
     return {**_event_summary(state), "remaining": len(runnable_issues(state, issue_id)),
             "errors": errors, "replay": replay, "replay_reason": reason}
 
@@ -240,7 +252,6 @@ def run_planner(event_id: str, body: PlanRequest | None = None):
                 (key == "participants" and value < 1)):
             raise HTTPException(422, f"invalid override: {key}")
         if key == "arrive_before":
-            import re
             if not re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", value):
                 raise HTTPException(422, "arrive_before must be HH:MM")
     if config.DEMO_MODE:
@@ -257,7 +268,7 @@ def run_planner(event_id: str, body: PlanRequest | None = None):
         except ValueError as exc:  # blank request or unusable model output
             raise HTTPException(422, str(exc)) from exc
         except Exception as exc:   # provider failure: never fall back to a sample plan
-            raise HTTPException(502, f"constraint extraction failed: {exc}") from exc
+            raise HTTPException(502, "Constraint extraction failed. Retry, or send {\"recorded\": true}.") from exc
     constraints.hard.update(body.overrides or {})
     action = plan_trip(req, constraints, client=client, search=state.travel.get("search"))
     action.payload["constraints"] = asdict(constraints)

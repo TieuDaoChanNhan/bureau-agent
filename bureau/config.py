@@ -10,9 +10,8 @@ RUNTIME_DIR = ROOT / "runtime"  # state written while the app runs (git-ignored)
 
 
 def _load_dotenv() -> None:
-    for path in (ROOT / ".env", ROOT.parent / ".env"):
-        if not path.exists():
-            continue
+    path = ROOT / ".env"
+    if path.exists():
         for line in path.read_text(encoding="utf-8").splitlines():
             line = line.split("#", 1)[0].strip()
             if "=" in line:

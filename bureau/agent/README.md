@@ -64,7 +64,7 @@ python -m pip install -r requirements.txt
 Keep the key local. `.env` is ignored by Git, and offline tests do not require it.
 On Windows PowerShell, set `$env:PYTHONIOENCODING="utf-8"` before capturing accented output.
 
-## Live acceptance checks (T04)
+## Live acceptance checks
 
 Run these with the configured real OpenAI client, starting each command from the repository root and with the corresponding issues still runnable:
 
@@ -99,7 +99,7 @@ The three labeled cases are in `eval/cases/messages.jsonl`:
 | `c003` / `m04` | `search_rules`; `ESCALATE` because the supplied rules do not specify a video language |
 
 The full command must finish without errors for every runnable issue. On the supplied hackathon fixtures this is 31 proposals from fresh runtime state.
-Save the actual `->` lines and JSON proposals in the pull request, together with the model, command, fixture revision and exit status.
+Record the actual `->` lines and JSON proposals together with the model, command, fixture revision and exit status.
 Fake-client tests verify the loop mechanics only; they are not evidence that the live acceptance cases passed.
 
 ## Offline tests

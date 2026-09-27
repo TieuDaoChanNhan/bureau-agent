@@ -1,8 +1,4 @@
-"""Expected behaviour of modules that are not written yet.
-
-Each test is skipped until its task is done. Whoever takes the task removes the
-@skip and makes the test pass (more tests are welcome).
-"""
+"""Behaviour of the runtime store, the agent tools and the executor, specified before they were written."""
 import json
 import tempfile
 import unittest

@@ -1,5 +1,8 @@
 # Documentation
 
+Task codes such as T24 and numbers such as #103 refer to this repository's GitHub issues
+and pull requests, where each change was specified and reviewed.
+
 | File | Content |
 |---|---|
 | `ARCHITECTURE.md` | Current system components, data lifecycle, planner pipeline, API, and decisions |

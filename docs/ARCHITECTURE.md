@@ -24,7 +24,7 @@ The FastAPI application serves the JSON API and the organizer console. The stati
 | `api` | FastAPI routes for events, runs, planning, approval, reset, sessions, and the web console |
 | `web` | Plain HTML, JavaScript, and CSS organizer console with guided tours |
 | `demo` | Public, static replay build with no live model or provider calls |
-| `eval` | Labeled, offline evaluation harness and reports |
+| `eval` | Labeled evaluation harness (live model calls) and a log of recorded runs |
 
 ## Event state and records
 
@@ -90,10 +90,10 @@ The organizer console shows detected issues, evidence, checks, proposals, tool t
 | One orchestrating agent | The agent chooses tools; fixed Python code enforces rules and execution boundaries. |
 | JSON runtime state | Small, inspectable demo data is easy to reset; deployed demo sessions are isolated per browser. |
 | Approval before execution | The agent drafts; organizers retain responsibility for money, identity, messages, groups, and travel. |
-| Invariants in code, at two layers | Identity threshold (T29) and requester identity (T50) are checked when the model proposes, so it can revise, and again when an organizer approves. Safety findings are fixed in code, not in the prompt. |
+| Invariants in code, at two layers | The identity threshold and the requester check are checked when the model proposes, so it can revise, and again when an organizer approves. Safety findings are fixed in code, not in the prompt. |
 | Replayable external data | The demonstration remains reliable without network availability or provider credits. |
 | Plain web console | No build pipeline is needed for the demo, and the API remains the single data contract. |
-| Labeled evaluation | Quality is measured against fixtures, while organizer feedback is reported separately when available. |
+| Labeled evaluation | Quality is measured against labeled synthetic fixtures; no session with a real organizer is reported. |
 
 ## Quality and delivery
 

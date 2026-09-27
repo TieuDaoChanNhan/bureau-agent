@@ -19,6 +19,11 @@ python -m unittest tests.test_core.LoaderTests -v          # one class
 | `test_agent.py` | Agent tool context, argument/proposal recovery, approval-only behavior and loop mechanics with a scripted fake LLM |
 | `test_eval.py` | Labeled corpus integrity, actual tool tracing with fake clients, scoring errors, isolated invariant checks, historical planning-option isolation and JSON reports |
 | `test_pending.py` | Store persistence and all six executor actions |
+| `test_requester.py` | Who may ask for a payment reply or a team change |
+| `test_message_safety.py` | Escalation of fenced "pre-approved" answers and similar pressure |
+| `test_batch_run.py` | Batch runs: order, limits, failures and dependencies |
+| `test_jinko.py` | Jinko hotel search client and saved-response replay |
+| `test_public_demo.py` | Public demo sessions, call limits and saved-example replay |
 | `test_executor_hardening.py` | Executor rejection, payment ownership, optional replies, and unchanged state on failure |
 | `test_api.py` | Runtime API, proposal persistence, approval/dismiss/reset, error responses, and outbox; fake agent and temporary storage |
 | `test_bulk_approval.py` | T24 eligibility exclusions, read-only previews, exact snapshots, mixed batches, per-item failures, concurrent/duplicate/retry protection, browser isolation and unverified model checks |
@@ -54,12 +59,12 @@ class StoreRoundTripTests(unittest.TestCase):
 ### Where to put it
 | You work on | Put tests in |
 |---|---|
-| `bureau/core/store.py`, `executor.py` | `test_pending.py`: remove the `@unittest.skip` line above the class, then add your tests to that class (or move the class to `test_core.py`) |
+| `bureau/core/store.py`, `executor.py` | `test_pending.py` or `test_executor_hardening.py` |
 | `bureau/core/*` (other) | `test_core.py` |
 | `bureau/tools/*` | `test_tools.py` |
 | `bureau/planner/*` | `test_planner.py` |
 | `bureau/agent/*`, batch run | `test_agent.py`, with `FakeClient` from `fake_llm.py` (never call the real API in tests) |
-| `api/main.py` | new file `test_api.py`, with `fastapi.testclient.TestClient(app)` |
+| `api/main.py` | `test_api.py`, with `fastapi.testclient.TestClient(app)` |
 
 ### Rules of thumb
 - **One test = one fact**, named after it: `test_team_of_five_is_rejected`, not `test_executor2`.

@@ -100,6 +100,10 @@ Rebuild from reviewed `main` after merge and after future fixture/UI changes.
 
 ### Outstanding release checks at that time
 
+Status on 27 September 2026: the Render service is live at https://bureau-agent.onrender.com;
+the live quick and full tours, browser isolation and the zero-limit fallback passed on it, and an
+external monitor keeps it awake (see DEPLOY.md). The list below is kept as written on 26 September.
+
 - Create the one free Render service and record its assigned URL in the README.
 - Set the project-scoped OpenAI key and confirm the team's monthly **hard** limit.
 - On Render, complete the live tour, simultaneous-browser isolation and zero-limit
