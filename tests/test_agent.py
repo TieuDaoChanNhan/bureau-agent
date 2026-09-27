@@ -342,12 +342,14 @@ class AgentLoopTests(unittest.TestCase):
                 state = load_event("hackathon")
                 payload = {"to": recipients, "text": "A draft reminder."}
                 if action_type == "LINK_PAYMENT":
-                    payload = {**PROPOSAL["payload"], "to": recipients, "message": "A draft reply."}
+                    # A payment reply goes only to the participant's registered addresses (T50).
+                    payload = {**PROPOSAL["payload"], "to": ["a.nguyen@polytechnique.example", "p01"],
+                               "message": "A draft reply."}
                 client = FakeClient([[("propose_action", {
                     **PROPOSAL, "action_type": action_type, "payload": payload,
                 })]])
                 action = resolve_issue(state, message_issue(state), client=client, verbose=False)
-                self.assertEqual(action.payload["to"], recipients)
+                self.assertEqual(action.payload["to"], payload["to"])
 
     def test_source_message_context_is_structured_and_scoped_to_issue(self):
         state = load_event("hackathon")
@@ -363,11 +365,12 @@ class AgentLoopTests(unittest.TestCase):
     def test_complete_executor_payloads_are_preserved(self):
         payloads = {
             "SEND_MESSAGE": {"to": "person@participants.example", "text": "A complete draft."},
-            "LINK_PAYMENT": {**PROPOSAL["payload"], "to": "person@participants.example",
+            # m01 comes from Antoine (p01): actions about him may follow his request (T50).
+            "LINK_PAYMENT": {**PROPOSAL["payload"], "to": "a.nguyen@polytechnique.example",
                              "message": "A draft payment confirmation."},
-            "MOVE_MEMBER": {"participant_id": "p02", "from_group": "t-nomads"},
+            "MOVE_MEMBER": {"participant_id": "p01", "from_group": "t-nomads"},
             "UPDATE_GROUPS": {"groups": [{
-                "id": "t-sample", "kind": "team", "name": "Sample", "members": ["p13", "p14"],
+                "id": "t-sample", "kind": "team", "name": "Sample", "members": ["p01", "p14"],
                 "capacity_min": 2, "capacity_max": 4,
             }]},
             "ESCALATE": {"note": "Please confirm the missing policy."},

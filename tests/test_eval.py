@@ -256,8 +256,10 @@ class EvaluationIsolationTests(unittest.TestCase):
     def test_over_capacity_move_is_counted_without_mutating_state(self):
         state, _ = run_eval.prepare_message(message_case())
         before = deepcopy(state)
+        # Not a message issue: the requester check (T50) does not apply, only the capacity rule.
         action = message_action(
             action_type="MOVE_MEMBER", payload={"participant_id": "p13", "to_group": "t-nomads"},
+            issue_id="solo_participants",
         )
         violations = run_eval.check_invariants(state, action)
         self.assertEqual(len(violations), 1)

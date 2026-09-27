@@ -15,6 +15,8 @@ Payments may only be linked to existing participants and cannot change owners
 (explicit participant_id, otherwise an exact email match). A new link also needs
 an identity score of at least ASK_HUMAN, or a payer email registered by the person. Travel selections
 must have valid=True. Group checks are scoped to the affected groups/members.
+A reply about a participant goes only to their registered addresses, and a team change asked by a
+message needs that message to come from the member (tools/requester.py, T50).
 Invalid actions leave the input state, outbox and audit log unchanged.
 edited_description replaces SEND_MESSAGE text or an optional LINK_PAYMENT reply.
 """
@@ -27,6 +29,7 @@ from . import store
 from .models import EventState, Group, ProposedAction
 from ..tools.groups import check_groups
 from ..tools.identity import ASK_HUMAN, link_band
+from ..tools.requester import requester_problem
 
 
 class InvariantViolation(Exception):
@@ -128,6 +131,9 @@ def apply(state: EventState, action: ProposedAction, edited_description: Optiona
           option_id: Optional[str] = None) -> EventState:
     """Return the new state. Must not mutate `state` if an invariant would break (T03)."""
     new_state = copy.deepcopy(state)
+    problem = requester_problem(new_state, action.action_type, action.payload or {}, action.issue_id)
+    if problem:
+        raise InvariantViolation(problem)
 
     if action.action_type == "SEND_MESSAGE":
         text = edited_description if edited_description is not None else action.payload["text"]
