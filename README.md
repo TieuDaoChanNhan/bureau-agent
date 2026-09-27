@@ -119,7 +119,7 @@ python -m bureau plan wei --recorded-constraints --budget 120   # none valid: di
 | **Dependencies** | Choosing a travel plan unlocks the six issues waiting for it (reminders, rooms, four student questions) |
 
 ![Proposal first](docs/screenshots/t35-proposal-card.jpg)
-![Trip packages](docs/screenshots/t37-trip-options.jpg)
+![Trip packages](docs/screenshots/t48-trip-options.jpg)
 
 ## Architecture
 
