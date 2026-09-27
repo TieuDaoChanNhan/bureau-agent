@@ -74,4 +74,7 @@ secure cookie rotation/expiry, atomic global and per-session limits, UTC-day
 rollover, failed-call accounting, mid-agent/mid-planner exhaustion and replay or
 429 without further fake-model calls. Reset cannot reset model allowances.
 Browser checks in `demo/test_browser.py` and `demo/test_live_browser.py` cover
-all 30 steps, both modes, separate visitors and local font loading.
+all 30 steps of the full tour, the 15-step quick tour opened by "Start the guided
+demo" (with the fake live agent and with replay at a zero limit), separate
+visitors and local font loading. They run in the CI `browser` job; locally,
+`DEMO_CHROME_PATH` can point to an installed Chrome or Edge.

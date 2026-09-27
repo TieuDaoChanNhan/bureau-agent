@@ -96,6 +96,41 @@ class LiveConsoleTests(unittest.TestCase):
         page.wait_for_function("tourState.driver === null")
         self.assertTrue(page.evaluate("!!summary('wei').logistics"))
 
+    def quick_tour(self, page):
+        """The default tour (T38): "Start the guided demo" opens 15 steps; action steps click the highlighted control."""
+        page.locator("#heroTourBtn").click()
+        clicks = {1: '[data-act="retry"]', 3: '[data-act="approve"]', 4: '#composeForm button[type="submit"]',
+                  6: '[data-ev="wei"]', 7: '[data-act="plan"]', 8: '#answerForm button[type="submit"]',
+                  10: '[data-budget]:not([data-budget=""])', 11: '.tour-act', 12: '[data-act="choose"]'}
+        self.assertEqual(15, page.evaluate("QUICK.length"))
+        for index in range(15):
+            with self.subTest(step=index + 1):
+                page.wait_for_function("i => tourState.driver?.getActiveIndex() === i && !ui.busy", arg=index)
+                page.locator(".driver-popover-title").wait_for(state="visible")
+                self.assertIn(f"Step {index + 1} of 15", page.locator(".driver-popover-progress-text").inner_text())
+                if index == 9:
+                    self.assertEqual(3, page.locator('[data-act="choose"]').count())
+                if index == 11:
+                    self.assertIn("No valid option", page.locator(".diag").inner_text())
+                page.locator(clicks.get(index, ".driver-popover-next-btn")).first.click()
+        page.wait_for_function("tourState.driver === null")
+        self.assertEqual("F", page.evaluate("summary('wei').logistics.id"))
+        self.assertFalse(page.evaluate("summary('wei').issues.some(i => isWaiting(i, summary('wei')))"))
+
+    def test_quick_tour_with_fake_live_agent(self):
+        url, runtime = self.server("live")
+        page = self.page(url)
+        self.quick_tour(page)
+        self.assertTrue((runtime / "fake_calls.jsonl").exists())
+        self.assertTrue(page.locator("#demoModeNotice").is_hidden())
+
+    def test_quick_tour_replays_at_zero_limit(self):
+        url, runtime = self.server("limit")
+        page = self.page(url)
+        self.quick_tour(page)
+        self.assertFalse((runtime / "fake_calls.jsonl").exists())
+        self.assertIn("Saved example (live limit reached)", page.locator("#demoModeNotice").inner_text())
+
     def test_full_tour_with_fake_live_agent_and_second_browser(self):
         url, runtime = self.server("live")
         first, second = self.page(url), self.page(url)
