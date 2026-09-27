@@ -68,7 +68,7 @@ End card in the final three seconds:
 > **L’agent enquête. Vous décidez.**<br>
 > Démo : bureau-agent.onrender.com<br>
 > Code : github.com/TieuDaoChanNhan/bureau-agent<br>
-> Van Khue NGUYEN · Xuan Bach HOANG · Gia Bao DINH · Huy PHAN<br>
+> Van Khue NGUYEN · Xuan Bach HOANG · Gia Bao DINH · Thanh Quang Huy PHAN<br>
 > Voix française générée avec Gradium
 
 The Gradium credit is not spoken and remains within the existing three-second end card.
