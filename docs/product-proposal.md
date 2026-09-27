@@ -267,13 +267,13 @@ def plan_trip(req: TravelRequest, c: Constraints) -> ProposedAction: ...
 ## 5. Hai luồng trọng tâm
 
 ### 5.1. Hackathon: một khoản phí không khớp, xuất phát từ một tin nhắn mơ hồ
-**Đầu vào:** *"Bonjour, j'ai déjà payé ma cotisation mais je reçois encore des relances. J'ai utilisé mon adresse perso pour payer."* từ `a.nguyen@polytechnique.edu`.
+**Đầu vào:** *"Bonjour, j'ai déjà payé ma cotisation mais je reçois encore des relances. J'ai utilisé mon adresse perso pour payer."* từ `a.nguyen@polytechnique.example`.
 
 | Bước | Ai làm | Nội dung |
 |---|---|---|
 | 1 | LLM | Hiểu: người này khẳng định đã trả phí bằng email khác; cần đối chiếu |
 | 2 | Code | Tìm đăng ký theo email gửi: *Antoine Nguyen*, chưa có phí |
-| 3 | Code | `match_person` trên các khoản thanh toán chưa khớp: *A. Nguyen · nguyen.a@gmail.com · 19/09* · điểm 0,91 (tên gần khớp, phần trước @ đảo thứ tự, trả sau khi đăng ký) |
+| 3 | Code | `match_person` trên các khoản thanh toán chưa khớp: *A. Nguyen · nguyen.a@gmail.example · 19/09* · điểm 0,91 (tên gần khớp, phần trước @ đảo thứ tự, trả sau khi đăng ký) |
 | 4 | Code | Ngưỡng: ≥ 0,98 đề xuất ghép; 0,70–0,98 **hỏi người**; < 0,70 coi là khác người |
 | 5 | LLM | Soạn câu hỏi xác nhận cho người tổ chức và thư trả lời sẵn cho người tham gia |
 | 6 | Người | Xác nhận |

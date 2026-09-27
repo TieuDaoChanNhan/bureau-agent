@@ -49,20 +49,20 @@ def main() -> None:
         id="hackathon:message:m01", event_id="hackathon", issue_id="message:m01", action_type="LINK_PAYMENT",
         title="Link payment f90 to Antoine Nguyen?",
         description=("Antoine says he paid from his personal address. Payment f90 (\"A. Nguyen\", "
-                     "nguyen.a@gmail.com, €10) scores 0.91: please confirm before I link it.\n\n"
+                     "nguyen.a@gmail.example, €10) scores 0.91: please confirm before I link it.\n\n"
                      "Reply to send after confirmation:\nBonjour Antoine, votre cotisation 2026 est bien associée "
                      "à votre inscription. Vous êtes éligible pour le hackathon.\n"
                      "— Drafted with AI assistance, approved by the organizers."),
         evidence=[Evidence("message", "m01", "Claims payment from a personal address"),
                   Evidence("participant", "p01", "Antoine Nguyen, registered, no linked fee"),
-                  Evidence("payment", "f90", "A. Nguyen · nguyen.a@gmail.com · €10 · 19 Sep"),
+                  Evidence("payment", "f90", "A. Nguyen · nguyen.a@gmail.example · €10 · 19 Sep"),
                   Evidence("rule", "§3", "Membership fee required to take part")],
         checks=[Check("Surname matches", True, "nguyen"), Check("First name compatible (initial)", True, "antoine"),
-                Check("Email local part has the same parts", True, "nguyen.a@gmail.com"),
+                Check("Email local part has the same parts", True, "nguyen.a@gmail.example"),
                 Check("Identity score ≥ 0.98", False, "0.91: ask a human")],
         confidence=0.91, payload={"payment_id": "f90", "participant_id": "p01"},
         trace=[
-            {"step": 1, "tool": "get_participant", "arguments": {"id_or_email": "a.nguyen@polytechnique.edu"},
+            {"step": 1, "tool": "get_participant", "arguments": {"id_or_email": "a.nguyen@polytechnique.example"},
              "result": '{"id": "p01", "name": "Antoine Nguyen", ...}', "ok": True},
             {"step": 1, "tool": "check_eligibility", "arguments": {},
              "result": '{"unpaid": ["p01", ...], "unmatched_payments": ["f90", "f91"]}', "ok": True},
@@ -91,7 +91,7 @@ def main() -> None:
 
     dump("POST_approve_request.json", {"edited_description": None,
                                        "option_id": selection.payload["ranked_valid"][0]})
-    dump("GET_outbox.json", [{"action_id": "hackathon:message:m01", "to": ["a.nguyen@polytechnique.edu"],
+    dump("GET_outbox.json", [{"action_id": "hackathon:message:m01", "to": ["a.nguyen@polytechnique.example"],
                               "text": "Bonjour Antoine, ...", "sent_at": "2026-09-25T21:08:00+02:00"}])
     del wei
 
