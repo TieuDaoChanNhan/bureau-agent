@@ -1,0 +1,140 @@
+1
+00:00:00,000 --> 00:00:02,600
+Inscriptions, paiements, messages :
+
+2
+00:00:02,600 --> 00:00:07,000
+le code repère les problèmes,
+l’agent enquête, les bénévoles décident.
+
+3
+00:00:07,000 --> 00:00:11,000
+Antoine a payé,
+mais reçoit encore des relances.
+
+4
+00:00:11,000 --> 00:00:17,000
+L’agent choisit ses outils pour rapprocher
+son inscription des paiements.
+
+5
+00:00:17,000 --> 00:00:19,500
+La correspondance reste incertaine.
+
+6
+00:00:19,500 --> 00:00:24,000
+L’agent propose un rapprochement
+et me demande de confirmer.
+
+7
+00:00:24,000 --> 00:00:27,000
+Je valide : le paiement est rattaché.
+
+8
+00:00:27,000 --> 00:00:31,000
+La réponse est placée
+dans une boîte d’envoi simulée.
+
+9
+00:00:31,000 --> 00:00:36,000
+Un sponsor demande les numéros
+de téléphone des participants.
+
+10
+00:00:36,000 --> 00:00:39,500
+L’agent consulte le règlement
+et transmet la demande
+
+11
+00:00:39,500 --> 00:00:43,000
+aux organisateurs,
+sans partager les données.
+
+12
+00:00:43,000 --> 00:00:48,000
+Même logique pour un week-end
+d’intégration de cent étudiants.
+
+13
+00:00:48,000 --> 00:00:51,600
+Leurs consignes deviennent
+des contraintes :
+
+14
+00:00:51,600 --> 00:00:54,000
+budget, horaires et capacité.
+
+15
+00:00:54,000 --> 00:00:57,200
+Avant de chercher, l’agent demande
+
+16
+00:00:57,200 --> 00:01:00,500
+si les cent cinquante euros
+incluent les autocars.
+
+17
+00:01:00,500 --> 00:01:04,000
+Je confirme : tout est compris.
+
+18
+00:01:04,000 --> 00:01:07,000
+Avec les offres hôtelières
+Jinko enregistrées,
+
+19
+00:01:07,000 --> 00:01:09,500
+trois formules passent les contrôles.
+
+20
+00:01:09,500 --> 00:01:12,000
+Les rejets sont expliqués.
+
+21
+00:01:12,000 --> 00:01:16,000
+F privilégie un retour plus tôt ;
+C coûte moins cher.
+
+22
+00:01:16,000 --> 00:01:21,000
+L’accueil du groupe reste à confirmer.
+
+23
+00:01:21,000 --> 00:01:26,000
+Et avec cent vingt euros par personne ?
+
+24
+00:01:26,000 --> 00:01:28,000
+Aucune formule ne convient.
+
+25
+00:01:28,000 --> 00:01:33,000
+L’agent explique les changements
+possibles, sans assouplir les contraintes.
+
+26
+00:01:33,000 --> 00:01:36,000
+Je rétablis le budget initial.
+
+27
+00:01:36,000 --> 00:01:41,000
+Je choisis F.
+Aucune réservation n’est effectuée.
+
+28
+00:01:41,000 --> 00:01:47,000
+Cette décision débloque six tâches :
+relances, chambres et questions.
+
+29
+00:01:47,000 --> 00:01:50,000
+Sur cinquante messages de test,
+
+30
+00:01:50,000 --> 00:01:55,000
+le modèle a choisi le bon type d’action
+dans quarante-cinq cas.
+
+31
+00:01:55,000 --> 00:01:58,000
+Bureau Agent. Vous décidez.
