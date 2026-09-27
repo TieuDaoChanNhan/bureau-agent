@@ -884,7 +884,7 @@ setInterval(() => {
 }, 500);
 
 // Demo video (T17): the hero button and footer link stay hidden until a URL is set here.
-const DEMO_VIDEO_URL = "";
+const DEMO_VIDEO_URL = "https://drive.google.com/file/d/1Zao5Yndk3AOOPt89zQ0dxiTy8JNssqQZ/view?usp=sharing";
 for (const id of ["#videoBtn", "#videoLink"]) {
   const a = $(id);
   if (DEMO_VIDEO_URL) { a.href = DEMO_VIDEO_URL; a.hidden = false; }
