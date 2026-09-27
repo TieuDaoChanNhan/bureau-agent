@@ -287,9 +287,9 @@ class PlanningEvaluationTests(unittest.TestCase):
             "expected_clarifications": [], "feasible": True, **overrides,
         }
 
-    def test_corpus_has_at_least_six_distinct_labeled_requests(self):
+    def test_corpus_covers_historical_and_current_wei_requests(self):
         cases = run_eval.load_cases("planning.jsonl")
-        self.assertGreaterEqual(len(cases), 6)
+        self.assertGreaterEqual(len(cases), 20)
         self.assertEqual(len({case["id"] for case in cases}), len(cases))
         self.assertEqual(len({case["text"] for case in cases}), len(cases))
         for case in cases:
@@ -297,11 +297,73 @@ class PlanningEvaluationTests(unittest.TestCase):
                 self.assertIsInstance(case["expected_hard"], dict)
                 self.assertIsInstance(case["expected_clarifications"], list)
                 self.assertIs(type(case["feasible"]), bool)
-                self.assertEqual(case["expected_hard"]["participants"], 40)
-                self.assertEqual(case["request_context"]["participants"], 40)
-                self.assertEqual(case["options_fixture"], "planning_options.json")
+                if case["id"] in {f"p{i:03}" for i in range(1, 9)}:
+                    self.assertEqual(case["expected_hard"]["participants"], 40)
+                    self.assertEqual(case["request_context"]["participants"], 40)
+                    self.assertEqual(case["options_fixture"], "planning_options.json")
+                else:
+                    self.assertEqual(case["event"], "wei")
+                    self.assertNotIn("options_fixture", case)
+                    self.assertEqual(case["expected_hard"]["participants"],
+                                     case.get("request_context", {}).get("participants", 100))
         self.assertTrue(any(case["expected_clarifications"] for case in cases))
         self.assertTrue(any(not case["expected_clarifications"] for case in cases))
+
+    def test_current_wei_uses_cached_hotels_and_includes_meal_allocations(self):
+        case = next(c for c in run_eval.load_cases("planning.jsonl") if c["id"] == "p009")
+        inputs = []
+
+        def extract(request):
+            inputs.append(asdict(request))
+            return Constraints(hard={"participants": 100, "max_cost_per_person_cents": 14000,
+                                     "arrive_before": "21:00", "no_overnight": True})
+
+        with mock.patch("bureau.planner.jinko.JINKO_MODE", "live"):
+            row = run_eval.evaluate_planning([case], extractor=extract)["cases"][0]
+        self.assertIsNone(row["error"])
+        self.assertEqual(inputs[0]["catering"]["groceries_per_person_cents"], 2000)
+        options = row["action"]["payload"]["options"]
+        self.assertEqual(len(options), 8)
+        option_c = next(o["option"] for o in options if o["option"]["id"] == "C")
+        self.assertIn("jinko:replay", option_c["source"])
+        self.assertEqual(option_c["cost_per_person_cents"], 13559)
+        self.assertEqual(option_c["cost_breakdown_per_person_cents"]["food_transport"], 200)
+        self.assertEqual(row["action"]["payload"]["ranked_valid"], ["C"])
+        self.assertTrue(row["ranking_correct"])
+
+    def test_current_wei_meals_excluded_and_preferences_change_rank(self):
+        cases = {c["id"]: c for c in run_eval.load_cases("planning.jsonl")}
+        for case_id, budget, soft, expected in (
+            ("p015", 12000, [], ["C", "E"]),
+            ("p011", 15000, ["lower_cost"], ["C", "E", "F"]),
+            ("p017", 15000, ["early_return", "lower_cost"], ["F", "C", "E"]),
+        ):
+            with self.subTest(case=case_id):
+                c = Constraints(hard={"participants": 100, "max_cost_per_person_cents": budget,
+                                      "arrive_before": "21:00", "no_overnight": True}, soft=soft)
+                row = run_eval.evaluate_planning([cases[case_id]], extractor=lambda request: c)["cases"][0]
+                self.assertEqual(row["action"]["payload"]["ranked_valid"], expected)
+                self.assertTrue(row["ranking_correct"])
+                if case_id == "p015":
+                    self.assertFalse(row["input"]["catering"]["included_in_participation_fee"])
+                    option_c = next(o["option"] for o in row["action"]["payload"]["options"]
+                                    if o["option"]["id"] == "C")
+                    self.assertEqual(option_c["cost_per_person_cents"], 11359)
+
+    def test_ranking_labels_do_not_affect_planner_and_clarifications_are_unassessed(self):
+        case = next(c for c in run_eval.load_cases("planning.jsonl") if c["id"] == "p009")
+        case = {**case, "expected_ranked_valid": ["invented-option"]}
+        c = Constraints(hard={"participants": 100, "max_cost_per_person_cents": 14000,
+                              "arrive_before": "21:00", "no_overnight": True})
+        report = run_eval.evaluate_planning([case], extractor=lambda request: c)
+        self.assertFalse(report["cases"][0]["ranking_correct"])
+        self.assertEqual(report["cases"][0]["action"]["payload"]["ranked_valid"], ["C"])
+        c.clarifications = ["Confirm the budget?"]
+        with mock.patch("bureau.planner.planner.search_options") as search:
+            report = run_eval.evaluate_planning([case], extractor=lambda request: c)
+        search.assert_not_called()
+        self.assertIsNone(report["cases"][0]["ranking_correct"])
+        self.assertEqual(report["metrics"]["ranking"]["total"], 0)
 
     def test_extractor_receives_request_context_without_gold_labels(self):
         requests = []
