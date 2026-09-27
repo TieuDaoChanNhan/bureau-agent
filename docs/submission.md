@@ -1,23 +1,36 @@
-# Submission text
+# Submission
 
-Ready-to-paste text for the hackathon form (T19). Fill in the TODOs before submitting.
+Text for the official submission form, field by field.
 
-## Project name
-Bureau Agent
+## Nom de l'équipe ou du projet
+cylindricalbirds · Bureau Agent
 
-## One-liner (≤ 140 characters)
-An operations agent for volunteer-run associations: it finds what needs attention, investigates, and proposes. Organizers approve.
+## Nom des membres (format NOM prénom)
+NGUYEN Van Khue, HOANG Xuan Bach, DINH Gia Bao, PHAN Thanh Quang Huy
 
-## Short description (~100 words)
-Volunteer boards run events on top of their studies, and most of the work is fragmented: payments that do not match registrations, team rules, trips with many constraints, and dozens of messages. Bureau Agent detects these issues with deterministic checks. An AI agent (OpenAI `gpt-4.1`, tool calling) then investigates each one with its own choice of tools and proposes one action with its evidence. Organizers approve, edit or dismiss it. Rules that must hold are enforced in code, and nothing is sent or booked without approval. The same loop plans trips with real Jinko hotel offers. On 50 labeled messages, it picks the right action 90% of the time.
+## Lien vers le projet (démo en ligne)
+https://bureau-agent.onrender.com
 
-## Links
-- Repository: https://github.com/TieuDaoChanNhan/bureau-agent
-- Live demo: https://bureau-agent.onrender.com
-- Video: https://drive.google.com/file/d/1Zao5Yndk3AOOPt89zQ0dxiTy8JNssqQZ/view?usp=sharing
+## Lien vers le repository (instructions de test dans le README)
+https://github.com/TieuDaoChanNhan/bureau-agent
 
-## Team
-Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH, Thanh Quang Huy PHAN.
+## Lien vers la vidéo
+https://drive.google.com/file/d/1Zao5Yndk3AOOPt89zQ0dxiTy8JNssqQZ/view?usp=sharing
 
-## Sponsor tools used
-OpenAI (agent, structured extraction, explanations), Jinko (hotel search), Pipelex (evaluated for constraint extraction).
+## Description courte
+
+**Français**
+
+Bureau Agent est un agent d'opérations pour les associations bénévoles (BDE, clubs, organisateurs d'événements). Des contrôles déterministes repèrent ce qui demande de l'attention : paiements non rapprochés, équipes invalides, messages sans réponse, voyage à organiser. Un agent IA (OpenAI gpt-4.1, appels d'outils) enquête, puis propose une seule action avec ses preuves et un brouillon de réponse ; rien n'est envoyé, modifié ou réservé sans validation d'un organisateur. Les règles critiques sont vérifiées dans le code, pas dans le prompt. Le même agent planifie un voyage de 100 étudiants avec de vraies offres d'hôtels Jinko et ne relâche jamais une contrainte. Nous avons attaqué notre propre agent (70 cas, 210 essais), trouvé trois failles, corrigées dans le code : 0 proposition dangereuse après correction. Démo en ligne avec visite guidée de 3 minutes.
+
+**English**
+
+Bureau Agent is an operations agent for volunteer-run associations. Deterministic checks find what needs attention: unmatched payments, invalid teams, unanswered messages, a trip to organize. An AI agent (OpenAI gpt-4.1, tool calling) investigates and proposes one action with its evidence and a draft reply; nothing is sent, changed or booked until an organizer approves. Critical rules are enforced in code, not in the prompt. The same agent plans a 100-student trip with real Jinko hotel offers and never relaxes a constraint. We attacked our own agent (70 cases, 210 attempts), found three weaknesses and fixed them in code: 0 unsafe proposals after the fixes. Live demo with a 3-minute guided tour.
+
+## Sponsors utilisés
+OpenAI, Jinko, Gradium
+
+(OpenAI: the agent, constraint extraction and explanations. Jinko: hotel search for the trip planner. Gradium: the French voice-over of the video.)
+
+## Projet existant
+None: the project was created during the hackathon (first commit on 25 September 2026).

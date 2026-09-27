@@ -104,26 +104,12 @@ use explicit fixtures. Missing credentials, API errors, refusals, truncated outp
 and invalid values raise errors; they never fall back to the sample's answers.
 The optional `client=` argument supports scripted tests without network access.
 
-## Provider choice and Pipelex trial (T10)
+## Provider choice
 
-We tried Pipelex **0.66.0** in a separate Python 3.11 environment before choosing
-the implementation. Its installation resolved 94 packages. Following the
-[self-hosted guide](https://docs.pipelex.com/latest/get-started/run-it-yourself/)
-and [typed concept guide](https://docs.pipelex.com/latest/building-methods/concepts/inline-structures/),
-we ran a typed `PipeLLM` via `PipelexMTHDSProtocol.execute` against the synthetic
-`p001` request, with direct OpenAI routing, Gateway disabled and `DO_NOT_TRACK=1`.
-
-The shipped model catalogue lacked `gpt-4.1` (`ModelChoiceNotFoundError`), so the
-trial added that handle to the local OpenAI backend. Windows also required UTF-8
-output (`python -X utf8`) after a console encoding failure. After those fixes the
-typed result was correct: 40 participants, 12000 cents, 21:00, no overnight travel,
-and 2 step-free rooms. This was a compatibility trial, not full corpus validation.
-
-We selected [OpenAI structured output](https://developers.openai.com/api/docs/guides/structured-outputs/)
-for the shipped path: it uses the existing SDK/model configuration and avoids a
-second runtime, provider catalogue, and dependency tree for a single extraction
-call. Pipelex can perform the task; the fallback is a maintenance/scope decision.
-No Pipelex dependency, credentials, or machine-specific configuration is shipped.
+Constraint extraction uses [OpenAI structured output](https://developers.openai.com/api/docs/guides/structured-outputs/)
+with the same SDK and model configuration as the agent. A Pipelex prototype of this single call
+also worked during the hackathon; we kept one provider to avoid a second runtime and dependency
+tree. No Pipelex code or dependency is shipped.
 
 ## Validation and limits
 

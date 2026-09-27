@@ -125,6 +125,11 @@ All approvals affect sample records and a simulated outbox; no real sends/bookin
 
 ## Judging keep-alive
 
+**In use:** an external monitor (UptimeRobot, free plan) requests `/health` every five minutes,
+which keeps the free service awake without any model call. GitHub scheduled workflows proved
+unreliable for this: on 27 September the ten-minute schedule below ran once in six hours.
+The workflow stays as a backup.
+
 The workflow `.github/workflows/keepalive.yml` requests `/api/events` every ten
 minutes without a model call. It is inactive until GitHub **Settings → Secrets
 and variables → Actions → Variables** contains:
