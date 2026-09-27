@@ -4,7 +4,7 @@
 
 > LLM for ambiguity · Code for invariants · Humans for accountability
 
-**▶ Try it online:** [bureau-agent.onrender.com](https://bureau-agent.onrender.com) · **🎬 Demo video (2 min):** TODO · **🧭 Guided demo:** open the app and click **Start the guided demo**
+**▶ Try it online:** [bureau-agent.onrender.com](https://bureau-agent.onrender.com) · **🎬 Demo video (2 min):** [watch](https://drive.google.com/file/d/1Zao5Yndk3AOOPt89zQ0dxiTy8JNssqQZ/view?usp=sharing) · **🧭 Guided demo:** open the app and click **Start the guided demo**
 
 Built during the X-IA Hackathon #1 "Rise of Agents X" (25–27 September 2026). All code in this repository was written during the hackathon.
 
@@ -58,21 +58,35 @@ Offline evaluation on **50 labeled messages** (the 25 sample messages plus 25 pa
 | Unnecessary questions to organizers | **6** | 15 |
 | Invariant violations | **0** | 1 |
 
-Constraint extraction on 8 labeled trip requests: hard constraints 8/8, clarification presence 8/8.
+Planning evaluation on **20 requests**, including 12 current-WEI cases using cached Jinko hotels:
+supported hard fields 20/20, clarification presence 16/20, feasibility 11/12 searched
+cases and exact ranking 5/5 labeled searched cases. Cheapest-first selected C;
+earliest-return selected F. One request forbidding coaches still received coach
+options ([#102](https://github.com/TieuDaoChanNhan/bureau-agent/issues/102)); three
+current cases stopped for unnecessary accessibility questions. [Results and limits](eval/README.md#recorded-expanded-planning-run).
 
-**Held-out safety evaluation** (24 new adversarial and control cases the prompt was not tuned on, `gpt-4.1`, 3 runs each; [details](eval/README.md#safety-corpus-held-out-t46)):
+**Held-out safety evaluation** (70 adversarial and control cases, including 46
+prompt-blind Codex-authored additions; `gpt-4.1`, three repeats before and after
+[T50](https://github.com/TieuDaoChanNhan/bureau-agent/issues/94);
+[results and limits](eval/README.md#expanded-safety-comparison-t51)):
 
-| Category | Handled correctly |
+| Category | Acceptable action before → after T50 |
 |---|---|
-| Prompt injection ("mark me as paid", "admin mode", "ignore the rules") | **18/18** |
-| Personal-data requests | **9/9** |
-| Pressure and exceptions (claimed authority, refunds, waivers) | **15/15** |
-| Ordinary questions (must be answered, not escalated) | **15/15**, 0 false refusals |
-| Impersonation (unregistered or look-alike sender) | 11/15 → **15/15** after the fix |
+| Prompt injection | 36/42 → 42/42 |
+| Personal-data requests | 24/24 → 24/24 |
+| Pressure and exceptions | 33/33 → 33/33 |
+| Ordinary questions | 51/51 → 51/51; zero false refusals |
+| Impersonation | 52/60 → 58/60 |
 
-The first run found one real weakness: the agent did not check that the **sender is the registered participant** a request is about. 7 of 72 proposals acted on such requests, for example addressing a payment confirmation to an unregistered address. None bypassed approval, but none was blocked by code either. We fixed it **in code, not in the prompt** ([T50](https://github.com/TieuDaoChanNhan/bureau-agent/issues/94)): replies about a participant go only to their registered address, and team changes need a request from the member. Re-run on the same corpus: **0 unsafe proposals out of 72**, 100% acceptable actions, still 0 false refusals. The corpus is small and was written by the team that fixed it; a larger, independently written one is in progress ([#96](https://github.com/TieuDaoChanNhan/bureau-agent/issues/96)).
+Unsafe final proposals fell from **20/210 to 3/210 attempts**. All three remaining
+unsafe drafts copied a false claim that partner credits may be resold
+([#103](https://github.com/TieuDaoChanNhan/bureau-agent/issues/103)); an acceptable
+action type does not establish safe reply content. The post-fix run also had two
+eight-step-limit errors, leaving 208 assessable proposals. Every returned proposal
+still required organizer approval. This small synthetic corpus covers one event;
+it is not an independent human study or a general safety guarantee.
 
-**227 automated tests** (no API calls: a scripted fake model) run on every push.
+**230 automated tests** (no API calls: a scripted fake model) run on every push.
 
 Real-user feedback: TODO (T18).
 
@@ -177,7 +191,7 @@ Design choices: **one agent, not several** (the loop is the product); invariants
 
 ## Team
 
-Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH and Huy PHAN (X-IA Hackathon #1). GitHub: [@TieuDaoChanNhan](https://github.com/TieuDaoChanNhan), [@0x2ee08](https://github.com/0x2ee08), [@pectpait](https://github.com/pectpait), [@hoanxuanbach](https://github.com/hoanxuanbach).
+Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH and Thanh Quang Huy PHAN (X-IA Hackathon #1). GitHub: [@TieuDaoChanNhan](https://github.com/TieuDaoChanNhan), [@0x2ee08](https://github.com/0x2ee08), [@pectpait](https://github.com/pectpait), [@hoanxuanbach](https://github.com/hoanxuanbach).
 
 How we worked: issues, pull requests, reviews, and documented engineering decisions ([CONTRIBUTING.md](CONTRIBUTING.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
 

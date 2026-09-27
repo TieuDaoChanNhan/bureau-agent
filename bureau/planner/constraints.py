@@ -51,6 +51,10 @@ def check_option(opt: TravelOption, c: Constraints) -> list[Check]:
         checks.append(Check(f"≥ {hard['step_free_rooms']} step-free rooms", hint,
                             "listed in facilities; confirm with the venue" if hint else "not listed",
                             verified="step_free_rooms" not in c.organizer_verified))
+    for requirement in dict.fromkeys(c.organizer_verified):
+        if requirement != "step_free_rooms":
+            checks.append(Check(requirement, False, "Confirm with the organizers and provider before booking.",
+                                verified=False))
     return checks
 
 

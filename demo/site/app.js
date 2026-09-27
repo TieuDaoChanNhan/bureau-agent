@@ -26,6 +26,9 @@ const PILL = {
   waiting: ["p-wait", "Waiting"], running: ["p-run", "Running…"], failed: ["p-fail", "Agent failed"], resolved: ["p-res", "Resolved"], dismissed: ["p-rej", "Dismissed"],
 };
 
+// A request never blocks the console for good (T52): every call gives up after API_TIMEOUT_MS, and
+// network errors or a restarting server (Render redeploys after each merge) get a message saying what to do.
+const API_TIMEOUT_MS = 120000;
 const demoStore = createDemoStore(window.DEMO_FIXTURES);
 ui.drafts = demoStore.drafts();
 async function api(path, options = {}) { const sessionId = demoStore.sessionInfo().id; try { return demoStore.request(path, options); } finally { if (demoStore.sessionInfo().id !== sessionId) restoreSessionUI(); refreshSessionNotice(); } }
@@ -627,7 +630,7 @@ async function planTrip(overrideBudget = null, text = null) {
     }
     const valid = (action.payload.ranked_valid || []).length;
     setRun(`Planner: ${valid} of ${(action.payload.options || []).length} packages pass every hard constraint`
-      + `${overrideBudget ? ` at ${euro(overrideBudget)}` : ""}.`, valid ? "" : "error");
+      + `${overrideBudget ? ` at ${euro(overrideBudget)}` : ""}.`, valid ? "" : "warn");  // a diagnosis, not a failure (the tour reads "error" as a failed request)
   });
 }
 
@@ -858,7 +861,7 @@ setInterval(() => {
 }, 500);
 
 // Demo video (T17): the hero button and footer link stay hidden until a URL is set here.
-const DEMO_VIDEO_URL = "";
+const DEMO_VIDEO_URL = "https://drive.google.com/file/d/1Zao5Yndk3AOOPt89zQ0dxiTy8JNssqQZ/view?usp=sharing";
 for (const id of ["#videoBtn", "#videoLink"]) {
   const a = $(id);
   if (DEMO_VIDEO_URL) { a.href = DEMO_VIDEO_URL; a.hidden = false; }

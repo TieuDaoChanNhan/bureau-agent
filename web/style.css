@@ -102,6 +102,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 0 20px 48px; }
 .run .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); flex: none; }
 .run.busy .dot { background: var(--warn); animation: pulse 1s ease-in-out infinite; }
 .run.error { color: var(--crit); } .run.error .dot { background: var(--crit); }
+.run.warn { color: var(--warn); } .run.warn .dot { background: var(--warn); }
 @keyframes pulse { 50% { opacity: .35; } }
 
 /* Issue list */

@@ -113,6 +113,9 @@ class LiveConsoleTests(unittest.TestCase):
                     self.assertEqual(3, page.locator('[data-act="choose"]').count())
                 if index == 11:
                     self.assertIn("No valid option", page.locator(".diag").inner_text())
+                    page.wait_for_timeout(600)  # let the tour poll the status line once
+                    # A diagnosis is the expected result, not a failure (the popover must not say so).
+                    self.assertNotIn("Something went wrong", page.locator(".driver-popover").inner_text())
                 page.locator(clicks.get(index, ".driver-popover-next-btn")).first.click()
         page.wait_for_function("tourState.driver === null")
         self.assertEqual("F", page.evaluate("summary('wei').logistics.id"))
@@ -128,6 +131,28 @@ class LiveConsoleTests(unittest.TestCase):
                                        arg=f"Step 1 of {total}")
                 page.locator(".driver-popover-close-btn").click()
                 page.wait_for_function("tourState.driver === null")
+
+    def test_failed_plan_request_is_reported_and_the_button_works_again(self):
+        """T52: a restarting server must not leave the console unresponsive."""
+        url, _ = self.server("limit")
+        page = self.page(url)
+        calls = {"n": 0}
+
+        def flaky(route):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                route.fulfill(status=503, body="")  # as while Render redeploys
+            else:
+                route.continue_()
+        page.route("**/api/events/wei/plan", flaky)
+        page.locator('[data-ev="wei"]').click()
+        page.locator('[data-key="issue:no_logistics_plan"]').click()
+        page.locator('[data-act="plan"]').click()
+        page.wait_for_function("!ui.busy && document.querySelector('#run').classList.contains('error')")
+        self.assertIn("restarting", page.locator("#runText").inner_text())
+        page.locator('[data-act="plan"]').click()
+        page.wait_for_function("!ui.busy && !!document.querySelector('#answerForm')")
+        self.assertEqual(2, calls["n"])
 
     def test_quick_tour_with_fake_live_agent(self):
         url, runtime = self.server("live")

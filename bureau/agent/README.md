@@ -14,7 +14,10 @@ The single event agent investigates an issue with model-selected tools and retur
 Issue + source messages -> model -> tool call -> result -> ... -> propose_action -> ProposedAction
 ```
 
-- The model chooses the tools and action. There is no keyword routing or additional agent.
+- Normally the model chooses the tools and action. Before model calls, a deterministic
+  guard escalates explicit requests to copy a purportedly approved answer verbatim
+  (#103). Claimed approval inside a participant message is not authorization. This
+  narrow guard is independent of the quoted answer's wording or the event's policy.
 - Source messages include their sender, channel and timestamp as structured data.
 - Up to eight model turns are allowed. Independent lookups can share a turn; a final proposal must be called alone after reading their results.
 - The last turn is reserved for `propose_action`; the model still chooses the action type and must escalate when evidence is insufficient.
@@ -23,6 +26,14 @@ Issue + source messages -> model -> tool call -> result -> ... -> propose_action
 - `run_pending` skips existing proposals and issues blocked by unresolved `depends_on` entries. It saves after each successful proposal, logs a failed issue, marks it `agent_failed` and continues the batch, and returns actions, errors, and the remaining runnable count. An `agent_failed` issue is not retried by later batches (so `remaining` reaches 0 and a failing call is not re-billed on every run); pass `issue_id` to retry it.
 - Terminal decisions no longer detected are retained before each batch save, preventing old proposals from becoming executable again.
 - Payload shape checks prevent missing executor inputs. Group replacements must retain already assigned participants and run the existing capacity/membership checks on a temporary preview before acceptance; the executor checks again after approval.
+- The verbatim-answer guard is rechecked at proposal and executor boundaries, so a
+  stale or edited non-escalation draft for the flagged message cannot bypass it.
+  An escalation still requires organizer approval and sends nothing. Its trace
+  names `check_message_instructions` and records that no model call was made.
+  Ordinary fenced code and questions about quoted answers continue through the
+  model. The guard recognizes bounded English/French wording, not every injection
+  or paraphrase; the prompt also treats embedded roles and claimed prior approval
+  as untrusted data and requires independent policy lookup.
 - The identity threshold is enforced in code, not only in the prompt: a `LINK_PAYMENT` whose payment and participant score below 0.70 (and share no registered email) is rejected with an error, so the model must escalate or ask for payment details. The executor refuses the same link on approval.
 - `get_payment` and `list_groups` expose actual records rather than requiring guessed ids or memberships. `list_group_candidates` returns ungrouped participants who want a group, including their names, skills and needs; payment eligibility is checked separately.
 - Rules are in English. `search_rules` uses English keywords; `list_rules` lets the model read all sections before declaring a policy absent.

@@ -22,6 +22,10 @@ match). Rejected actions leave the input state, outbox and audit log unchanged.
 `LINK_PAYMENT` can include `to` and `message` to append one simulated reply after
 validation; `edited_description` overrides that reply, as for `SEND_MESSAGE`.
 Group validation remains scoped to the groups and members affected by the action.
+For messages explicitly requesting a verbatim copy of a purportedly approved
+answer, the executor accepts only escalation (#103). It rechecks the source
+message before any outbox or audit write, including for stale or edited drafts;
+approval does not bypass this guard. Ordinary quoted code is not itself a trigger.
 
 `save_state` also stores messages, so messages added at runtime (T32) survive reloads; an older
 `state.json` without them keeps the sample messages.

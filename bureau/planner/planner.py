@@ -19,6 +19,7 @@ from .compose import CateringBudgetError, catering_costs, compose_packages
 from .explain import explain, rejection_line
 from .extract import extract_constraints
 from .interface import Constraints, TravelOption, TravelRequest
+from .requirements import unsupported_request_questions
 
 __all__ = ["plan_trip", "extract_constraints", "search_options", "request_from_state", "TravelRequest",
            "HARD_KEYS", "recorded_constraints"]
@@ -101,6 +102,13 @@ def plan_trip(req: TravelRequest, c: Constraints, client=None, search: dict | No
     are computed in code either way.
     """
     clarifications = list(c.clarifications)
+    for key in sorted(c.hard.keys() - HARD_KEYS.keys()):
+        clarifications.append(f"The planner cannot enforce the hard requirement '{key}'. "
+                              "How should the organizers verify it before searching?")
+    # Also guard direct/recorded callers that bypass live extraction.
+    for question in unsupported_request_questions(req.text):
+        if question not in clarifications:
+            clarifications.append(question)
     if not clarifications:
         try:
             catering_costs(req)

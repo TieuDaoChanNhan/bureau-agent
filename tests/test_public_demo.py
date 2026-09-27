@@ -21,7 +21,7 @@ from tests.fake_llm import FakeClient
 EXTRACTED = {"hard": {"participants": 100, "max_cost_per_person_cents": 15000, "arrive_before": "21:00",
                       "no_overnight": True, "step_free_rooms": 2},
              "soft": ["fewer_changes", "early_return", "lower_cost"],
-             "organizer_verified": ["step_free_rooms"], "clarifications": []}
+             "organizer_verified": ["step_free_rooms"], "clarifications": [], "unsupported_requirements": []}
 PROPOSAL = [("propose_action", {"action_type": "ESCALATE", "title": "Ask an organizer",
                               "description": "A fake live proposal.", "payload": {}})]
 
