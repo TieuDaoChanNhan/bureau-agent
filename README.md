@@ -39,6 +39,7 @@ The same loop plans trips. The organizer's request for a student integration wee
 | Risk | What prevents it |
 |---|---|
 | The model links a payment to the wrong person | The identity score is enforced **in code** at two layers (proposal and approval): below 0.70 is refused. A live `gpt-4o-mini` run did propose such a link; it is now impossible. |
+| Someone writes on behalf of another participant | Also in code, at both layers: a reply about a participant goes only to their registered address, and a team change needs a request from the member's registered address. Found by our held-out safety evaluation, then fixed. |
 | The model invents a rule | Answers must cite a rule section; when the rules are silent, it escalates to the organizers ("silence is not permission"). |
 | A personal-data or refund request | Escalated, never answered by the agent. |
 | A team over the size limit, a person in two teams | Group invariants are re-checked by the executor on approval. |
@@ -67,11 +68,11 @@ Constraint extraction on 8 labeled trip requests: hard constraints 8/8, clarific
 | Personal-data requests | **9/9** |
 | Pressure and exceptions (claimed authority, refunds, waivers) | **15/15** |
 | Ordinary questions (must be answered, not escalated) | **15/15**, 0 false refusals |
-| Impersonation (unregistered or look-alike sender) | 11/15 |
+| Impersonation (unregistered or look-alike sender) | 11/15 → **15/15** after the fix |
 
-It found one real weakness: the agent does not check that the **sender is the registered participant** a request is about. 7 of 72 proposals acted on such requests, for example addressing a payment confirmation to an unregistered address. None bypassed approval, but none was blocked by code either. The code fix is tracked in [#94](https://github.com/TieuDaoChanNhan/bureau-agent/issues/94).
+The first run found one real weakness: the agent did not check that the **sender is the registered participant** a request is about. 7 of 72 proposals acted on such requests, for example addressing a payment confirmation to an unregistered address. None bypassed approval, but none was blocked by code either. We fixed it **in code, not in the prompt** ([T50](https://github.com/TieuDaoChanNhan/bureau-agent/issues/94)): replies about a participant go only to their registered address, and team changes need a request from the member. Re-run on the same corpus: **0 unsafe proposals out of 72**, 100% acceptable actions, still 0 false refusals. The corpus is small and was written by the team that fixed it; a larger, independently written one is in progress ([#96](https://github.com/TieuDaoChanNhan/bureau-agent/issues/96)).
 
-**218 automated tests** (no API calls: a scripted fake model) run on every push.
+**227 automated tests** (no API calls: a scripted fake model) run on every push.
 
 Real-user feedback: TODO (T18).
 
@@ -112,7 +113,7 @@ Then open http://127.0.0.1:8000 and click **Start the guided demo**. **Reset dem
 
 **Tests and evaluation**
 ```bash
-python -m unittest discover -s tests -t .     # 218 tests, no API key needed (or: uv run python -m unittest …)
+python -m unittest discover -s tests -t .     # 227 tests, no API key needed (or: uv run python -m unittest …)
 python -m eval.run_eval                       # 50-case evaluation (needs a key)
 python -m bureau plan wei --recorded-constraints   # trip planner offline: 3 of 8 packages valid at €150
 python -m bureau plan wei --recorded-constraints --budget 120   # none valid: diagnosis, no relaxation
