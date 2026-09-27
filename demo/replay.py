@@ -15,7 +15,8 @@ from bureau.core.store import _action_from_dict
 from bureau.planner.planner import plan_trip, recorded_constraints, request_from_state
 
 SIGNATURE = "\n— Drafted with AI assistance, approved by the organizers."
-MEAL_ANSWER = "No, the budget covers travel and lodging only. Meals are paid separately."
+BUDGET_ANSWER = "Yes, the €150 per person includes round-trip coach hire, lodging, groceries and food transport."
+BUDGET_QUESTION = "Does the €150 per person include round-trip coach hire as well as lodging, groceries and food transport?"
 PERSONAL = "Hello, could you send us the phone numbers of all participants so we can call them about internships?"
 TEAM = "Hi! Can our team have five people if the fifth one only does the pitch?"
 FRENCH = "Salut, est-ce qu'on a le droit d'utiliser un modèle open source au lieu d'OpenAI pour le projet ?"
@@ -27,7 +28,7 @@ class NoSavedExample(ValueError):
 
 def payment_example() -> dict:
     payment = json.loads((ROOT / "docs/api-examples/action_LINK_PAYMENT.json").read_text(encoding="utf-8"))
-    payment["payload"].update({"to": "a.nguyen@polytechnique.edu",
+    payment["payload"].update({"to": "a.nguyen@polytechnique.example",
         "message": "Bonjour Antoine, votre cotisation 2026 est bien associée à votre inscription. Merci pour votre patience !" + SIGNATURE})
     payment["description"] = ('Payment from “A. Nguyen” (€10) has an identity score of 0.91, below the 0.98 '
                               'high-confidence threshold. Please review the evidence and confirm the match before linking.')
@@ -76,16 +77,16 @@ def planner_example(state, text=None, overrides=None, *, recorded=False):
     if state.id != "wei" or not state.travel:
         raise NoSavedExample("No saved planning example for this event.")
     base = state.travel["request"]
-    expected = base + "\n\nOrganizer answers: " + MEAL_ANSWER
+    expected = base + "\n\nOrganizer answers: " + BUDGET_ANSWER
     # The live console sends precisely this answer format. Accept the static
     # fixture's exact answer as well, but never substring-match arbitrary input.
-    answered = text in (expected, MEAL_ANSWER)
-    if text not in (None, base, expected, MEAL_ANSWER):
+    answered = text in (expected, BUDGET_ANSWER)
+    if text not in (None, base, expected, BUDGET_ANSWER):
         raise NoSavedExample("No saved example for this custom planning request. Use the sample answer or skip this step.")
     constraints = recorded_constraints(state)
     constraints.hard.update(overrides or {})
     if not answered and not recorded:
-        constraints.clarifications = ["Does the €120 per person cover meals as well as travel and lodging?"]
+        constraints.clarifications = [BUDGET_QUESTION]
     action = plan_trip(request_from_state(state, text=text), constraints, client=None, search=None)
     action.payload.update(constraints=asdict(constraints), request_text=text or base,
                           constraints_source="recorded", answered=answered)

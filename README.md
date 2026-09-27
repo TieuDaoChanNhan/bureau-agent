@@ -4,7 +4,7 @@
 
 > LLM for ambiguity · Code for invariants · Humans for accountability
 
-**▶ Try it online:** TODO (public demo link, T20) · **🎬 Demo video (2 min):** TODO · **🧭 Guided demo:** open the app and click **Start the guided demo**
+**▶ Try it online:** [bureau-agent.onrender.com](https://bureau-agent.onrender.com) · **🎬 Demo video (2 min):** TODO · **🧭 Guided demo:** open the app and click **Start the guided demo**
 
 Built during the X-IA Hackathon #1 "Rise of Agents X" (25–27 September 2026). All code in this repository was written during the hackathon.
 
@@ -66,7 +66,7 @@ Real-user feedback: TODO (T18).
 ## Try it
 
 ### Online
-TODO: the public demo link (T20). Open it and click **Start the guided demo**: a 3-minute, 15-step tour that highlights each button. **See every feature** under it opens the full 30-step tour.
+[bureau-agent.onrender.com](https://bureau-agent.onrender.com) runs the live agent (`gpt-4.1`). Each browser gets its own copy of the sample data; a shared daily limit on model calls applies, after which proposals come from clearly labelled saved examples. The first load after a quiet period can take up to a minute (free hosting). Open it and click **Start the guided demo**: a 3-minute, 15-step tour that highlights each button. **See every feature** under it opens the full 30-step tour.
 
 ### Locally
 Requires Python 3.11+ and an OpenAI API key for the live agent. Everything else works without a key.
@@ -124,6 +124,7 @@ python -m bureau plan wei --recorded-constraints --budget 120   # none valid: di
 | Planner | [`bureau/planner/`](bureau/planner/README.md) | LLM constraint extraction → Jinko hotels × transport → packages in code → hard-constraint gate → ranking → LLM explanation |
 | API | [`api/`](api/README.md) | FastAPI routes used by the web console |
 | Web | [`web/`](web/README.md) | Static HTML/JS console and guided tour (no build step) |
+| Public demo | [`docs/DEPLOY.md`](docs/DEPLOY.md), [`demo/`](demo/README.md) | Render free service from `main`: per-browser sessions, model-call limits, saved-example fallback; static backup |
 | Evaluation | [`eval/`](eval/README.md) | Labeled cases, runner, recorded model comparison |
 
 Design choices: **one agent, not several** (the loop is the product); invariants in code, not in the prompt; the agent only proposes; timezone-aware dates and money in integer cents.

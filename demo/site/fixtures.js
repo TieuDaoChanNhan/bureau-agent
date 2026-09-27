@@ -33,7 +33,7 @@ window.DEMO_FIXTURES = {
               [
                 "Email local part has the same parts",
                 true,
-                "nguyen.a@gmail.com"
+                "nguyen.a@gmail.example"
               ],
               [
                 "Paid after registering",
@@ -146,7 +146,7 @@ window.DEMO_FIXTURES = {
           "id": "message:m01",
           "kind": "unprocessed_message",
           "blocking": false,
-          "title": "New email message from a.nguyen@polytechnique.edu",
+          "title": "New email message from a.nguyen@polytechnique.example",
           "subject_ids": [
             "m01"
           ],
@@ -161,7 +161,7 @@ window.DEMO_FIXTURES = {
           "id": "message:m02",
           "kind": "unprocessed_message",
           "blocking": false,
-          "title": "New email message from julien.morel@gmail.com",
+          "title": "New email message from julien.morel@gmail.example",
           "subject_ids": [
             "m02"
           ],
@@ -191,7 +191,7 @@ window.DEMO_FIXTURES = {
           "id": "message:m04",
           "kind": "unprocessed_message",
           "blocking": false,
-          "title": "New email message from mei.tanaka@gmail.com",
+          "title": "New email message from mei.tanaka@gmail.example",
           "subject_ids": [
             "m04"
           ],
@@ -266,7 +266,7 @@ window.DEMO_FIXTURES = {
           "id": "message:m09",
           "kind": "unprocessed_message",
           "blocking": false,
-          "title": "New email message from lea.martin@polytechnique.edu",
+          "title": "New email message from lea.martin@polytechnique.example",
           "subject_ids": [
             "m09"
           ],
@@ -341,7 +341,7 @@ window.DEMO_FIXTURES = {
           "id": "message:m14",
           "kind": "unprocessed_message",
           "blocking": false,
-          "title": "New email message from victor.leroy@polytechnique.edu",
+          "title": "New email message from victor.leroy@polytechnique.example",
           "subject_ids": [
             "m14"
           ],
@@ -648,7 +648,7 @@ window.DEMO_FIXTURES = {
     },
     "wei": {
       "id": "wei",
-      "name": "WEI 2026 (sample data)",
+      "name": "Student association WEI (demo)",
       "issues": [
         {
           "id": "no_logistics_plan",
@@ -722,7 +722,7 @@ window.DEMO_FIXTURES = {
           "id": "rooms_unassigned",
           "kind": "rooms_unassigned",
           "blocking": true,
-          "title": "8 participants have no room",
+          "title": "100 participants have no room",
           "subject_ids": [
             "w01",
             "w02",
@@ -731,7 +731,99 @@ window.DEMO_FIXTURES = {
             "w05",
             "w06",
             "w07",
-            "w08"
+            "w08",
+            "w09",
+            "w10",
+            "w11",
+            "w12",
+            "w13",
+            "w14",
+            "w15",
+            "w16",
+            "w17",
+            "w18",
+            "w19",
+            "w20",
+            "w21",
+            "w22",
+            "w23",
+            "w24",
+            "w25",
+            "w26",
+            "w27",
+            "w28",
+            "w29",
+            "w30",
+            "w31",
+            "w32",
+            "w33",
+            "w34",
+            "w35",
+            "w36",
+            "w37",
+            "w38",
+            "w39",
+            "w40",
+            "w41",
+            "w42",
+            "w43",
+            "w44",
+            "w45",
+            "w46",
+            "w47",
+            "w48",
+            "w49",
+            "w50",
+            "w51",
+            "w52",
+            "w53",
+            "w54",
+            "w55",
+            "w56",
+            "w57",
+            "w58",
+            "w59",
+            "w60",
+            "w61",
+            "w62",
+            "w63",
+            "w64",
+            "w65",
+            "w66",
+            "w67",
+            "w68",
+            "w69",
+            "w70",
+            "w71",
+            "w72",
+            "w73",
+            "w74",
+            "w75",
+            "w76",
+            "w77",
+            "w78",
+            "w79",
+            "w80",
+            "w81",
+            "w82",
+            "w83",
+            "w84",
+            "w85",
+            "w86",
+            "w87",
+            "w88",
+            "w89",
+            "w90",
+            "w91",
+            "w92",
+            "w93",
+            "w94",
+            "w95",
+            "w96",
+            "w97",
+            "w98",
+            "w99",
+            "w100"
           ],
           "details": {},
           "status": "open",
@@ -761,7 +853,7 @@ window.DEMO_FIXTURES = {
           "id": "message:wm02",
           "kind": "unprocessed_message",
           "blocking": false,
-          "title": "New email message from tom.girard@etu.example.fr",
+          "title": "New email message from tom.girard@wei.example",
           "subject_ids": [
             "wm02"
           ],
@@ -771,32 +863,151 @@ window.DEMO_FIXTURES = {
           "status": "open",
           "depends_on": [],
           "resolved_by_action_id": null
+        },
+        {
+          "id": "message:wm03",
+          "kind": "unprocessed_message",
+          "blocking": false,
+          "title": "New email message from sarah.lefebvre@wei.example",
+          "subject_ids": [
+            "wm03"
+          ],
+          "details": {
+            "text": "Bonjour le bureau, j'ai envoyé le formulaire d'inscription au WEI mais pas encore le virement de 150 €. Est-ce que l'inscription suffit à valider ma place ? Les repas et le transport des courses sont-ils bien compris dans cette participation ?"
+          },
+          "status": "open",
+          "depends_on": [],
+          "resolved_by_action_id": null
+        },
+        {
+          "id": "message:wm04",
+          "kind": "unprocessed_message",
+          "blocking": false,
+          "title": "New email message from camille.dupont@wei.example",
+          "subject_ids": [
+            "wm04"
+          ],
+          "details": {
+            "text": "Bonjour, le virement de 150 € du 22 septembre pourrait apparaître sous C. DUPONT-LAMBERT avec la référence WEI Cami. Il devrait correspondre à mon inscription Camille Dupont. Pouvez-vous vérifier avec la trésorerie avant de confirmer mon paiement ? Je peux fournir un justificatif si nécessaire."
+          },
+          "status": "open",
+          "depends_on": [],
+          "resolved_by_action_id": null
+        },
+        {
+          "id": "message:wm05",
+          "kind": "unprocessed_message",
+          "blocking": false,
+          "title": "New email message from ines.roux@wei.example",
+          "subject_ids": [
+            "wm05"
+          ],
+          "details": {
+            "text": "Hi organizers, Emma and I requested step-free rooms. Before you assign rooms, can you confirm access from the coaches to the bedrooms, bathroom, shared kitchen and activity space? Please check the coach boarding arrangements with the operator too; a room label alone does not answer those questions."
+          },
+          "status": "open",
+          "depends_on": [
+            "no_logistics_plan"
+          ],
+          "resolved_by_action_id": null
+        },
+        {
+          "id": "message:wm06",
+          "kind": "unprocessed_message",
+          "blocking": false,
+          "title": "New discord message from lucas_b",
+          "subject_ids": [
+            "wm06"
+          ],
+          "details": {
+            "text": "Pour les repas du WEI, est-ce qu'on pourra cuisiner ensemble sur place ? Il faudrait une cuisine autorisée pour notre groupe de 100 et un espace pour les jeux, avec les horaires et règles du lieu. Est-ce qu'un lieu a été retenu ? Les courses achetées par le bureau et leur transport jusqu'au lieu sont-ils bien inclus dans notre participation de 150 € ?"
+          },
+          "status": "open",
+          "depends_on": [
+            "no_logistics_plan"
+          ],
+          "resolved_by_action_id": null
+        },
+        {
+          "id": "message:wm07",
+          "kind": "unprocessed_message",
+          "blocking": false,
+          "title": "New email message from student09@wei.example",
+          "subject_ids": [
+            "wm07"
+          ],
+          "details": {
+            "text": "Hello, will the two rented coaches collect us on the campus in Palaiseau on Friday and bring us back there on Sunday? Please send the meeting point and return time once the venue and both coach journeys are confirmed. Is the Trouville-Deauville area only a search assumption for now?"
+          },
+          "status": "open",
+          "depends_on": [
+            "no_logistics_plan"
+          ],
+          "resolved_by_action_id": null
         }
       ],
       "actions": [],
       "travel": {
-        "request": "WEI for 40 people. Leave Paris Friday 9 Oct after class, back Sunday afternoon. Max €120 per person. Arrive before 21:00, no overnight travel. Two people need step-free rooms.",
-        "participants": 40,
-        "origin": "Paris",
+        "request": "We're planning an integration weekend for 100 students in Trouville-Deauville, 9–11 October 2026. Leave campus in Palaiseau Friday after 17:00, return Sunday by 18:00. Budget: €150 each, meals included; we're unsure whether coach hire is covered. We need two coaches, arrival before 21:00, no overnight travel, two separate step-free rooms, and a venue with a shared kitchen and activity spaces. The association buys and transports groceries. Prefer fewer changes, then an earlier return, then lower cost.",
+        "participants": 100,
+        "origin": "Campus in Palaiseau",
         "depart_after": "2026-10-09T17:00:00+02:00",
+        "return_by": "2026-10-11T18:00:00+02:00",
+        "nights": 2,
         "constraints": {
           "hard": {
-            "participants": 40,
+            "participants": 100,
             "arrive_before": "21:00",
             "no_overnight": true,
             "step_free_rooms": 2,
-            "max_cost_per_person_cents": 12000
+            "max_cost_per_person_cents": 15000
           },
           "soft": [
             "fewer_changes",
-            "near_station",
-            "early_return"
+            "early_return",
+            "lower_cost"
           ],
           "organizer_verified": [
             "step_free_rooms"
           ]
         },
         "destination": "Trouville-Deauville",
+        "provenance": {
+          "status": "unconfirmed_demo",
+          "association": "Unnamed student association",
+          "event": "WEI — weekend d’intégration (self-made demo)",
+          "source": "User-provided description in issue #15 implementation conversation (2026-09-26)",
+          "confirmed_context": "The scenario is modelled on a real French student integration weekend described by a project contributor: organizers collect registrations, check payments, hire coaches and seek accommodation with cooking and activity spaces. Meals are included in the student fee; organizers buy groceries and transport them to the venue.",
+          "unconfirmed_assumptions": [
+            "Trouville-Deauville search area and Palaiseau pickup point",
+            "9–11 October 2026 dates and travel times",
+            "100 students and two separate step-free rooms",
+            "€150 complete-package ceiling and €150 provisional participation fee, both including meals and food transport; demo allocations of €20 groceries and €2 food transport per person",
+            "The initial organizer request leaves coach inclusion unclear; recorded constraints represent the clarified complete-package budget",
+            "Payment deadline, refund policy and all illustrative transport/package prices and facilities"
+          ],
+          "personal_data": "All registrations, payments and messages are fictional.",
+          "travel_options": "Illustrative recorded packages, not Jinko results or confirmed supplier quotes.",
+          "review_status": "Pending an approval comment on PR #62 from a teammate who has attended or organized a WEI; no association naming consent is recorded."
+        },
+        "organizer_checks": [
+          "Confirm the destination area, dates, headcount, fee and budget with the student organizers before using this demo for a real trip.",
+          "Confirm a private round-trip coach hire, at least 100 passenger seats across the hired coaches (demo: two 53-seat buses), campus pickup, return time and accessibility with the operator; a scheduled coach ticket is not a charter quote.",
+          "Confirm accommodation for 100 students for two nights, including two separate step-free rooms and accessible shared spaces.",
+          "Confirm shared-kitchen capacity, equipment and permission for student group cooking. The student organizers must plan the menu, quantities and dietary needs, buy groceries and organize their transport to the venue, including vehicle capacity, handling and storage. Verify the food and delivery allocation within the student fee; the demo amounts and transport method are not confirmed.",
+          "Confirm indoor and outdoor activity spaces, permission for integration activities and venue noise rules.",
+          "Verify availability and complete group quotes with providers. Jinko hotel room prices are scaled estimates, not confirmed group blocks; ground search is unavailable for the current key. Verify private coach hire, kitchen access and activity permissions directly with providers."
+        ],
+        "catering": {
+          "included_in_participation_fee": true,
+          "purchased_by": "student organizers",
+          "transported_by": "student organizers",
+          "groceries_per_person_cents": 2000,
+          "food_transport_per_person_cents": 200,
+          "budget_status": "unconfirmed_demo",
+          "transport_method": null,
+          "logistics_status": "to_confirm"
+        },
         "search": {
           "city": "Deauville",
           "country_code": "fr",
@@ -806,7 +1017,7 @@ window.DEMO_FIXTURES = {
           ],
           "checkin": "2026-10-09",
           "checkout": "2026-10-11",
-          "rooms": 20
+          "rooms": 50
         }
       },
       "logistics": null,
@@ -819,22 +1030,206 @@ window.DEMO_FIXTURES = {
           "w05": "Emma Laurent",
           "w06": "Nathan Moreau",
           "w07": "Sarah Lefebvre",
-          "w08": "Hugo Garnier"
+          "w08": "Hugo Garnier",
+          "w09": "Alice Martin",
+          "w10": "Gabriel Petit",
+          "w11": "Chloé Simon",
+          "w12": "Louis Robert",
+          "w13": "Manon Richard",
+          "w14": "Adam Durand",
+          "w15": "Jade Michel",
+          "w16": "Arthur Thomas",
+          "w17": "Lina Garcia",
+          "w18": "Paul Fontaine",
+          "w19": "Clara Chevalier",
+          "w20": "Noé François",
+          "w21": "Maya Legrand",
+          "w22": "Rayan Gauthier",
+          "w23": "Léa Garnier",
+          "w24": "Ethan Roussel",
+          "w25": "Zoé Vincent",
+          "w26": "Samuel Muller",
+          "w27": "Anna Faure",
+          "w28": "Nicolas André",
+          "w29": "Nora Mercier",
+          "w30": "Raphaël Blanc",
+          "w31": "Louise Guérin",
+          "w32": "Sacha Boyer",
+          "w33": "Yasmine Perrin",
+          "w34": "Victor Morel",
+          "w35": "Eva Masson",
+          "w36": "Alexandre Colin",
+          "w37": "Julia Renault",
+          "w38": "Omar Leroy",
+          "w39": "Lucie Bonnet",
+          "w40": "Théo Marchand",
+          "w41": "Adèle Delcourt",
+          "w42": "Bastien Delcourt",
+          "w43": "Célia Delcourt",
+          "w44": "Dorian Delcourt",
+          "w45": "Élise Delcourt",
+          "w46": "Farid Delcourt",
+          "w47": "Gaëlle Delcourt",
+          "w48": "Ilyes Delcourt",
+          "w49": "Jeanne Delcourt",
+          "w50": "Kilian Delcourt",
+          "w51": "Adèle Vidal",
+          "w52": "Bastien Vidal",
+          "w53": "Célia Vidal",
+          "w54": "Dorian Vidal",
+          "w55": "Élise Vidal",
+          "w56": "Farid Vidal",
+          "w57": "Gaëlle Vidal",
+          "w58": "Ilyes Vidal",
+          "w59": "Jeanne Vidal",
+          "w60": "Kilian Vidal",
+          "w61": "Adèle Renaud",
+          "w62": "Bastien Renaud",
+          "w63": "Célia Renaud",
+          "w64": "Dorian Renaud",
+          "w65": "Élise Renaud",
+          "w66": "Farid Renaud",
+          "w67": "Gaëlle Renaud",
+          "w68": "Ilyes Renaud",
+          "w69": "Jeanne Renaud",
+          "w70": "Kilian Renaud",
+          "w71": "Adèle Lemoine",
+          "w72": "Bastien Lemoine",
+          "w73": "Célia Lemoine",
+          "w74": "Dorian Lemoine",
+          "w75": "Élise Lemoine",
+          "w76": "Farid Lemoine",
+          "w77": "Gaëlle Lemoine",
+          "w78": "Ilyes Lemoine",
+          "w79": "Jeanne Lemoine",
+          "w80": "Kilian Lemoine",
+          "w81": "Adèle Marin",
+          "w82": "Bastien Marin",
+          "w83": "Célia Marin",
+          "w84": "Dorian Marin",
+          "w85": "Élise Marin",
+          "w86": "Farid Marin",
+          "w87": "Gaëlle Marin",
+          "w88": "Ilyes Marin",
+          "w89": "Jeanne Marin",
+          "w90": "Kilian Marin",
+          "w91": "Adèle Pascal",
+          "w92": "Bastien Pascal",
+          "w93": "Célia Pascal",
+          "w94": "Dorian Pascal",
+          "w95": "Élise Pascal",
+          "w96": "Farid Pascal",
+          "w97": "Gaëlle Pascal",
+          "w98": "Ilyes Pascal",
+          "w99": "Jeanne Pascal",
+          "w100": "Kilian Pascal"
         },
         "payments": {
-          "b02": "Tom Girard · €112",
-          "b03": "Inès Roux · €112",
-          "b04": "Lucas Bernard · €112",
-          "b05": "Emma Laurent · €112",
-          "b90": "C. DUPONT-LAMBERT · €112"
+          "b02": "Tom Girard · €150",
+          "b03": "Inès Roux · €150",
+          "b04": "Lucas Bernard · €150",
+          "b05": "Emma Laurent · €150",
+          "b90": "C. DUPONT-LAMBERT · €150",
+          "b009": "Alice Martin · €150",
+          "b010": "Gabriel Petit · €150",
+          "b011": "Chloé Simon · €150",
+          "b012": "Louis Robert · €150",
+          "b013": "Manon Richard · €150",
+          "b014": "Adam Durand · €150",
+          "b015": "Jade Michel · €150",
+          "b016": "Arthur Thomas · €150",
+          "b017": "Lina Garcia · €150",
+          "b018": "Paul Fontaine · €150",
+          "b019": "Clara Chevalier · €150",
+          "b020": "Noé François · €150",
+          "b021": "Maya Legrand · €150",
+          "b022": "Rayan Gauthier · €150",
+          "b023": "Léa Garnier · €150",
+          "b024": "Ethan Roussel · €150",
+          "b025": "Zoé Vincent · €150",
+          "b026": "Samuel Muller · €150",
+          "b027": "Anna Faure · €150",
+          "b028": "Nicolas André · €150",
+          "b029": "Nora Mercier · €150",
+          "b030": "Raphaël Blanc · €150",
+          "b031": "Louise Guérin · €150",
+          "b032": "Sacha Boyer · €150",
+          "b033": "Yasmine Perrin · €150",
+          "b034": "Victor Morel · €150",
+          "b035": "Eva Masson · €150",
+          "b036": "Alexandre Colin · €150",
+          "b037": "Julia Renault · €150",
+          "b038": "Omar Leroy · €150",
+          "b039": "Lucie Bonnet · €150",
+          "b040": "Théo Marchand · €150",
+          "b041": "Adèle Delcourt · €150",
+          "b042": "Bastien Delcourt · €150",
+          "b043": "Célia Delcourt · €150",
+          "b044": "Dorian Delcourt · €150",
+          "b045": "Élise Delcourt · €150",
+          "b046": "Farid Delcourt · €150",
+          "b047": "Gaëlle Delcourt · €150",
+          "b048": "Ilyes Delcourt · €150",
+          "b049": "Jeanne Delcourt · €150",
+          "b050": "Kilian Delcourt · €150",
+          "b051": "Adèle Vidal · €150",
+          "b052": "Bastien Vidal · €150",
+          "b053": "Célia Vidal · €150",
+          "b054": "Dorian Vidal · €150",
+          "b055": "Élise Vidal · €150",
+          "b056": "Farid Vidal · €150",
+          "b057": "Gaëlle Vidal · €150",
+          "b058": "Ilyes Vidal · €150",
+          "b059": "Jeanne Vidal · €150",
+          "b060": "Kilian Vidal · €150",
+          "b061": "Adèle Renaud · €150",
+          "b062": "Bastien Renaud · €150",
+          "b063": "Célia Renaud · €150",
+          "b064": "Dorian Renaud · €150",
+          "b065": "Élise Renaud · €150",
+          "b066": "Farid Renaud · €150",
+          "b067": "Gaëlle Renaud · €150",
+          "b068": "Ilyes Renaud · €150",
+          "b069": "Jeanne Renaud · €150",
+          "b070": "Kilian Renaud · €150",
+          "b071": "Adèle Lemoine · €150",
+          "b072": "Bastien Lemoine · €150",
+          "b073": "Célia Lemoine · €150",
+          "b074": "Dorian Lemoine · €150",
+          "b075": "Élise Lemoine · €150",
+          "b076": "Farid Lemoine · €150",
+          "b077": "Gaëlle Lemoine · €150",
+          "b078": "Ilyes Lemoine · €150",
+          "b079": "Jeanne Lemoine · €150",
+          "b080": "Kilian Lemoine · €150",
+          "b081": "Adèle Marin · €150",
+          "b082": "Bastien Marin · €150",
+          "b083": "Célia Marin · €150",
+          "b084": "Dorian Marin · €150",
+          "b085": "Élise Marin · €150",
+          "b086": "Farid Marin · €150",
+          "b087": "Gaëlle Marin · €150",
+          "b088": "Ilyes Marin · €150",
+          "b089": "Jeanne Marin · €150",
+          "b090": "Kilian Marin · €150",
+          "b091": "Adèle Pascal · €150",
+          "b092": "Bastien Pascal · €150",
+          "b093": "Célia Pascal · €150",
+          "b094": "Dorian Pascal · €150",
+          "b095": "Élise Pascal · €150",
+          "b096": "Farid Pascal · €150",
+          "b097": "Gaëlle Pascal · €150",
+          "b098": "Ilyes Pascal · €150",
+          "b099": "Jeanne Pascal · €150",
+          "b100": "Kilian Pascal · €150"
         },
         "groups": {}
       },
       "meta": {
         "type": "Integration weekend",
         "dates": "9–11 Oct 2026",
-        "place": "Paris → Trouville-Deauville",
-        "participants": 8
+        "place": "Palaiseau → Trouville-Deauville (demo)",
+        "participants": 100
       },
       "outbox": [],
       "audit": []
@@ -861,7 +1256,7 @@ window.DEMO_FIXTURES = {
       {
         "source_type": "payment",
         "source_id": "f90",
-        "description": "A. Nguyen · nguyen.a@gmail.com · €10 · 19 Sep"
+        "description": "A. Nguyen · nguyen.a@gmail.example · €10 · 19 Sep"
       },
       {
         "source_type": "rule",
@@ -885,7 +1280,7 @@ window.DEMO_FIXTURES = {
       {
         "name": "Email local part has the same parts",
         "passed": true,
-        "detail": "nguyen.a@gmail.com",
+        "detail": "nguyen.a@gmail.example",
         "verified": true
       },
       {
@@ -900,7 +1295,7 @@ window.DEMO_FIXTURES = {
     "payload": {
       "payment_id": "f90",
       "participant_id": "p01",
-      "to": "a.nguyen@polytechnique.edu",
+      "to": "a.nguyen@polytechnique.example",
       "message": "Bonjour Antoine, votre cotisation 2026 est bien associée à votre inscription. Merci pour votre patience !\n— Drafted with AI assistance, approved by the organizers."
     },
     "trace": [
@@ -908,7 +1303,7 @@ window.DEMO_FIXTURES = {
         "step": 1,
         "tool": "get_participant",
         "arguments": {
-          "id_or_email": "a.nguyen@polytechnique.edu"
+          "id_or_email": "a.nguyen@polytechnique.example"
         },
         "result": "{\"id\": \"p01\", \"name\": \"Antoine Nguyen\", ...}",
         "ok": true
@@ -945,40 +1340,46 @@ window.DEMO_FIXTURES = {
     "event_id": "wei",
     "issue_id": "no_logistics_plan",
     "action_type": "SELECT_TRAVEL_PLAN",
-    "title": "2 of 5 options pass every verified hard constraint",
-    "description": "Option A ranks first under the current priorities (fewer_changes, near_station, early_return) at €112/person. Other valid options: Option B (€118). Rejected: Option C (arrive before 21:00); Option D (cost ≤ €120/person); Option E (arrive before 21:00, no overnight travel). Organizers choose; nothing is booked automatically.",
+    "title": "3 of 5 options pass every verified hard constraint",
+    "description": "Option D ranks first under the current priorities (fewer_changes, early_return, lower_cost) at €141/person. Other valid options: Option A (€112), Option B (€118). Rejected: Option C (arrive before 21:00); Option E (arrive before 21:00, no overnight travel). Organizers choose; nothing is booked automatically.",
     "evidence": [
       {
         "source_type": "travel_option",
         "source_id": "A",
-        "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+        "description": "recorded illustration for the student WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified"
       },
       {
         "source_type": "travel_option",
         "source_id": "B",
-        "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+        "description": "recorded illustration for the student WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified"
       },
       {
         "source_type": "travel_option",
         "source_id": "C",
-        "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+        "description": "recorded illustration for the student WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified"
       },
       {
         "source_type": "travel_option",
         "source_id": "D",
-        "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+        "description": "recorded illustration for the student WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified"
       },
       {
         "source_type": "travel_option",
         "source_id": "E",
-        "description": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+        "description": "recorded illustration for the student WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified"
       }
     ],
     "checks": [
       {
-        "name": "cost ≤ €120/person",
+        "name": "itemized cost matches total",
         "passed": true,
-        "detail": "€112",
+        "detail": "coach: €42 + lodging: €77 + groceries: €20 + food_transport: €2",
+        "verified": true
+      },
+      {
+        "name": "cost ≤ €150/person",
+        "passed": true,
+        "detail": "€141",
         "verified": true
       },
       {
@@ -994,9 +1395,9 @@ window.DEMO_FIXTURES = {
         "verified": true
       },
       {
-        "name": "lodging for 40",
+        "name": "lodging for 100",
         "passed": true,
-        "detail": "40",
+        "detail": "100",
         "verified": true
       },
       {
@@ -1010,6 +1411,7 @@ window.DEMO_FIXTURES = {
     "requires_approval": true,
     "payload": {
       "ranked_valid": [
+        "D",
         "A",
         "B"
       ],
@@ -1018,26 +1420,47 @@ window.DEMO_FIXTURES = {
           "option": {
             "id": "A",
             "transport": {
-              "mode": "train",
+              "mode": "coach",
+              "charter": true,
+              "capacity": 106,
+              "round_trip": true,
+              "charter_verified": false,
               "depart": "18:10",
               "arrive": "20:15",
               "changes": 0,
               "overnight": false,
-              "return_arrive": "19:05"
+              "return_arrive": "17:30",
+              "vehicles": 2,
+              "seats_per_vehicle": 53
             },
             "lodging": {
-              "name": "Group hostel",
-              "rooms": 10,
-              "capacity": 40,
-              "walk_minutes": 6,
-              "step_free_hint": true
+              "name": "Illustrative Normandy group holiday park A",
+              "rooms": 25,
+              "capacity": 100,
+              "step_free_hint": true,
+              "nights": 2,
+              "kitchen_hint": true,
+              "activity_space_hint": true,
+              "facilities_verified": false
             },
             "cost_per_person_cents": 11200,
-            "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+            "source": "recorded illustration for the student WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified",
+            "cost_breakdown_per_person_cents": {
+              "coach": 3500,
+              "lodging": 5500,
+              "groceries": 2000,
+              "food_transport": 200
+            }
           },
           "checks": [
             {
-              "name": "cost ≤ €120/person",
+              "name": "itemized cost matches total",
+              "passed": true,
+              "detail": "coach: €35 + lodging: €55 + groceries: €20 + food_transport: €2",
+              "verified": true
+            },
+            {
+              "name": "cost ≤ €150/person",
               "passed": true,
               "detail": "€112",
               "verified": true
@@ -1055,9 +1478,9 @@ window.DEMO_FIXTURES = {
               "verified": true
             },
             {
-              "name": "lodging for 40",
+              "name": "lodging for 100",
               "passed": true,
-              "detail": "40",
+              "detail": "100",
               "verified": true
             },
             {
@@ -1073,26 +1496,47 @@ window.DEMO_FIXTURES = {
           "option": {
             "id": "B",
             "transport": {
-              "mode": "train",
-              "depart": "17:52",
+              "mode": "coach",
+              "charter": true,
+              "capacity": 106,
+              "round_trip": true,
+              "charter_verified": false,
+              "depart": "18:05",
               "arrive": "20:40",
-              "changes": 1,
+              "changes": 0,
               "overnight": false,
-              "return_arrive": "19:40"
+              "return_arrive": "18:00",
+              "vehicles": 2,
+              "seats_per_vehicle": 53
             },
             "lodging": {
-              "name": "Hotel",
-              "rooms": 20,
-              "capacity": 40,
-              "walk_minutes": 12,
-              "step_free_hint": true
+              "name": "Illustrative Normandy residential activity centre B",
+              "rooms": 50,
+              "capacity": 100,
+              "step_free_hint": true,
+              "nights": 2,
+              "kitchen_hint": true,
+              "activity_space_hint": true,
+              "facilities_verified": false
             },
             "cost_per_person_cents": 11800,
-            "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+            "source": "recorded illustration for the student WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified",
+            "cost_breakdown_per_person_cents": {
+              "coach": 4000,
+              "lodging": 5600,
+              "groceries": 2000,
+              "food_transport": 200
+            }
           },
           "checks": [
             {
-              "name": "cost ≤ €120/person",
+              "name": "itemized cost matches total",
+              "passed": true,
+              "detail": "coach: €40 + lodging: €56 + groceries: €20 + food_transport: €2",
+              "verified": true
+            },
+            {
+              "name": "cost ≤ €150/person",
               "passed": true,
               "detail": "€118",
               "verified": true
@@ -1110,9 +1554,9 @@ window.DEMO_FIXTURES = {
               "verified": true
             },
             {
-              "name": "lodging for 40",
+              "name": "lodging for 100",
               "passed": true,
-              "detail": "40",
+              "detail": "100",
               "verified": true
             },
             {
@@ -1129,25 +1573,46 @@ window.DEMO_FIXTURES = {
             "id": "C",
             "transport": {
               "mode": "coach",
+              "charter": true,
+              "capacity": 106,
+              "round_trip": true,
+              "charter_verified": false,
               "depart": "18:30",
               "arrive": "22:10",
               "changes": 0,
               "overnight": false,
-              "return_arrive": "20:30"
+              "return_arrive": "20:30",
+              "vehicles": 2,
+              "seats_per_vehicle": 53
             },
             "lodging": {
-              "name": "Hotel",
-              "rooms": 20,
-              "capacity": 40,
-              "walk_minutes": 5,
-              "step_free_hint": true
+              "name": "Illustrative Normandy holiday village C",
+              "rooms": 50,
+              "capacity": 100,
+              "step_free_hint": true,
+              "nights": 2,
+              "kitchen_hint": true,
+              "activity_space_hint": true,
+              "facilities_verified": false
             },
             "cost_per_person_cents": 9600,
-            "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+            "source": "recorded illustration for the student WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified",
+            "cost_breakdown_per_person_cents": {
+              "coach": 3000,
+              "lodging": 4400,
+              "groceries": 2000,
+              "food_transport": 200
+            }
           },
           "checks": [
             {
-              "name": "cost ≤ €120/person",
+              "name": "itemized cost matches total",
+              "passed": true,
+              "detail": "coach: €30 + lodging: €44 + groceries: €20 + food_transport: €2",
+              "verified": true
+            },
+            {
+              "name": "cost ≤ €150/person",
               "passed": true,
               "detail": "€96",
               "verified": true
@@ -1165,9 +1630,9 @@ window.DEMO_FIXTURES = {
               "verified": true
             },
             {
-              "name": "lodging for 40",
+              "name": "lodging for 100",
               "passed": true,
-              "detail": "40",
+              "detail": "100",
               "verified": true
             },
             {
@@ -1183,28 +1648,49 @@ window.DEMO_FIXTURES = {
           "option": {
             "id": "D",
             "transport": {
-              "mode": "train",
+              "mode": "coach",
+              "charter": true,
+              "capacity": 106,
+              "round_trip": true,
+              "charter_verified": false,
               "depart": "18:10",
               "arrive": "20:15",
               "changes": 0,
               "overnight": false,
-              "return_arrive": "19:05"
+              "return_arrive": "17:00",
+              "vehicles": 2,
+              "seats_per_vehicle": 53
             },
             "lodging": {
-              "name": "Seafront hotel",
-              "rooms": 20,
-              "capacity": 40,
-              "walk_minutes": 15,
-              "step_free_hint": true
+              "name": "Illustrative Normandy group resort D",
+              "rooms": 50,
+              "capacity": 100,
+              "step_free_hint": true,
+              "nights": 2,
+              "kitchen_hint": true,
+              "activity_space_hint": true,
+              "facilities_verified": false
             },
             "cost_per_person_cents": 14100,
-            "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+            "source": "recorded illustration for the student WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified",
+            "cost_breakdown_per_person_cents": {
+              "coach": 4200,
+              "lodging": 7700,
+              "groceries": 2000,
+              "food_transport": 200
+            }
           },
           "checks": [
             {
-              "name": "cost ≤ €120/person",
-              "passed": false,
-              "detail": "€141 (+€21)",
+              "name": "itemized cost matches total",
+              "passed": true,
+              "detail": "coach: €42 + lodging: €77 + groceries: €20 + food_transport: €2",
+              "verified": true
+            },
+            {
+              "name": "cost ≤ €150/person",
+              "passed": true,
+              "detail": "€141",
               "verified": true
             },
             {
@@ -1220,9 +1706,9 @@ window.DEMO_FIXTURES = {
               "verified": true
             },
             {
-              "name": "lodging for 40",
+              "name": "lodging for 100",
               "passed": true,
-              "detail": "40",
+              "detail": "100",
               "verified": true
             },
             {
@@ -1232,33 +1718,54 @@ window.DEMO_FIXTURES = {
               "verified": false
             }
           ],
-          "valid": false
+          "valid": true
         },
         {
           "option": {
             "id": "E",
             "transport": {
-              "mode": "night coach",
+              "mode": "coach",
+              "charter": true,
+              "capacity": 106,
+              "round_trip": true,
+              "charter_verified": false,
               "depart": "23:00",
               "arrive": "02:30",
               "arrives_next_day": true,
               "changes": 0,
               "overnight": true,
-              "return_arrive": "21:00"
+              "return_arrive": "21:00",
+              "vehicles": 2,
+              "seats_per_vehicle": 53
             },
             "lodging": {
-              "name": "Group hostel",
-              "rooms": 10,
-              "capacity": 40,
-              "walk_minutes": 6,
-              "step_free_hint": true
+              "name": "Illustrative Normandy group holiday park E",
+              "rooms": 25,
+              "capacity": 100,
+              "step_free_hint": true,
+              "nights": 2,
+              "kitchen_hint": true,
+              "activity_space_hint": true,
+              "facilities_verified": false
             },
             "cost_per_person_cents": 7800,
-            "source": "recorded (illustrative, to be replaced by Jinko sandbox results)"
+            "source": "recorded illustration for the student WEI demo; total includes meals and food transport; not a Jinko quote; charter and venue facilities unverified",
+            "cost_breakdown_per_person_cents": {
+              "coach": 2200,
+              "lodging": 3400,
+              "groceries": 2000,
+              "food_transport": 200
+            }
           },
           "checks": [
             {
-              "name": "cost ≤ €120/person",
+              "name": "itemized cost matches total",
+              "passed": true,
+              "detail": "coach: €22 + lodging: €34 + groceries: €20 + food_transport: €2",
+              "verified": true
+            },
+            {
+              "name": "cost ≤ €150/person",
               "passed": true,
               "detail": "€78",
               "verified": true
@@ -1276,9 +1783,9 @@ window.DEMO_FIXTURES = {
               "verified": true
             },
             {
-              "name": "lodging for 40",
+              "name": "lodging for 100",
               "passed": true,
-              "detail": "40",
+              "detail": "100",
               "verified": true
             },
             {
@@ -1290,10 +1797,33 @@ window.DEMO_FIXTURES = {
           ],
           "valid": false
         }
-      ]
+      ],
+      "constraints": {
+        "hard": {
+          "participants": 100,
+          "arrive_before": "21:00",
+          "no_overnight": true,
+          "step_free_rooms": 2,
+          "max_cost_per_person_cents": 15000
+        },
+        "soft": [
+          "fewer_changes",
+          "early_return",
+          "lower_cost"
+        ],
+        "organizer_verified": [
+          "step_free_rooms"
+        ],
+        "clarifications": []
+      },
+      "request_text": "We're planning an integration weekend for 100 students in Trouville-Deauville, 9–11 October 2026. Leave campus in Palaiseau Friday after 17:00, return Sunday by 18:00. Budget: €150 each, meals included; we're unsure whether coach hire is covered. We need two coaches, arrival before 21:00, no overnight travel, two separate step-free rooms, and a venue with a shared kitchen and activity spaces. The association buys and transports groceries. Prefer fewer changes, then an earlier return, then lower cost.",
+      "constraints_source": "recorded",
+      "answered": false
     },
     "trace": []
   },
+  "budget_answer": "Yes, the €150 per person includes round-trip coach hire, lodging, groceries and food transport.",
+  "budget_question": "Does the €150 per person include round-trip coach hire as well as lodging, groceries and food transport?",
   "scenarios": {
     "m02": {
       "rule": "§7",
@@ -1370,5 +1900,5 @@ window.DEMO_FIXTURES = {
     "§7": "Impact 30%, innovation 20%, execution quality 20%, user experience 15%, demo and pitch clarity 15%. Building on an existing project is allowed if declared at submission; only the part created during the hackathon is evaluated.",
     "§10": "Registration data is used only to organise the hackathon and to communicate with participants."
   },
-  "revision": "3be85a7eddd93e7e"
+  "revision": "2efa24d0a3c858ec"
 };

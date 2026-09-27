@@ -53,11 +53,11 @@ review rather than silently breaking the demo. Keep `TASKS.md` unchanged.
 
 Initial issues come from the real deterministic detector and fictional input
 in `data/`. Antoine's payment proposal and the five illustrative travel packages
-come from `docs/api-examples/`. Those examples are curated fixtures, not newly
+come from shared `demo/replay.py` fixtures and the deterministic planner on `data/wei/travel_options.json`. Those examples are curated fixtures, not newly
 recorded live model outputs. The three new-message examples and 13 sample inbox
 messages use curated proposals; unsupported messages explicitly fall back to
 organizer review. The planner uses one fixed clarification answer, then checks
-budgets from €1 to €1,000, groups from 1 to 100, and a chosen arrival deadline.
+budgets from €1 to €1,000, groups from 1 to 200, and a chosen arrival deadline.
 These are deterministic checks on saved packages. Sample per-person prices stay
 fixed when group size changes; changing the group size checks capacity only.
 No live Jinko offers, free-form language understanding or production Python

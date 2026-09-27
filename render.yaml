@@ -1,0 +1,28 @@
+# One native free service. No database, persistent disk, worker or paid plan.
+services:
+  - type: web
+    name: bureau-agent
+    runtime: python
+    plan: free
+    branch: main
+    autoDeployTrigger: commit # current spelling of autoDeploy: true
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: OPENAI_MODEL
+        value: gpt-4.1
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: JINKO_MODE
+        value: replay
+      - key: DEMO_MODE
+        value: "1"
+      - key: DEMO_DAILY_LLM_LIMIT
+        value: "400"
+      - key: DEMO_SESSION_LLM_LIMIT
+        value: "60"
+      - key: DEMO_MAX_OUTPUT_TOKENS
+        value: "2048"

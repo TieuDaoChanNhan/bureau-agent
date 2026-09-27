@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from bureau.core.detect import detect_issues
 from bureau.core.loader import load_event
-from demo.replay import payment_example, scenarios_and_rules
+from demo.replay import payment_example, scenarios_and_rules, planner_example, BUDGET_ANSWER, BUDGET_QUESTION
 
 DEMO = ROOT / "demo"
 SITE = DEMO / "site"
@@ -53,12 +53,8 @@ def build() -> None:
         }
     examples = ROOT / "docs" / "api-examples"
     fixtures["payment"] = payment_example()
-    fixtures["plan"] = json.loads((examples / "action_SELECT_TRAVEL_PLAN.json").read_text(encoding="utf-8"))
-    # Deliberately ambiguous request demonstrates asking before assuming a meal budget.
-    fixtures["events"]["wei"]["travel"]["request"] = (
-        "WEI for 40 people. Leave Paris Friday 9 Oct after class, back Sunday afternoon. "
-        "Max €120 per person. Arrive before 21:00, no overnight travel. Two people need step-free rooms."
-    )
+    fixtures["plan"] = asdict(planner_example(load_event("wei"), recorded=True))
+    fixtures["budget_answer"], fixtures["budget_question"] = BUDGET_ANSWER, BUDGET_QUESTION
     fixtures["scenarios"], fixtures["rules"] = scenarios_and_rules()
     if any(s["rule"] not in fixtures["rules"] for s in fixtures["scenarios"].values()):
         raise ValueError("A curated scenario references an unknown rule.")
@@ -104,9 +100,9 @@ def build() -> None:
         "It will read this issue, choose tools (records, payments, rules, teams) and propose one action with its evidence. Nothing changes until you approve.": "Load a saved sample proposal and inspect its evidence. Cases without a specific example are handed to the organizers; no live AI runs here.",
         "tool calls, chosen by the model": "illustrative tool calls from the saved example",
         "Paste an email or a Discord message. It is added to the event, detected as an issue, and the agent investigates it right away. The text is treated as data, never as instructions.": "Try one of the three saved examples below. Other messages are saved locally for organizer review; this demo does not analyze new text with AI.",
-        "An AI model turns the request into structured constraints; code then builds travel + lodging packages from real hotel\n      offers and checks every one of them. Nothing is booked.": "Replay the saved planning example, clarify the meal budget, and compare five illustrative packages. Prices are sample data, not live offers. Nothing is booked.",
-        "Nothing is searched until the request is clear. Your answer is added to the request and the constraints are extracted again.": "This saved scenario assumes meals are paid separately. Confirm that answer to compare illustrative packages; no live search or text extraction occurs.",
-        '<textarea name="answer" required maxlength="1000" rows="3"\n        placeholder="No, the budget covers travel and lodging only."></textarea>': '<textarea name="answer" required readonly rows="3">No, the budget covers travel and lodging only. Meals are paid separately.</textarea>',
+        "An AI model turns the request into structured constraints; code then builds travel + lodging packages from real hotel\n      offers and checks every one of them. Nothing is booked.": "Replay the saved planning example, clarify coach inclusion, and compare five illustrative complete packages. Prices include groceries and food transport; no current quote or booking is made.",
+        "Nothing is searched until the request is clear. Your answer is added to the request and the constraints are extracted again.": "Confirm that the complete budget includes coach hire, lodging, groceries and food transport. No live search or text extraction occurs.",
+        '<textarea name="answer" required maxlength="1000" rows="3"\n        placeholder="Confirm what the budget includes."></textarea>': f'<textarea name="answer" required readonly rows="3">{BUDGET_ANSWER}</textarea>',
         'if (ui.view === "outbox")': 'if (ui.view === "audit") { el.innerHTML = auditHTML(); return; }\n  if (ui.view === "outbox")',
         '${seg}\n      <span class="lbl">Options compared</span>': '${seg}\n      ${plannerControls(action, decided)}\n      <span class="lbl">Options compared</span>',
         'if (text !== draftOf(action)) ui.drafts[action.id] = text; else delete ui.drafts[action.id];': 'if (text !== draftOf(action)) ui.drafts[action.id] = text; else delete ui.drafts[action.id];\n  demoStore.saveDrafts(ui.drafts);\n  refreshSessionNotice();',

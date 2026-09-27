@@ -23,7 +23,7 @@ function plannerControls(action, decided) {
     <p class="note">Re-check the saved packages. Sample prices stay fixed when group size changes; this checks capacity, not a new quote.</p>
     <form id="scenarioForm" class="compose scenario-controls">
       <label>Budget per person (€)<input name="budget" type="number" min="1" max="1000" step="0.01" required value="${esc(hard.max_cost_per_person_cents / 100)}"></label>
-      <label>People<input name="people" type="number" min="1" max="100" step="1" required value="${esc(hard.participants)}"></label>
+      <label>People<input name="people" type="number" min="1" max="200" step="1" required value="${esc(hard.participants)}"></label>
       <label>Arrive before<input name="arrival" type="time" required value="${esc(hard.arrive_before)}"></label>
       <button type="submit" class="btn primary">Compare sample packages</button>
     </form></details>`;

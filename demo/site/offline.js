@@ -84,18 +84,18 @@ function createDemoStore(fixtures, options = {}) {
     if (!issue || terminal(issue)) fail(409, "Reset the event before planning again.");
     const prior = s.actions.find(a => a.issue_id === issue.id);
     if (!body.text && !prior?.payload?.answered) {
-      return saveProposal(s, proposal(s, issue, "ESCALATE", "Does the budget include meals?",
-        "Clarify the meal budget before comparing the saved packages.",
-        {clarifications: ["Does the €120 per person cover meals as well as travel and lodging?"], request_text: s.travel.request}));
+      return saveProposal(s, proposal(s, issue, "ESCALATE", "Does the budget include coach hire?",
+        "Clarify coach inclusion before comparing the saved complete packages.",
+        {clarifications: [fixtures.budget_question], request_text: s.travel.request}));
     }
     // The UI supplies a fixed answer: this static demo performs no text extraction.
-    if (body.text && !body.text.includes("No, the budget covers travel and lodging only. Meals are paid separately.")) {
+    if (body.text && ![fixtures.budget_answer, s.travel.request + "\n\nOrganizer answers: " + fixtures.budget_answer].includes(body.text)) {
       fail(422, "This saved scenario supports the provided answer only; no live text analysis is available.");
     }
     const hard = {...s.travel.constraints.hard, ...prior?.payload?.constraints?.hard, ...body.overrides};
     const budget = hard.max_cost_per_person_cents;
     if (!Number.isSafeInteger(budget) || budget < 100 || budget > 100000) fail(422, "Enter a budget from €1 to €1,000 per person.");
-    if (!Number.isInteger(hard.participants) || hard.participants < 1 || hard.participants > 100) fail(422, "Enter a group size from 1 to 100.");
+    if (!Number.isInteger(hard.participants) || hard.participants < 1 || hard.participants > 200) fail(422, "Enter a group size from 1 to 200.");
     if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(hard.arrive_before)) fail(422, "Enter a valid arrival deadline.");
     if (Object.keys(body.overrides || {}).some(k => !["max_cost_per_person_cents", "participants", "arrive_before"].includes(k))) fail(422, "This demo supports budget, group size and arrival deadline changes.");
     const a = copy(fixtures.plan);
@@ -106,8 +106,9 @@ function createDemoStore(fixtures, options = {}) {
     a.payload.options.forEach(row => {
       const o = row.option;
       row.checks = [
+        {name: "itemized cost matches total", passed: Object.values(o.cost_breakdown_per_person_cents).every(n => Number.isInteger(n) && n >= 0) && Object.values(o.cost_breakdown_per_person_cents).reduce((a,b) => a+b, 0) === o.cost_per_person_cents, verified: true, detail: "Coach + lodging + groceries + food transport"},
         {name: `cost ≤ €${budget / 100}/person`, passed: o.cost_per_person_cents <= budget, verified: true, detail: `€${o.cost_per_person_cents / 100}`},
-        {name: `arrive before ${hard.arrive_before}`, passed: o.transport.arrive >= o.transport.depart && o.transport.arrive < hard.arrive_before, verified: true, detail: o.transport.arrive},
+        {name: `arrive before ${hard.arrive_before}`, passed: !o.transport.arrives_next_day && o.transport.arrive <= hard.arrive_before, verified: true, detail: o.transport.arrive},
         {name: "no overnight travel", passed: !o.transport.overnight, verified: true, detail: ""},
         {name: `lodging for ${hard.participants}`, passed: o.lodging.capacity >= hard.participants, verified: true, detail: String(o.lodging.capacity)},
         {name: "2 step-free rooms and group availability", passed: null, verified: false, detail: "Organizers must confirm with the venue"},
@@ -115,9 +116,16 @@ function createDemoStore(fixtures, options = {}) {
       row.valid = row.checks.filter(c => c.verified).every(c => c.passed);
       o.source = "Illustrative repository fixture — not a live quote";
     });
-    a.payload.ranked_valid = a.payload.options.filter(r => r.valid).sort((x, y) =>
-      x.option.transport.changes - y.option.transport.changes || x.option.lodging.walk_minutes - y.option.lodging.walk_minutes ||
-      x.option.transport.return_arrive.localeCompare(y.option.transport.return_arrive)).map(r => r.option.id);
+    const priorities = {fewer_changes: o => o.transport.changes || 0, near_station: o => o.lodging.walk_minutes ?? 99,
+      early_return: o => o.transport.return_arrive || "23:59", lower_cost: o => o.cost_per_person_cents};
+    a.payload.ranked_valid = a.payload.options.filter(r => r.valid).sort((x, y) => {
+      for (const key of [...a.payload.constraints.soft, "lower_cost"]) {
+        const value = priorities[key]; if (!value) continue;
+        const left = value(x.option), right = value(y.option);
+        if (left !== right) return left < right ? -1 : 1;
+      }
+      return 0;
+    }).map(r => r.option.id);
     a.action_type = a.payload.ranked_valid.length ? "SELECT_TRAVEL_PLAN" : "ESCALATE";
     a.title = `${a.payload.ranked_valid.length} of ${a.payload.options.length} sample options pass verified constraints`;
     a.description = a.payload.ranked_valid.length ? `Option ${a.payload.ranked_valid[0]} ranks first under the stated preferences. ${a.payload.ranked_valid.length} package(s) pass the verified constraints. Accessibility and group availability still need confirmation. Sample prices stay fixed when group size changes; these are not live quotes.`

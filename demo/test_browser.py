@@ -73,7 +73,7 @@ class DemoTests(unittest.TestCase):
             10: '[data-act="approve"]', 12: '#outboxBtn', 14: '#composeBtn',
             15: '#composeForm button[type="submit"]', 18: '[data-ev="wei"]',
             20: '[data-act="plan"]', 21: '#answerForm button[type="submit"]',
-            24: '[data-budget="9000"]', 26: '[data-budget=""]', 27: '[data-act="choose"][data-opt="A"]',
+            24: '[data-budget="9000"]', 26: '[data-budget=""]', 27: '[data-act="choose"][data-opt="D"]',
         }
         self.assertEqual(self.page.evaluate("STEPS.length"), 30)
         for index in range(30):
@@ -88,11 +88,11 @@ class DemoTests(unittest.TestCase):
                 if index == 25:
                     self.assertIn("No valid option", self.page.locator(".diag").inner_text())
                 if index == 23:
-                    self.assertEqual(self.page.locator('[data-act="choose"]').count(), 2)
+                    self.assertEqual(self.page.locator('[data-act="choose"]').count(), 3)
                     self.page.screenshot(path=str(ARTIFACTS / "trip-options.png"))
                 self.page.locator(clicks.get(index, ".driver-popover-next-btn")).click()
         self.page.wait_for_function("tourState.driver === null")
-        self.assertEqual(self.api("/api/events/wei")["logistics"]["id"], "A")
+        self.assertEqual(self.api("/api/events/wei")["logistics"]["id"], "D")
         self.assertEqual(len(self.api("/api/events/hackathon/outbox")), 1)
         self.assertTrue(self.api("/api/events/hackathon/audit"))
         self.assertFalse(self.page.evaluate("summary('wei').issues.some(i => i.depends_on.length && isWaiting(i, summary('wei')) )"))
@@ -220,19 +220,19 @@ class DemoTests(unittest.TestCase):
         self.page.wait_for_function("!ui.busy")
         self.assertEqual(self.page.locator('[data-act="choose"]').count(), 3)
         self.page.locator("details:has(#scenarioForm) summary").click()
-        self.page.locator('#scenarioForm [name="people"]').fill("41")
+        self.page.locator('#scenarioForm [name="people"]').fill("101")
         self.page.locator('#scenarioForm button[type="submit"]').click()
         self.page.wait_for_function("!ui.busy")
         self.assertEqual(self.page.locator('[data-act="choose"]').count(), 0)
-        self.assertIn("41-person capacity", self.page.locator("#detail").inner_text())
+        self.assertIn("101-person capacity", self.page.locator("#detail").inner_text())
         self.assertEqual(self.api("/api/events/wei")["logistics"], None)
         # A budget shortcut must never silently relax the visitor's other constraints.
         self.page.locator('[data-budget=""]').click()
         self.page.wait_for_function("!ui.busy")
         self.assertEqual(self.page.locator('[data-act="choose"]').count(), 0)
         hard = self.api("/api/events/wei")["actions"][0]["payload"]["constraints"]["hard"]
-        self.assertEqual(hard["participants"], 41)
-        self.assertEqual(hard["max_cost_per_person_cents"], 12000)
+        self.assertEqual(hard["participants"], 101)
+        self.assertEqual(hard["max_cost_per_person_cents"], 15000)
         self.api("/api/events/hackathon/run?issue_id=message:m07", {})
         action = self.api("/api/events/hackathon")["actions"][0]
         self.assertEqual(action["action_type"], "SEND_MESSAGE")
@@ -242,7 +242,7 @@ class DemoTests(unittest.TestCase):
 
     def test_invalid_plan_and_dismissal_have_no_side_effects(self):
         self.api("/api/events/wei/plan", {})
-        data = self.api("/api/events/wei/plan", {"text": "No, the budget covers travel and lodging only. Meals are paid separately."})
+        data = self.api("/api/events/wei/plan", {"text": "Yes, the €150 per person includes round-trip coach hire, lodging, groceries and food transport."})
         action_id = data["action_id"]
         before = self.api("/api/events/wei")
         result = self.page.evaluate("id => {try {demoStore.request('/api/actions/'+id+'/approve', {method:'POST',body:JSON.stringify({option_id:'C'})});} catch(e){return e.message;}}", action_id)

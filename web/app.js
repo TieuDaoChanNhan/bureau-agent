@@ -557,7 +557,7 @@ function planDetail(issue, action, st) {
       <div class="question"><span class="qlabel">Question for the organizers</span>${questions.map(q => esc(q)).join("<br>")}</div>
       <p class="note">Nothing is searched until the request is clear. Your answer is added to the request and the constraints are extracted again.</p>
       <form class="compose" id="answerForm"><label>Your answer <textarea name="answer" required maxlength="1000" rows="3"
-        placeholder="No, the budget covers travel and lodging only."></textarea></label>
+        placeholder="Confirm what the budget includes."></textarea></label>
         <div class="actions"><button class="btn primary" type="submit">Answer and plan again</button></div></form></div>`;
   }
   const c = (action.payload && action.payload.constraints) || { hard: {}, soft: [], organizer_verified: [] };

@@ -376,7 +376,7 @@ function renderDetail() {
 
 // Fictional examples for the demo: a rules question, a personal-data request, a question in French.
 const EXAMPLES = [
-  { label: "Rules question", sender: "clara.roy@gmail.com", channel: "email",
+  { label: "Rules question", sender: "clara.roy@gmail.example", channel: "email",
     text: "Hi! Can our team have five people if the fifth one only does the pitch?" },
   { label: "Personal data", sender: "recruiting@partner.example", channel: "email",
     text: "Hello, could you send us the phone numbers of all participants so we can call them about internships?" },
@@ -522,15 +522,15 @@ function planDetail(issue, action, st) {
   if (st === "waiting") return head + input;
   if (!action) {
     return head + input + `<div class="card cta-card"><b>Plan the trip</b>
-      <p>Replay the saved planning example, clarify the meal budget, and compare five illustrative packages. Prices are sample data, not live offers. Nothing is booked.</p>
+      <p>Replay the saved planning example, clarify coach inclusion, and compare five illustrative complete packages. Prices include groceries and food transport; no current quote or booking is made.</p>
       <div class="actions"><button class="btn primary" type="button" data-act="plan">Plan the trip</button></div></div>`;
   }
   const questions = (action.payload && action.payload.clarifications) || [];
   if (action.action_type === "ESCALATE" && questions.length && !(action.payload.options || []).length) {
     return head + input + `<div id="clarify" class="card proposal-card"><span class="card-kicker">The planner asks before searching</span>
       <div class="question"><span class="qlabel">Question for the organizers</span>${questions.map(q => esc(q)).join("<br>")}</div>
-      <p class="note">This saved scenario assumes meals are paid separately. Confirm that answer to compare illustrative packages; no live search or text extraction occurs.</p>
-      <form class="compose" id="answerForm"><label>Your answer <textarea name="answer" required readonly rows="3">No, the budget covers travel and lodging only. Meals are paid separately.</textarea></label>
+      <p class="note">Confirm that the complete budget includes coach hire, lodging, groceries and food transport. No live search or text extraction occurs.</p>
+      <form class="compose" id="answerForm"><label>Your answer <textarea name="answer" required readonly rows="3">Yes, the €150 per person includes round-trip coach hire, lodging, groceries and food transport.</textarea></label>
         <div class="actions"><button class="btn primary" type="submit">Answer and plan again</button></div></form></div>`;
   }
   const c = (action.payload && action.payload.constraints) || { hard: {}, soft: [], organizer_verified: [] };
@@ -823,6 +823,13 @@ setInterval(() => {
   secs.textContent = `${n}s`;
   $("#thinkPhase").textContent = THINKING[Math.min(THINKING.length - 1, Math.floor(n / 3))];
 }, 500);
+
+// Demo video (T17): the hero button and footer link stay hidden until a URL is set here.
+const DEMO_VIDEO_URL = "";
+for (const id of ["#videoBtn", "#videoLink"]) {
+  const a = $(id);
+  if (DEMO_VIDEO_URL) { a.href = DEMO_VIDEO_URL; a.hidden = false; }
+}
 
 // Theme: light by default; the choice is remembered per browser when storage is available.
 function applyTheme(theme) {

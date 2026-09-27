@@ -15,12 +15,12 @@ from api.sessions import COOKIE, TTL, cleanup
 from bureau.core import store
 from bureau.core.llm_usage import LiveUnavailable, create_completion, database
 from bureau.core.session import current_session
-from demo.replay import MEAL_ANSWER
+from demo.replay import BUDGET_ANSWER
 from tests.fake_llm import FakeClient
 
-EXTRACTED = {"hard": {"participants": 40, "max_cost_per_person_cents": 12000, "arrive_before": "21:00",
+EXTRACTED = {"hard": {"participants": 100, "max_cost_per_person_cents": 15000, "arrive_before": "21:00",
                       "no_overnight": True, "step_free_rooms": 2},
-             "soft": ["fewer_changes", "near_station", "early_return"],
+             "soft": ["fewer_changes", "early_return", "lower_cost"],
              "organizer_verified": ["step_free_rooms"], "clarifications": []}
 PROPOSAL = [("propose_action", {"action_type": "ESCALATE", "title": "Ask an organizer",
                               "description": "A fake live proposal.", "payload": {}})]
@@ -104,12 +104,12 @@ class PublicDemoTests(unittest.TestCase):
             self.assertEqual("live limit reached", response.json()["replay_reason"])
             question = self.client.post("/api/events/wei/plan").json()
             action = next(a for a in question["actions"] if a["id"] == question["action_id"])
-            text = action["payload"]["request_text"] + "\n\nOrganizer answers: " + MEAL_ANSWER
+            text = action["payload"]["request_text"] + "\n\nOrganizer answers: " + BUDGET_ANSWER
             response = self.client.post("/api/events/wei/plan", json={"text": text})
             self.assertEqual(200, response.status_code, response.text)
             self.assertTrue(response.json()["replay"])
             options = response.json()["actions"][0]["payload"]["ranked_valid"]
-            self.assertEqual(["A", "B"], options)
+            self.assertEqual(["D", "A", "B"], options)
             response = self.client.post("/api/events/wei/plan", json={"text": text, "overrides": {"max_cost_per_person_cents": 9000}})
             self.assertEqual("ESCALATE", response.json()["actions"][0]["action_type"])
         self.assertEqual([], self.fake.requests)
@@ -191,7 +191,7 @@ class PublicDemoTests(unittest.TestCase):
     def test_cap_between_extraction_and_explanation_does_not_call_twice(self):
         self.fake.script = [json.dumps(EXTRACTED)]
         with patch("bureau.config.OPENAI_API_KEY", "test-only"), patch("bureau.config.DEMO_DAILY_LLM_LIMIT", 1):
-            response = self.client.post("/api/events/wei/plan", json={"text": MEAL_ANSWER})
+            response = self.client.post("/api/events/wei/plan", json={"text": BUDGET_ANSWER})
         self.assertEqual(200, response.status_code, response.text)
         self.assertTrue(response.json()["replay"])
         self.assertEqual(1, len(self.fake.requests))

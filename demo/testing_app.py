@@ -10,7 +10,7 @@ def create_app():
     from bureau import config
     from bureau.agent import loop
     from bureau.core import store
-    from demo.replay import issue_example, MEAL_ANSWER
+    from demo.replay import issue_example, BUDGET_ANSWER
     from tests.fake_llm import FakeClient
 
     # Explicit opt-in is required; ordinary uvicorn/api startup never uses fakes.
@@ -25,11 +25,11 @@ def create_app():
             log.write(json.dumps({"model": kwargs["model"]}) + "\n")
         if "response_format" in kwargs:
             request = json.loads(kwargs["messages"][1]["content"])
-            extracted = {"hard": {"participants": 40, "max_cost_per_person_cents": 12000,
+            extracted = {"hard": {"participants": 100, "max_cost_per_person_cents": 15000,
                                   "arrive_before": "21:00", "no_overnight": True, "step_free_rooms": 2},
-                         "soft": ["fewer_changes", "near_station", "early_return"],
+                         "soft": ["fewer_changes", "early_return", "lower_cost"],
                          "organizer_verified": ["step_free_rooms"],
-                         "clarifications": [] if MEAL_ANSWER in request["text"] else ["Does the budget include meals?"]}
+                         "clarifications": [] if BUDGET_ANSWER in request["text"] else ["Does the budget include coach hire?"]}
             step = json.dumps(extracted)
         elif "tools" in kwargs:
             context = json.loads(kwargs["messages"][1]["content"].split("\n", 1)[1])
