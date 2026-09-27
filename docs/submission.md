@@ -13,11 +13,11 @@ Volunteer boards run events on top of their studies, and most of the work is fra
 
 ## Links
 - Repository: https://github.com/TieuDaoChanNhan/bureau-agent
-- Live demo: TODO (T20, Render)
-- Video: TODO
+- Live demo: https://bureau-agent.onrender.com
+- Video: https://drive.google.com/file/d/1Zao5Yndk3AOOPt89zQ0dxiTy8JNssqQZ/view?usp=sharing
 
 ## Team
-Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH, Huy PHAN.
+Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH, Thanh Quang Huy PHAN.
 
 ## Sponsor tools used
 OpenAI (agent, structured extraction, explanations), Jinko (hotel search), Pipelex (evaluated for constraint extraction).

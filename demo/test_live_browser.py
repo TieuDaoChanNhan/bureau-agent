@@ -123,6 +123,9 @@ class LiveConsoleTests(IssueFilterChecks, unittest.TestCase):
                     self.assertEqual(3, page.locator('[data-act="choose"]').count())
                 if index == 11:
                     self.assertIn("No valid option", page.locator(".diag").inner_text())
+                    page.wait_for_timeout(600)  # let the tour poll the status line once
+                    # A diagnosis is the expected result, not a failure (the popover must not say so).
+                    self.assertNotIn("Something went wrong", page.locator(".driver-popover").inner_text())
                 page.locator(clicks.get(index, ".driver-popover-next-btn")).first.click()
         page.wait_for_function("tourState.driver === null")
         self.assertEqual("F", page.evaluate("summary('wei').logistics.id"))

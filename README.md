@@ -4,7 +4,7 @@
 
 > LLM for ambiguity · Code for invariants · Humans for accountability
 
-**▶ Try it online:** [bureau-agent.onrender.com](https://bureau-agent.onrender.com) · **🎬 Demo video (2 min):** TODO · **🧭 Guided demo:** open the app and click **Start the guided demo**
+**▶ Try it online:** [bureau-agent.onrender.com](https://bureau-agent.onrender.com) · **🎬 Demo video (2 min):** [watch](https://drive.google.com/file/d/1Zao5Yndk3AOOPt89zQ0dxiTy8JNssqQZ/view?usp=sharing) · **🧭 Guided demo:** open the app and click **Start the guided demo**
 
 Built during the X-IA Hackathon #1 "Rise of Agents X" (25–27 September 2026). All code in this repository was written during the hackathon.
 
@@ -191,7 +191,7 @@ Design choices: **one agent, not several** (the loop is the product); invariants
 
 ## Team
 
-Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH and Huy PHAN (X-IA Hackathon #1). GitHub: [@TieuDaoChanNhan](https://github.com/TieuDaoChanNhan), [@0x2ee08](https://github.com/0x2ee08), [@pectpait](https://github.com/pectpait), [@hoanxuanbach](https://github.com/hoanxuanbach).
+Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH and Thanh Quang Huy PHAN (X-IA Hackathon #1). GitHub: [@TieuDaoChanNhan](https://github.com/TieuDaoChanNhan), [@0x2ee08](https://github.com/0x2ee08), [@pectpait](https://github.com/pectpait), [@hoanxuanbach](https://github.com/hoanxuanbach).
 
 How we worked: issues, pull requests, reviews, and documented engineering decisions ([CONTRIBUTING.md](CONTRIBUTING.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
 

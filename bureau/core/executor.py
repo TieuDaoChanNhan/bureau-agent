@@ -30,6 +30,7 @@ from .models import EventState, Group, ProposedAction
 from ..tools.groups import check_groups
 from ..tools.identity import ASK_HUMAN, link_band
 from ..tools.requester import requester_problem
+from ..tools.message_safety import message_instruction_problem
 
 
 class InvariantViolation(Exception):
@@ -131,6 +132,9 @@ def apply(state: EventState, action: ProposedAction, edited_description: Optiona
           option_id: Optional[str] = None) -> EventState:
     """Return the new state. Must not mutate `state` if an invariant would break (T03)."""
     new_state = copy.deepcopy(state)
+    problem = message_instruction_problem(new_state, action.action_type, action.issue_id)
+    if problem:
+        raise InvariantViolation(problem)
     problem = requester_problem(new_state, action.action_type, action.payload or {}, action.issue_id)
     if problem:
         raise InvariantViolation(problem)

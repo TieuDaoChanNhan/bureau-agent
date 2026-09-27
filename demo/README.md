@@ -2,6 +2,9 @@
 
 Target Space: https://huggingface.co/spaces/bachbeo2007/bureau
 
+The [27 September 2026 verification record](VERIFICATION.md#static-backup-refresh--27-september-2026)
+includes the published revision, public tour results and screenshots.
+
 This is a browser-only adaptation of the existing operations console and its
 30-step Demo tour. It shows two fictional events, evidence, editable replies,
 approval/dismissal, a simulated outbox, local activity, clarification, and trip

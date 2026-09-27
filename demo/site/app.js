@@ -699,7 +699,7 @@ async function planTrip(overrideBudget = null, text = null) {
     }
     const valid = (action.payload.ranked_valid || []).length;
     setRun(`Planner: ${valid} of ${(action.payload.options || []).length} packages pass every hard constraint`
-      + `${overrideBudget ? ` at ${euro(overrideBudget)}` : ""}.`, valid ? "" : "error");
+      + `${overrideBudget ? ` at ${euro(overrideBudget)}` : ""}.`, valid ? "" : "warn");  // a diagnosis, not a failure (the tour reads "error" as a failed request)
   });
 }
 
@@ -1006,7 +1006,7 @@ setInterval(() => {
 }, 500);
 
 // Demo video (T17): the hero button and footer link stay hidden until a URL is set here.
-const DEMO_VIDEO_URL = "";
+const DEMO_VIDEO_URL = "https://drive.google.com/file/d/1Zao5Yndk3AOOPt89zQ0dxiTy8JNssqQZ/view?usp=sharing";
 for (const id of ["#videoBtn", "#videoLink"]) {
   const a = $(id);
   if (DEMO_VIDEO_URL) { a.href = DEMO_VIDEO_URL; a.hidden = false; }

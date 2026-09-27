@@ -86,6 +86,26 @@ class PlannerTests(unittest.TestCase):
             self.assertEqual(plan_trip(req, c).action_type, "ESCALATE")
         search.assert_not_called()
 
+    def test_explicit_mode_restrictions_gate_even_recorded_constraints(self):
+        for text in ("Train only.", "Trains only: coaches are forbidden.", "No coach, please.",
+                     "Uniquement en train.", "Pas d’autocar.", "Les avions sont interdits.",
+                     "We must travel by rail.", "Bus-only travel."):
+            with self.subTest(text=text), mock.patch("bureau.planner.planner.search_options") as search:
+                constraints = wei_constraints()
+                action = plan_trip(replace(wei_request(), text=text), constraints)
+                self.assertEqual(action.action_type, "ESCALATE")
+                self.assertIn("transport-mode", action.payload["clarifications"][0])
+                self.assertEqual(constraints.clarifications, [])
+                search.assert_not_called()
+
+    def test_mode_mentions_and_preferences_do_not_trigger_the_restriction_guard(self):
+        for text in ("We need two coaches, no overnight travel.", "Prefer trains but coaches are fine.",
+                     "No coach restrictions; choose the cheapest package.", "Nous préférons le train."):
+            with self.subTest(text=text):
+                action = plan_trip(replace(wei_request(), text=text), wei_constraints())
+                self.assertEqual(action.action_type, "SELECT_TRAVEL_PLAN")
+                self.assertEqual(action.payload["ranked_valid"], ["D", "A", "B"])
+
     def test_missing_or_invalid_meal_allocations_stop_before_search(self):
         req = wei_request()
         for invalid in (None, True, -1, 20.0):
@@ -96,6 +116,15 @@ class PlannerTests(unittest.TestCase):
                 self.assertEqual(action.action_type, "ESCALATE")
                 self.assertIn("allocations", action.payload["clarifications"][0])
                 search.assert_not_called()
+
+    def test_unknown_hard_fields_cannot_be_silently_ignored(self):
+        c = wei_constraints()
+        c.hard["room_type"] = "single"
+        with mock.patch("bureau.planner.planner.search_options") as search:
+            action = plan_trip(wei_request(), c)
+        search.assert_not_called()
+        self.assertEqual(action.action_type, "ESCALATE")
+        self.assertIn("room_type", action.payload["clarifications"][0])
 
 
 class PlannerCliTests(unittest.TestCase):
