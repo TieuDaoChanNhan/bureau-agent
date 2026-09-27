@@ -201,7 +201,8 @@ const STEPS = [
     el: "#clarify", title: "The planner asks before searching", action: true, side: "left",
     prepare: () => {
       const form = $("#answerForm");
-      if (form) form.answer.value = "Yes, the €150 covers the complete package: coaches, lodging and meals.";
+      // The exact sample answer, which the public demo can also replay when the live limit is reached (demo/replay.py).
+      if (form) form.answer.value = "Yes, the €150 per person includes round-trip coach hire, lodging, groceries and food transport.";
     },
     text: `<p>The organizers say meals are included but are unsure whether the €150 also covers ${b("coach hire")}. The planner
       ${b("asks")} instead of assuming, and nothing is searched yet. We filled in an answer; you can change it.</p>${CLICK("Answer and plan again")}<p class="tour-wait">About 10 seconds.</p>`,

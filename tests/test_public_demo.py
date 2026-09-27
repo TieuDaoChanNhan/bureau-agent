@@ -97,6 +97,17 @@ class PublicDemoTests(unittest.TestCase):
         self.assertTrue((self.runtime / fresh).exists())
         self.assertTrue(unrelated.exists())
 
+    def test_replayed_message_reply_goes_to_the_message_sender(self):
+        # Regression: the sender is on the message record, not in the issue details.
+        with patch("bureau.config.OPENAI_API_KEY", "test-only"), patch("bureau.config.DEMO_DAILY_LLM_LIMIT", 0):
+            response = self.run_issue("message:m02")
+        self.assertEqual(200, response.status_code, response.text)
+        action = next(a for a in response.json()["actions"] if a["issue_id"] == "message:m02")
+        sender = next(m["sender"] for m in json.loads((Path(__file__).resolve().parents[1] / "data/hackathon/messages.json").read_text(encoding="utf-8"))
+                      if m["id"] == "m02")
+        self.assertEqual(sender, action["payload"]["to"])
+        self.assertEqual([], self.fake.requests)
+
     def test_zero_daily_limit_replays_run_and_plan_without_model(self):
         with patch("bureau.config.OPENAI_API_KEY", "test-only"), patch("bureau.config.DEMO_DAILY_LLM_LIMIT", 0):
             response = self.run_issue()
@@ -109,7 +120,7 @@ class PublicDemoTests(unittest.TestCase):
             self.assertEqual(200, response.status_code, response.text)
             self.assertTrue(response.json()["replay"])
             options = response.json()["actions"][0]["payload"]["ranked_valid"]
-            self.assertEqual(["D", "A", "B"], options)
+            self.assertEqual(["F", "C", "E"], options)  # same as a live run on the saved Jinko responses
             response = self.client.post("/api/events/wei/plan", json={"text": text, "overrides": {"max_cost_per_person_cents": 9000}})
             self.assertEqual("ESCALATE", response.json()["actions"][0]["action_type"])
         self.assertEqual([], self.fake.requests)

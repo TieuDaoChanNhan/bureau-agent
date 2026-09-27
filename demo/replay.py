@@ -51,18 +51,21 @@ def issue_example(state, issue):
         value.update(id=f"{state.id}:{issue.id}", event_id=state.id, issue_id=issue.id)
         return _action_from_dict(value)
     text = issue.details.get("text", "")
+    # The sender lives on the message record, not in the issue details.
+    message_id = issue.id.removeprefix("message:")
+    sender = next((m.sender for m in state.messages if m.id == message_id), "")
     scenarios, rules = scenarios_and_rules()
     sample = scenarios.get(issue.id.removeprefix("message:"))
     kind = "ESCALATE"
     if sample:
         kind, title, rule = "SEND_MESSAGE", sample["title"], sample["rule"]
-        payload = {"to": issue.details["sender"], "text": sample["text"] + SIGNATURE}
+        payload = {"to": sender, "text": sample["text"] + SIGNATURE}
     elif text == PERSONAL or issue.id == "message:m05":
         title, rule = "A sponsor requests participants' personal data", "§10"
         payload = {"note": "Please decide how to respond under the association's personal-data rules."}
     elif text == TEAM:
         kind, title, rule = "SEND_MESSAGE", "Review a reply to the rules question", "§3"
-        payload = {"to": issue.details["sender"], "text": "Hi! Teams may have at most four members, including anyone preparing the pitch. Please form a team within that limit." + SIGNATURE}
+        payload = {"to": sender, "text": "Hi! Teams may have at most four members, including anyone preparing the pitch. Please form a team within that limit." + SIGNATURE}
     elif text == FRENCH:
         title, rule = "Confirm which models are permitted", "§2"
         payload = {"note": "Merci de confirmer avec les organisateurs si le modèle open source envisagé est autorisé."}
@@ -87,7 +90,8 @@ def planner_example(state, text=None, overrides=None, *, recorded=False):
     constraints.hard.update(overrides or {})
     if not answered and not recorded:
         constraints.clarifications = [BUDGET_QUESTION]
-    action = plan_trip(request_from_state(state, text=text), constraints, client=None, search=None)
+    # Same packages as a live run: the saved Jinko hotel responses (JINKO_MODE=replay) x recorded transport.
+    action = plan_trip(request_from_state(state, text=text), constraints, client=None, search=state.travel.get("search"))
     action.payload.update(constraints=asdict(constraints), request_text=text or base,
                           constraints_source="recorded", answered=answered)
     return action
