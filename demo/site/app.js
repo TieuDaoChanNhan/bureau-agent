@@ -478,42 +478,49 @@ function requestedBudget(s) {
   return c && c.hard ? c.hard.max_cost_per_person_cents : null;
 }
 
-const travelLine = t => `${esc(t.mode || "")} · ${esc(t.depart || "?")} → ${esc(t.arrive || "?")} · `
-  + `${t.changes ? `${esc(t.changes)} change${t.changes > 1 ? "s" : ""}` : "direct"}${t.overnight ? " · overnight" : ""}`
-  + `${t.return_arrive ? ` · back Sunday ${esc(t.return_arrive)}` : ""}`;
+const legKind = t => `${t.changes ? `${t.changes} change${t.changes > 1 ? "s" : ""}` : "direct"}${t.mode ? ` ${t.mode}` : ""}`;
 // Per-person cost split (T16 data), meal items grouped: "Coach €42 · Lodging €78.59 · Meals €22".
 const COST_LABEL = { coach: "Coach", transport: "Travel", lodging: "Lodging" };
-function costLine(o) {
+function costParts(o) {
   const parts = o.cost_breakdown_per_person_cents || {};
-  if (!Object.keys(parts).length) return "";
   let meals = 0;
   const shown = [];
   for (const [k, v] of Object.entries(parts)) {
     if (COST_LABEL[k]) shown.push(`${COST_LABEL[k]} ${euro(v)}`); else meals += v;
   }
   if (meals) shown.push(`Meals ${euro(meals)}`);
-  return `<div class="line cost">${esc(shown.join(" · "))}</div>`;
+  return shown.join(" · ");
 }
-const lodgingLine = l => `${esc(l.name || "")}${l.walk_minutes != null ? ` · ${esc(l.walk_minutes)} min walk` : ""}`
-  + `${l.capacity ? ` · ${esc(l.capacity)} beds` : ""}`;
+// What organizers must still confirm for a package (checks code cannot verify, and the group block).
+function toConfirm(row) {
+  const items = (row.checks || []).filter(c => c.verified === false).map(c => c.name);
+  if ((row.option.lodging || {}).group_block_confirmed === false) items.push("group block with the hotel");
+  return items;
+}
 
-// Valid packages as cards (ranked first highlighted), rejected ones in a compact table.
+// Valid packages as cards with labelled rows (ranked first highlighted); what every package still needs
+// confirmed is said once above them; rejected packages in a table with separate time columns (T48).
 function optionsBlock(action, decided) {
   const rows = (action.payload && action.payload.options) || [];
   const ranked = (action.payload && action.payload.ranked_valid) || [];
   const byId = Object.fromEntries(rows.map(r => [r.option.id, r]));
-  const cards = ranked.map((id, k) => {
-    const row = byId[id]; if (!row) return "";
+  const validRows = ranked.map(id => byId[id]).filter(Boolean);
+  const shared = validRows.length ? toConfirm(validRows[0]).filter(x => validRows.every(r => toConfirm(r).includes(x))) : [];
+  const cards = validRows.map((row, k) => {
     const o = row.option, t = o.transport || {}, l = o.lodging || {};
-    const confirm = (row.checks || []).filter(c => c.verified === false).map(c => c.name);
+    const own = toConfirm(row).filter(x => !shared.includes(x));
+    const facts = [
+      ["Outbound", `${esc(t.depart || "?")} → ${esc(t.arrive || "?")} · ${esc(legKind(t))}${t.overnight ? ' · <span class="bad">overnight</span>' : ""}`],
+      t.return_arrive ? ["Return", `back ${esc(t.return_arrive)} on Sunday`] : null,
+      ["Lodging", `${esc(l.name || "")}<small>${[l.walk_minutes != null ? `${esc(l.walk_minutes)} min walk to the station` : "",
+                                                 l.capacity ? `${esc(l.capacity)} beds` : ""].filter(Boolean).join(" · ")}</small>`],
+      costParts(o) ? ["Per person", esc(costParts(o))] : null,
+    ].filter(Boolean);
     return `<div class="optcard ${k === 0 ? "first" : ""}">
       <div class="top"><b>Option ${esc(o.id)}</b><span class="verdict ${k === 0 ? "v-pick" : "v-alt"}">${k === 0 ? "Ranked 1st" : "Valid"}</span></div>
       <div class="price">${euro(o.cost_per_person_cents)} <small>per person</small></div>
-      ${costLine(o)}
-      <div class="line">🚆 ${travelLine(t)}</div>
-      <div class="line">🏨 ${lodgingLine(l)}</div>
-      ${confirm.length ? `<span class="confirm">Organizers confirm: ${esc(confirm.join(", "))}</span>` : ""}
-      ${l.group_block_confirmed === false ? '<span class="confirm">Group block to confirm with the hotel</span>' : ""}
+      <dl class="facts">${facts.map(([k2, v]) => `<dt>${k2}</dt><dd>${v}</dd>`).join("")}</dl>
+      ${own.length ? `<span class="confirm">Organizers also confirm: ${esc(own.join(", "))}</span>` : ""}
       ${decided ? "" : `<button class="btn ${k === 0 ? "ok" : ""}" type="button" data-act="choose" data-opt="${esc(o.id)}">Choose option ${esc(o.id)} · ${euro(o.cost_per_person_cents)}</button>`}
     </div>`;
   }).join("");
@@ -521,14 +528,19 @@ function optionsBlock(action, decided) {
     const o = row.option, t = o.transport || {}, l = o.lodging || {};
     const failed = (row.checks || []).filter(c => c.verified !== false && !c.passed);
     const costBad = failed.some(c => /cost/i.test(c.name)), timeBad = failed.some(c => /arriv/i.test(c.name));
-    return `<tr><td><b>${esc(o.id)}</b></td><td class="${t.overnight ? "bad" : ""}">${travelLine(t)}</td><td>${lodgingLine(l)}</td>
-      <td class="num ${costBad ? "bad" : ""}">${euro(o.cost_per_person_cents)}</td><td class="num ${timeBad ? "bad" : ""}">${esc(t.arrive || "")}</td>
+    return `<tr><td><b>${esc(o.id)}</b></td>
+      <td class="num ${t.overnight ? "bad" : ""}">${esc(t.depart || "")}${t.overnight ? " · overnight" : ""}</td>
+      <td class="num ${timeBad ? "bad" : ""}">${esc(t.arrive || "")}</td>
+      <td class="num">${esc(t.return_arrive || "")}</td>
+      <td>${esc(l.name || "")}</td>
+      <td class="num ${costBad ? "bad" : ""}">${euro(o.cost_per_person_cents)}</td>
       <td><span class="whyred">${esc(failed.map(c => `${c.name}${c.detail ? ` (${c.detail})` : ""}`).join("; "))}</span></td></tr>`;
   }).join("");
   return `<div class="optwrap">
+    ${cards && shared.length ? `<p class="shared-confirm">For every package, organizers still confirm: ${esc(shared.join(", "))}.</p>` : ""}
     ${cards ? `<div class="optcards">${cards}</div>` : '<p class="note">No package passes every hard constraint.</p>'}
     ${rejected ? `<span class="lbl">Rejected packages and why</span><div class="rejwrap"><table class="opts">
-      <thead><tr><th>Option</th><th>Travel</th><th>Lodging</th><th>Per person</th><th>Arrives</th><th>Broken constraint</th></tr></thead>
+      <thead><tr><th>Option</th><th>Departs</th><th>Arrives</th><th>Back</th><th>Lodging</th><th>Per person</th><th>Broken constraint</th></tr></thead>
       <tbody>${rejected}</tbody></table></div>` : ""}
   </div>`;
 }
