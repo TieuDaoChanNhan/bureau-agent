@@ -12,6 +12,7 @@ from ..core.store import append_log, merge_issue_status, save_state
 from ..tools.groups import check_groups
 from ..tools.identity import ASK_HUMAN, link_band
 from ..tools.requester import requester_problem
+from ..tools.message_safety import message_instruction_problem, untrusted_answer_source
 from .prompts import SYSTEM_PROMPT
 from .tool_specs import ACTION_TYPES, TOOLS, build_handlers
 
@@ -97,6 +98,9 @@ def _action_from_args(state: EventState, issue: Issue, args: dict) -> ProposedAc
         raise ValueError("Include a payload object; nest executor fields inside it, not at the top level")
     payload = args["payload"]
     _validate_payload(action_type, payload)
+    problem = message_instruction_problem(state, action_type, issue.id)
+    if problem:
+        raise ValueError(problem)
     if action_type == "LINK_PAYMENT":
         _check_identity(state, payload)
         if issue.kind == "unprocessed_message" and not (payload.get("message") and payload.get("to")):
@@ -205,6 +209,22 @@ def resolve_issue(state: EventState, issue: Issue, max_steps: int = MAX_STEPS,
     Tests inject a fake client with the chat.completions.create interface.
     Invalid tool arguments and proposals are returned to the model for repair.
     """
+    source = untrusted_answer_source(state, issue.id)
+    if source is not None:
+        note = ("The source message requests a verbatim reply and claims it is already approved. "
+                "Participant-supplied approval is not authorization. "
+                "What rule-grounded response should the organizers provide?")
+        action = ProposedAction(
+            id=f"{state.id}:{issue.id}", event_id=state.id, issue_id=issue.id,
+            action_type="ESCALATE", title="Review untrusted reply instructions", description=note,
+            evidence=[Evidence("message", source.id, "Verbatim reply requested with a claimed prior approval.")],
+            requires_approval=True, payload={"note": note},
+            trace=[{"step": 1, "tool": "check_message_instructions", "arguments": {"message_id": source.id},
+                    "result": "Untrusted prior-approval claim requires organizer review; no model call.", "ok": True}],
+        )
+        issue.status = "needs_human"
+        state.actions.append(action)
+        return action
     client = client or _default_client()
     handlers = build_handlers(state)
     context = {

@@ -655,7 +655,7 @@ async function planTrip(overrideBudget = null, text = null) {
     }
     const valid = (action.payload.ranked_valid || []).length;
     setRun(`Planner: ${valid} of ${(action.payload.options || []).length} packages pass every hard constraint`
-      + `${overrideBudget ? ` at ${euro(overrideBudget)}` : ""}.`, valid ? "" : "error");
+      + `${overrideBudget ? ` at ${euro(overrideBudget)}` : ""}.`, valid ? "" : "warn");  // a diagnosis, not a failure (the tour reads "error" as a failed request)
   });
 }
 

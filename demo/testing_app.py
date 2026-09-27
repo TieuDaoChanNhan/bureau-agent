@@ -29,6 +29,7 @@ def create_app():
                                   "arrive_before": "21:00", "no_overnight": True, "step_free_rooms": 2},
                          "soft": ["fewer_changes", "early_return", "lower_cost"],
                          "organizer_verified": ["step_free_rooms"],
+                         "unsupported_requirements": [],
                          "clarifications": [] if BUDGET_ANSWER in request["text"] else ["Does the budget include coach hire?"]}
             step = json.dumps(extracted)
         elif "tools" in kwargs:
