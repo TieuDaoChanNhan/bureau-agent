@@ -4,7 +4,7 @@ Record [Bureau Agent on Render](https://bureau-agent.onrender.com/#top). Use **S
 
 **Voice-over production:** generate the French narration with **Gradium**, using access provided by the hackathon sponsor. Generate one clip per timeline row, check the pronunciation of names and amounts, and fit each clip to its scene at a natural pace. Align both subtitle tracks to the generated audio and include the Gradium credit on the end card below.
 
-This is the recording script for [issue #16](https://github.com/TieuDaoChanNhan/bureau-agent/issues/16). The target export is **1 minute 58 seconds, including a 3-second end card**, leaving two seconds below the submission limit. The interactive tour takes about three minutes; the video cuts waiting time and time spent reading the tour popovers.
+This is the recording script for the demo video. The target export is **1 minute 58 seconds, including a 3-second end card**, leaving two seconds below the submission limit. The interactive tour takes about three minutes; the video cuts waiting time and time spent reading the tour popovers.
 
 ## Story and features
 
@@ -92,13 +92,11 @@ The Gradium credit is not spoken and remains within the existing three-second en
 - [ ] Show no API keys, `.env`, personal notifications or real personal data.
 - [ ] Burn in readable English subtitles; optionally add the separate French track. Retime both draft SRT files against the final voice-over and edit. Check accents, numbers, audio and table readability at 1080p.
 - [ ] Target **1:58 including the end card**; verify the actual exported file is **≤ 2:00**.
-- [ ] Follow the recording handoff in [issue #76](https://github.com/TieuDaoChanNhan/bureau-agent/issues/76): agree the script by 13:00 and aim to upload by 18:00 on Sunday 27 September 2026; issue #16's internal completion deadline is 20:00.
-- [ ] Upload a shareable video, check playback in a private window and add its real URL to the README, the page's `DEMO_VIDEO_URL` and `docs/submission.md`. Recording, upload and those links remain follow-up work; this script alone does not complete issue #16.
 
 ## Review references
 
 - [Render short tour](https://bureau-agent.onrender.com/#top) and `QUICK` in [web/tour.js](../web/tour.js): the 15-step order, controls and automatic transitions.
-- [Tour entry buttons, PR #92](https://github.com/TieuDaoChanNhan/bureau-agent/pull/92): hero and top-bar labels.
+- Tour entry buttons in [web/index.html](../web/index.html): hero and top-bar labels.
 - [Sample data](../data/README.md): identity match, budget and package ranking.
 - [Planner](../bureau/planner/README.md): constraints, Jinko replay and verification limits.
 - [Evaluation](../eval/README.md): denominator and scope of `45/50`.

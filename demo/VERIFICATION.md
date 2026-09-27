@@ -2,7 +2,7 @@
 
 ## Static backup refresh — 27 September 2026
 
-[T45 / #82](https://github.com/TieuDaoChanNhan/bureau-agent/issues/82) is verified
+The refreshed static backup is verified
 on the [public Space](https://huggingface.co/spaces/bachbeo2007/bureau) and its
 [direct app URL](https://bachbeo2007-bureau.static.hf.space).
 
@@ -48,8 +48,8 @@ This refresh makes no model calls and changes no Render configuration.
 The following report records the earlier deployment and its then-outstanding
 Render checks. It does not describe the current status of the live service.
 
-This branch incorporates `main` at `b150cf1` (T16's 100-student WEI with meals
-included, and T36's product page). The complete budget is €150 per person;
+This build includes the 100-student WEI with meals
+included and the product page. The complete budget is €150 per person;
 the clarification asks whether coach hire is included. Recorded packages retain
 itemized coach, lodging, groceries and food-transport costs.
 

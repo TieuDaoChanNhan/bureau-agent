@@ -74,7 +74,7 @@ that shell, set `$env:DEMO_MODE='0'`; the public-demo tests enable it themselves
 Render builds with `pip install -r requirements.txt` and starts
 `uvicorn api.main:app --host 0.0.0.0 --port $PORT`. Each subsequent push to `main`
 deploys automatically. `autoDeployTrigger: commit` is the current Blueprint
-spelling of the task's `autoDeploy: true`. Keep the default single Uvicorn worker.
+spelling of `autoDeploy: true`. Keep the default single Uvicorn worker.
 Redeploying also resets each browser's sample data.
 
 Local equivalent, after installing requirements:
