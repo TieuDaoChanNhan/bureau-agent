@@ -2,6 +2,8 @@
 
 Record [Bureau Agent on Render](https://bureau-agent.onrender.com/#top). Use **Start the guided demo · 3 min** in the hero, or **Quick tour** in the top bar, to start the default **15-step short tour**. Recording instructions are in English; the voice-over and on-screen callouts remain in French. Include **English subtitles** so viewers who do not speak French can follow along.
 
+**Voice-over production:** generate the French narration with **Gradium**, using access provided by the hackathon sponsor. Generate one clip per timeline row, check the pronunciation of names and amounts, and fit each clip to its scene at a natural pace. Align the English subtitles to the generated audio and include the Gradium credit on the end card below.
+
 This is the recording script for [issue #16](https://github.com/TieuDaoChanNhan/bureau-agent/issues/16). The target export is **1 minute 58 seconds, including a 3-second end card**, leaving two seconds below the submission limit. The interactive tour takes about three minutes; the video cuts waiting time and time spent reading the tour popovers. The team's [Vietnamese recording notes are in issue #76](https://github.com/TieuDaoChanNhan/bureau-agent/issues/76#issuecomment-5855218962), outside the tracked repository files.
 
 ## Story and features
@@ -15,7 +17,7 @@ Follow `QUICK` in [web/tour.js](../web/tour.js). The short tour has no separate 
 1. Open the Render link, let it load, then hard-refresh with **Ctrl+Shift+R**. Use the light theme and a window of at least 1440×900. Adjust zoom so the highlighted button and popover fit; turn off personal notifications. Do not use the Hugging Face backup for this script: it has a different package fixture.
 2. Click **Start the guided demo · 3 min** or the top-bar **Quick tour**, and verify **Step 1 of 15**. The first **Next →** resets both sample events. Avoid the hero **Full tour · 6 min** and top-bar **Full tour** buttons. These labels follow [PR #92](https://github.com/TieuDaoChanNhan/bureau-agent/pull/92); if that change has not reached Render yet, the hero may still say **Start the guided demo**. The 15-step count identifies the correct tour.
 3. Rehearse once: coach-budget question → F/C/E pass at €150 → none passes at €120 → restore €150 → choose F → six issues unlock. Check the result-source labels described below before recording the voice-over.
-4. Capture the whole run and record narration separately, one row at a time. Wait for the real result, then cut the wait while preserving the click and its corresponding result. Show **« Temps d’attente coupés »** so video duration does not imply system latency. Do not speed up the evidence viewers need to read.
+4. Capture the whole run and generate the French narration separately with sponsor-provided Gradium access, one row at a time. Wait for the real result, then cut the wait while preserving the click and its corresponding result. Show **« Temps d’attente coupés »** so video duration does not imply system latency. Do not speed up the evidence viewers need to read.
 5. On action steps, click the highlighted control and let the tour advance automatically. On explanation steps, hold the result for the allotted time, then click **Next →**. Burn in English subtitles, at most two lines at a time, away from buttons, prices and verification labels. An additional selectable French subtitle track is optional.
 6. Import [demo-subtitles.en.srt](demo-subtitles.en.srt) as the English subtitle starting point. Its cue times follow this 1:58 storyboard; **retime them to the recorded French speech and final edit** before export. Keep French callouts separate from the English dialogue subtitles. If a shot or spoken line changes, update its subtitles too.
 
@@ -66,7 +68,10 @@ End card in the final three seconds:
 > **L’agent enquête. Vous décidez.**<br>
 > Démo : bureau-agent.onrender.com<br>
 > Code : github.com/TieuDaoChanNhan/bureau-agent<br>
-> Van Khue NGUYEN · Xuan Bach HOANG · Gia Bao DINH · Huy PHAN
+> Van Khue NGUYEN · Xuan Bach HOANG · Gia Bao DINH · Huy PHAN<br>
+> Voix française générée avec Gradium
+
+The Gradium credit is not spoken and remains within the existing three-second end card.
 
 ## Keep the recording accurate
 
@@ -82,6 +87,7 @@ End card in the final three seconds:
 
 - [ ] Use the Render **15-step short tour**, with the controls and sequence above: step 4 opens the form automatically; step 12 returns to €150 before choosing F.
 - [ ] Match every French line and English subtitle to the result actually shown. Rehearse with a timer instead of speeding up narration to compensate for API waits.
+- [ ] Generate the French voice-over with sponsor-provided Gradium access, listen to each clip, check names and amounts, and retime the English subtitle cues to that audio. Keep the Gradium end-card credit visible.
 - [ ] Keep synthetic-data, cut-wait, saved-example (if present), cached-price and unverified-condition labels readable and clear of subtitles.
 - [ ] Show no API keys, `.env`, personal notifications or real personal data.
 - [ ] Burn in readable English subtitles; optionally add a separate French track. Retime the draft SRT against the final voice-over and edit. Check accents, numbers, audio and table readability at 1080p.
