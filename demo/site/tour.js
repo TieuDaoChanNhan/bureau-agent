@@ -151,10 +151,13 @@ async function tourAdvance() {
 function tourWatch(step) {
   tourStopPolling();
   tourState.started = Date.now();
-  if (step.done()) { tourAdvance(); return; }
+  // Move on only once the console has finished loading and rendering: a render after the next step
+  // is highlighted would replace its control, and Driver's overlay would then block clicks on it.
+  const ready = () => step.done() && !ui.busy && !ui.switching;
+  if (ready()) { tourAdvance(); return; }
   let rehighlighted = false;
   tourState.poll = setInterval(() => {
-    if (step.done()) { tourAdvance(); return; }
+    if (ready()) { tourAdvance(); return; }
     // The console re-renders while the agent works: when the highlighted control is gone, highlight
     // the step again so the selector can match the "thinking" panel (once per step, to avoid flicker).
     if (!rehighlighted && !document.querySelector(".driver-active-element") && document.querySelector("#detail .thinking")) {

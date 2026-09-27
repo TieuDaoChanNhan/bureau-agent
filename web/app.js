@@ -843,10 +843,13 @@ function store(data) {
 async function selectEvent(id) {
   ui.current = id;
   ui.view = "issue";
-  store(await api(`/api/events/${encodeURIComponent(id)}`));
-  ui.outbox = await api(`/api/events/${encodeURIComponent(id)}/outbox`);
-  if (!ui.sel[id]) ui.sel[id] = firstKey(summary());
-  render();
+  ui.switching = true;   // the guided tour waits for the final render before highlighting
+  try {
+    store(await api(`/api/events/${encodeURIComponent(id)}`));
+    ui.outbox = await api(`/api/events/${encodeURIComponent(id)}/outbox`);
+    if (!ui.sel[id]) ui.sel[id] = firstKey(summary());
+    render();
+  } finally { ui.switching = false; }
 }
 
 // ---------- actions ----------
