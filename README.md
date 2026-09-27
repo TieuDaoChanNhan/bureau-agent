@@ -6,7 +6,7 @@
 
 **▶ Try it online:** [bureau-agent.onrender.com](https://bureau-agent.onrender.com) · **🎬 Demo video (2 min):** [watch](https://drive.google.com/file/d/1Zao5Yndk3AOOPt89zQ0dxiTy8JNssqQZ/view?usp=sharing) · **🧭 Guided demo:** click **Start the guided demo · 3 min** on the site
 
-Team **cylindricalbirds**, X-IA Hackathon #1 "Rise of Agents X" (25–27 September 2026). The project was started at the hackathon: all code in this repository was written between 25 September 09:00 and the submission deadline, and no existing project was reused.
+Team **cylindricalbirds**, X-IA Hackathon n°1 "Rise of Agents X" (25–27 September 2026). The project was started at the hackathon: all code in this repository was written between 25 September 09:00 and the submission deadline, and no existing project was reused.
 
 ![Bureau Agent: landing page and operations console](docs/screenshots/readme-hero.jpg)
 
@@ -40,11 +40,11 @@ One loop handles every kind of event:
 2. **Investigate.** An AI agent (OpenAI `gpt-4.1`, tool calling) picks its own tools: look up a participant, read payments, score an identity match, search the rules, check teams. It proposes **one** action: link a payment, send a reply, move a member, or ask the organizers. Every tool call is recorded and shown.
 3. **Decide.** The organizer sees the proposal first, with the agent's question, the evidence and an editable draft reply. Approving is what changes data or "sends" the reply (to a simulated outbox), and it is logged.
 
-![A proposal: the agent found a payment made from a personal email, scored the identity match at 0.91 and asks the organizer to confirm before linking it, with a draft reply and every tool call it made](docs/screenshots/readme-proposal.jpg)
+<p align="center"><img src="docs/screenshots/readme-proposal.jpg" alt="A proposal: the agent found a payment made from a personal email, scored the identity match at 0.91 and asks the organizer to confirm before linking it, with a draft reply and every tool call it made" width="520"></p>
 
 The same loop **plans trips**. For a 100-student integration weekend ("€150 each with meals included, arrive before 21:00, no overnight travel, two step-free rooms, two coaches"), the planner turns the organizers' words into constraints and **asks before searching** (does the €150 cover the coaches?). It builds packages from **real Jinko hotel offers** (saved on 26 September 2026 and replayed, so the demo is reproducible), checks every package in code, and finds **3 of 8 valid** at €150. At €120 **none is**, and it **never relaxes a constraint by itself**: it says which change would unlock each option. Requirements it cannot check (a shared kitchen, a train-only rule) are either asked about or listed for organizers to confirm. Choosing a package unlocks six waiting issues.
 
-![Trip options: three valid packages with outbound, return, lodging and cost per person, what organizers still confirm, and the rejected packages with the broken constraint in red](docs/screenshots/t48-trip-options.jpg)
+<p align="center"><img src="docs/screenshots/t48-trip-options.jpg" alt="Trip options: three valid packages with outbound, return, lodging and cost per person, what organizers still confirm, and the rejected packages with the broken constraint in red" width="520"></p>
 
 ## Strengths
 
@@ -72,7 +72,7 @@ Any volunteer-run organization that runs events with a small board: student asso
 | **Dependencies** | Choosing a travel plan unlocks the issues waiting for it |
 | **Guided tours** | A 3-minute quick tour and a 6-minute full tour that highlight each control |
 
-![Approve safe replies: a preview of the replies a code rule marks as safe, with recipient, cited rule and full draft](docs/screenshots/readme-bulk.jpg)
+<p align="center"><img src="docs/screenshots/readme-bulk.jpg" alt="Approve safe replies: a preview of the replies a code rule marks as safe, with recipient, cited rule and full draft" width="620"></p>
 
 ## Why it is safe to use
 
