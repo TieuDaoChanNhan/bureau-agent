@@ -77,7 +77,8 @@ if no room count can be determined, leave its hard value null and ask for a coun
 Ask concise clarification questions in the language of the text field (English
 text needs English questions, French text needs French questions; do not infer
 language from a city or event name) for ambiguity,
-conflicting numbers, vague limits, or unsupported hard requirements. In particular,
+conflicting numbers, vague limits, or restrictions that change package eligibility
+but cannot be checked, especially transport-mode restrictions. In particular,
 if a budget does not explicitly say whether meals are included or excluded, ask
 whether meals are included. Naming only 'travel and lodging' does not establish
 that meals are excluded: record the stated ceiling and ask about meals. Only
@@ -93,11 +94,17 @@ Do not ask about optional constraints that are simply absent. Origin, destinatio
 departure and return context belong to TravelRequest, not additional hard keys.
 If the request is clear, clarifications is empty.
 
-Account for every stated hard requirement. Put requirements that cannot be
-represented and checked by the supported fields into unsupported_requirements,
-using a short faithful description in the organizer's language. In particular,
-transport-mode restrictions, required kitchen facilities, hotel ratings and room
-types are unsupported. Never drop them just because hard has a fixed schema.
+Account for every stated hard requirement. Put requirements that need supplier or
+organizer verification into unsupported_requirements, using a short faithful
+description in the request's language (English request means English notes).
+Kitchen facilities, activity spaces, number of coaches, hotel ratings and room
+types are confirmation notes, not blocking questions: packages may be compared
+conditionally while organizers verify these before booking. Do not ask the
+organizer to waive them or to confirm them before searching. Code will show them
+as unverified checks for every option; it will never mark them satisfied.
+Transport-mode restrictions (train only, no coaches) instead require a blocking
+clarification because the checker cannot enforce which mode is acceptable.
+Never drop a requirement just because hard has a fixed schema.
 Do not put ordinary trip context, stated soft preferences, or supported fields
 (including organizer-verified step_free_rooms) in unsupported_requirements.
 An empty list means there are no additional hard requirements to verify.
@@ -154,11 +161,10 @@ def _constraints_from_json(content: str) -> Constraints:
     # This boundary invariant must hold even if a provider omits the marker.
     if "step_free_rooms" in hard and "step_free_rooms" not in value["organizer_verified"]:
         value["organizer_verified"].append("step_free_rooms")
-    # Unsupported requirements cannot vanish just because the model returned no questions.
-    for requirement in value["unsupported_requirements"]:
-        value["clarifications"].append(
-            f"The planner cannot verify this requirement: {requirement}. "
-            "How should the organizers resolve it before searching?")
+    # Supplier/facility requirements stay visible without preventing comparison.
+    # Eligibility restrictions remain blocking questions, including the text guard below.
+    value["organizer_verified"] = list(dict.fromkeys(
+        value["organizer_verified"] + value["unsupported_requirements"]))
     return Constraints(hard=hard, soft=value["soft"],
                        organizer_verified=value["organizer_verified"], clarifications=value["clarifications"])
 

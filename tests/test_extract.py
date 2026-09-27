@@ -52,17 +52,46 @@ class ExtractionTests(unittest.TestCase):
         c = extract_constraints(self.request, client=FakeStructuredClient(response(step_free_rooms=2)))
         self.assertEqual(c.organizer_verified, ["step_free_rooms"])
 
-    def test_unsupported_requirement_becomes_a_question_even_without_model_clarification(self):
+    def test_unsupported_facility_is_preserved_as_an_unverified_check(self):
         payload = response(max_cost_per_person_cents=16000)
         payload["unsupported_requirements"] = ["A private kitchen exclusively for our group"]
-        req = replace(self.request, text="EUR 160 each including meals. A private kitchen is mandatory.")
+        req = replace(wei_request(), text="EUR 160 each including meals. A private kitchen is mandatory.")
         constraints = extract_constraints(req, client=FakeStructuredClient(payload))
         self.assertEqual(constraints.hard["max_cost_per_person_cents"], 16000)
-        self.assertIn("private kitchen", constraints.clarifications[0])
+        self.assertEqual(constraints.clarifications, [])
+        action = plan_trip(req, constraints)
+        self.assertEqual(action.action_type, "SELECT_TRAVEL_PLAN")
+        for row in action.payload["options"]:
+            check = next(check for check in row["checks"] if "private kitchen" in check["name"])
+            self.assertFalse(check["verified"])
+            self.assertFalse(check["passed"])
+
+    def test_demo_budget_answer_reaches_f_c_e_with_kitchen_and_coach_confirmation_notes(self):
+        from bureau.core.loader import load_event
+        from demo.replay import BUDGET_ANSWER
+        request = wei_request()
+        payload = response(participants=100, arrive_before="21:00", no_overnight=True, step_free_rooms=2)
+        payload["soft"] = ["fewer_changes", "early_return", "lower_cost"]
+        payload["unsupported_requirements"] = ["A shared kitchen and activity spaces", "Two coaches"]
+        payload["clarifications"] = ["Does the EUR150 ceiling include coach hire?"]
+        first = extract_constraints(request, client=FakeStructuredClient(payload))
         with patch("bureau.planner.planner.search_options") as search:
-            action = plan_trip(req, constraints)
+            self.assertEqual(plan_trip(request, first).action_type, "ESCALATE")
         search.assert_not_called()
-        self.assertEqual(action.action_type, "ESCALATE")
+
+        payload["hard"]["max_cost_per_person_cents"] = 15000
+        payload["clarifications"] = []
+        answered = replace(request, text=request.text + "\n" + BUDGET_ANSWER)
+        constraints = extract_constraints(answered, client=FakeStructuredClient(payload))
+        with patch("bureau.planner.jinko.JINKO_MODE", "replay"):
+            action = plan_trip(answered, constraints, search=load_event("wei").travel["search"])
+        self.assertEqual(action.action_type, "SELECT_TRAVEL_PLAN")
+        self.assertEqual(action.payload["ranked_valid"], ["F", "C", "E"])
+        for row in action.payload["options"]:
+            for requirement in payload["unsupported_requirements"]:
+                check = next(c for c in row["checks"] if c["name"] == requirement)
+                self.assertFalse(check["verified"])
+                self.assertFalse(check["passed"])
 
     def test_train_only_cannot_disappear_when_model_omits_the_restriction(self):
         req = replace(self.request, participants=100, text=(
