@@ -1,406 +1,101 @@
-# Kiến trúc Bureau Agent
-*Tài liệu kiến trúc cho nhóm dự thi X-IA Hackathon #1 · Phiên bản 1.1 · 25/09/2026*
-*Tài liệu liên quan: `DE_XUAT_BUREAU_AGENT_V3.md` (sản phẩm), `README.md` (cách chạy).*
+# Architecture
 
-Tài liệu này mô tả hệ thống sẽ được xây dựng: các thành phần, luồng dữ liệu, giao diện giữa các phần, và cách nhóm làm việc chung trên một repo. Mục 10 liệt kê các **quyết định cần duyệt** trước khi dựng framework.
+Bureau Agent helps volunteer-run associations keep event operations consistent. It detects concrete problems in an event, investigates ambiguous cases with an AI agent, and asks an organizer to approve every consequential change.
 
-**Ký hiệu:** **[đã có]** = đã có trong bộ khung hiện tại, có kiểm thử. **[cần làm]** = chưa làm. **[VERIFY]** = chi tiết của bên thứ ba cần kiểm tra lại với tài liệu hoặc API thật.
+> LLMs investigate ambiguity. Code enforces invariants. Organizers decide.
 
-### Thay đổi so với đề xuất v3 (sau phản biện)
-| Vấn đề | Sửa |
+## System overview
+
+```text
+sample data -> EventState -> deterministic detection -> Issue
+                    ^                                |
+                    |                                v
+runtime store <- executor <- organizer approval <- ProposedAction <- agent / planner
+```
+
+The FastAPI application serves the JSON API and the organizer console. The static public demo is a separate replayable build with per-browser state.
+
+| Layer | Responsibility |
 |---|---|
-| `TravelRequest` thiếu điểm đến | Thêm `destination`. **Điểm đến do người tổ chức cho**; planner không tự chọn nơi đi |
-| LLM ghép phương án trọn gói dễ cộng sai giá, ghép sai ngày | **LLM hiểu yêu cầu → code ghép và kiểm tra → LLM giải thích** |
-| Tiền dùng số thực | `amount_cents: int` + `currency`; ràng buộc giá dùng `max_cost_per_person_cents` |
-| Quy chế là một chuỗi dài, khó trích dẫn | `Rule(id, title, text, source)`; decision trace trích được `§3` |
-| Bằng chứng là chuỗi tự do | `Evidence(source_type, source_id, description)` |
-| Ngày giờ không có múi giờ | Mọi `datetime` phải có múi giờ; bộ nạp dữ liệu từ chối ngày giờ thiếu múi giờ |
-| Tên `duplicate_membership` dễ nhầm với phí hội viên | Đổi thành `multiple_group_membership` |
-| Phát hiện lại có thể tạo vấn đề trùng | ID vấn đề là **dấu vân tay xác định** (loại + đối tượng); có kiểm thử |
-| `plan_trip` trả về danh sách nhưng chỉ có một hành động | Trả về **một** `ProposedAction` |
-| Không biết vấn đề được giải quyết bằng hành động nào | Thêm `Issue.resolved_by_action_id` |
-| Mọi hành động đều có "độ tin cậy" | `confidence` chỉ dùng cho suy luận (danh tính, ý định); sự kiện xác định chỉ có đạt/không đạt |
-| Ràng buộc "phòng không bậc thang" mà API không xác minh được | Jinko chỉ có mô tả tiện nghi dạng chữ, không có trường có cấu trúc. Ràng buộc này là **"người tổ chức xác nhận"** (`Check.verified = False`): hiển thị, nhưng không dùng để loại phương án |
+| `bureau/core` | Dataclasses, data loading, deterministic detection, runtime persistence, approved-action execution |
+| `bureau/tools` | Pure rule, eligibility, identity, and group helpers used by the agent |
+| `bureau/agent` | OpenAI tool-calling loop; it creates proposals but never changes event data |
+| `bureau/planner` | Constraint extraction, recorded/live search, package composition, validation, ranking, and explanation |
+| `api` | FastAPI routes for events, runs, planning, approval, reset, sessions, and the web console |
+| `web` | Plain HTML, JavaScript, and CSS organizer console with guided tours |
+| `demo` | Public, static replay build with no live model or provider calls |
+| `eval` | Labeled, offline evaluation harness and reports |
 
----
+## Event state and records
 
-## Mục lục
-1. Mục tiêu và nguyên tắc
-2. Tổng quan hệ thống
-3. Mô hình dữ liệu
-4. Vòng đời của một vấn đề
-5. Thành phần lõi
-6. Planner chuyến đi
-7. API và giao diện web
-8. Đánh giá
-9. Cấu trúc repo và quy trình làm việc chung
-10. Quyết định cần duyệt
-11. Phân công và mốc thời gian
-12. Rủi ro kỹ thuật
+`EventState` holds an event's immutable context and mutable operating state:
 
----
+- participants, payments, groups, messages, rules, deadlines, settings, travel, and logistics;
+- detected `Issue` records with deterministic ids and dependencies;
+- `ProposedAction` records, evidence, checks, tool trace, and approval metadata.
 
-## 1. Mục tiêu và nguyên tắc
+Money is stored as integer cents and every datetime is timezone-aware. `data/<event>/` is committed sample input. `runtime/<event>/` is ignored local state containing approved changes, issue state, actions, audit log, and simulated outbox messages.
 
-**Mục tiêu:** một agent duy nhất giữ cho trạng thái của một sự kiện nhất quán. Agent phát hiện vấn đề, điều tra bằng công cụ, đề xuất hành động, và người tổ chức duyệt. Demo trên hai sự kiện: hackathon (P0) và weekend d'intégration (P1).
+## Issue lifecycle
 
-**Nguyên tắc kiến trúc:**
-| Nguyên tắc | Hệ quả trong thiết kế |
+1. `detect_issues(state)` derives issues from the current records: payment mismatches, unpaid registrations, group violations, logistics gaps, room allocation, and unprocessed messages.
+2. Stored issue state is merged by deterministic id. Resolved and dismissed decisions remain in history even after their issue disappears from new detection.
+3. The agent or planner creates a proposal for one runnable issue. Dependencies prevent premature work.
+4. An organizer approves, edits, or dismisses the proposal.
+5. `executor.apply()` uses a deep copy, checks scoped invariants, writes an audit event and optional simulated message, then returns the new state.
+6. Detection runs again, so repaired issues disappear and dependent work becomes runnable.
+
+The agent cannot execute actions. The executor is the only state-changing boundary.
+
+## Agent execution
+
+The agent uses OpenAI Chat Completions with tools such as rule search, participant lookup, eligibility checks, identity matching, group validation, and group proposals. It ends only by calling `propose_action`.
+
+`run_pending()` is shared by CLI and API. It selects open or human-review issues without an existing proposal, skips blocked dependencies, persists each successful proposal immediately, records individual agent failures in the audit log, and returns the remaining backlog. The console runs issues one at a time to show progress and permit cancellation between issues.
+
+Tool calls and outcomes are recorded in proposal traces. The console displays the trace after a run; it is not a live token stream.
+
+## Planner pipeline
+
+The trip planner keeps interpretation and enforcement separate:
+
+```text
+organizer text -> structured constraints -> search/replay -> package composition
+              -> deterministic checks -> ranking -> explanation -> travel proposal
+```
+
+- Constraint extraction uses structured LLM output and asks clarifying questions instead of guessing.
+- Hotel search supports Jinko live mode and recorded replay. Public demo transport choices are illustrative because the available ground-search endpoint was unavailable.
+- Composition and checks are deterministic Python code. Prices are integer cents and every hard constraint produces a visible check.
+- Unsupported verification, such as venue accessibility described only in free text, remains an organizer confirmation rather than a fabricated fact.
+- The planner either returns a `SELECT_TRAVEL_PLAN` proposal with ranked packages or an `ESCALATE` diagnosis. Approval stores logistics and unlocks dependent work.
+
+## API and console
+
+The API returns dataclass-shaped JSON. The key route groups are:
+
+- events, issue summaries, actions, and outbox;
+- bounded agent runs and individual retry;
+- incoming messages, which are saved as data and then investigated;
+- approval, dismissal, and reset;
+- trip planning, clarification answers, and what-if budgets;
+- public-demo sessions and limits.
+
+The organizer console shows detected issues, evidence, checks, proposals, tool traces, approvals, simulated outbox messages, and the trip planner. It uses no frontend build step. The public static demo replays curated fixtures and clearly marks replay behavior.
+
+## Key decisions
+
+| Decision | Rationale |
 |---|---|
-| LLM cho chỗ mơ hồ | LLM chỉ đọc tin nhắn, tách ràng buộc, chọn công cụ, soạn nội dung, giải thích |
-| Code cho quy tắc bất biến | Điều kiện dự thi, sĩ số nhóm, mỗi người một nhóm, ngân sách, giờ đến, điểm danh tính đều là hàm Python thuần, có kiểm thử |
-| Con người chịu trách nhiệm | Agent **không bao giờ thực thi**. Nó chỉ tạo `ProposedAction`. Thực thi nằm ở một module riêng (`executor`), chỉ chạy khi có duyệt |
-| Một agent điều phối | Không làm đa agent. Mọi khả năng là công cụ của một vòng lặp |
-| Chạy được không cần mạng | Phát hiện vấn đề, planner, kiểm thử chạy được mà không cần API. Jinko có chế độ phát lại kết quả đã lưu |
-| Trạng thái tính lại được | Vấn đề được phát hiện lại từ dữ liệu sau mỗi hành động, với ID ổn định, nên không có trạng thái "lệch" giữa dữ liệu và danh sách vấn đề |
+| One orchestrating agent | The agent chooses tools; fixed Python code enforces rules and execution boundaries. |
+| JSON runtime state | Small, inspectable demo data is easy to reset; deployed demo sessions are isolated per browser. |
+| Approval before execution | The agent drafts; organizers retain responsibility for money, identity, messages, groups, and travel. |
+| Replayable external data | The demonstration remains reliable without network availability or provider credits. |
+| Plain web console | No build pipeline is needed for the demo, and the API remains the single data contract. |
+| Labeled evaluation | Quality is measured against fixtures, while organizer feedback is reported separately when available. |
 
----
+## Quality and delivery
 
-## 2. Tổng quan hệ thống
+Unit tests cover deterministic rules, agent loop recovery with fake clients, API behavior, planner replay, data consistency, evaluation, and public-demo isolation. Browser tests cover the console tours. CI runs the test suite on pushes and pull requests; dependency consistency is checked from `uv.lock`.
 
-```
-                    ┌─────────────────────────── Web UI (hàng chờ duyệt, decision trace) ───┐
-                    │                                                                        │
-                    ▼                                                                        │
-             ┌─────────────┐   HTTP/JSON                                                     │
-             │  API        │◄──────────────────────────────────────────────────────────────┘
-             │  (FastAPI)  │
-             └──────┬──────┘
-                    │
-   ┌────────────────┼──────────────────────────────────────────────┐
-   │                ▼                                              │
-   │  Store ◄──► EventState ──► detect_issues() ──► Issue[]        │   Lõi (bureau/)
-   │  (JSON)          ▲                               │            │
-   │                  │                               ▼            │
-   │            executor.apply()            agent.resolve_issue()  │──► OpenAI
-   │            (chỉ khi được duyệt)           │  gọi công cụ      │
-   │                  ▲                       ▼                    │
-   │                  │                 ProposedAction ────────────┼──► hàng chờ duyệt
-   │                  │                       ▲                    │
-   │                  │                       │                    │
-   │                  │               planner.plan_trip()          │──► Jinko (live / replay)
-   │                  │               (P1: chuyến đi)              │
-   └──────────────────┴──────────────────────────────────────────────┘
-```
-
-| Thành phần | Vai trò | Trạng thái |
-|---|---|---|
-| `models` | Schema dữ liệu | [đã có] |
-| `loader` | Nạp dữ liệu mẫu vào `EventState` | [đã có] |
-| `detect` | Phát hiện vấn đề bằng code | [đã có] |
-| `tools/*` | Công cụ cố định: quy chế, điều kiện, danh tính, nhóm | [đã có] |
-| `agent` | Vòng lặp OpenAI, kết thúc bằng `propose_action` | [đã có, chưa chạy với API] |
-| `planner/*` | Tách ràng buộc, tìm kiếm, cổng ràng buộc, xếp hạng, chẩn đoán | Đã có; khách sạn Jinko live/replay, đi lại minh họa do ground search trả 404 |
-| `store` | Lưu và đọc trạng thái, hành động, hộp thư đã gửi | [cần làm] |
-| `executor` | Áp hành động đã duyệt lên trạng thái | [cần làm] |
-| `api` | HTTP API cho giao diện | [cần làm] |
-| `web` | Giao diện duyệt | [cần làm] |
-| `eval` | Bộ đánh giá | [cần làm] |
-
----
-
-## 3. Mô hình dữ liệu
-Schema nằm trong `bureau/models.py` [đã có]. Tóm tắt:
-
-| Đối tượng | Trường chính | Ghi chú |
-|---|---|---|
-| `EventState` | `id, name, rules, deadlines, settings, participants, payments, groups, messages, logistics, issues, actions` | Một sự kiện tại một thời điểm |
-| `Participant` | `id, name, emails[], registered_at, skills[], needs[], looking_for_group` | `needs` ví dụ `step_free` |
-| `Payment` | `id, payer_name, amount_cents, currency, paid_at, payer_email?, reference?, participant_id?` | Tiền là số nguyên (cent); `participant_id = None` là chưa gắn với ai |
-| `Rule` | `id, title, text, source` | Một mục quy chế, ví dụ `§3` |
-| `Evidence` | `source_type, source_id, description` | Nguồn dùng để đề xuất (bản ghi, điều khoản, kết quả tìm kiếm) |
-| `Group` | `id, kind(team/room), name, members[], capacity_min, capacity_max, declared_at?` | Đội (hackathon) hoặc phòng (WEI) |
-| `Message` | `id, channel, sender, text, received_at` | Email, Discord, biểu mẫu |
-| `Issue` | `id, kind, blocking, title, subject_ids[], details, status, depends_on[], resolved_by_action_id?` | ID là dấu vân tay xác định, ví dụ `multiple_group_membership:p02` |
-| `Check` | `name, passed, detail, verified` | `verified = False` khi nguồn dữ liệu không xác minh được; người tổ chức phải kiểm tra |
-| `ProposedAction` | `id, event_id, issue_id, action_type, title, description, evidence[Evidence], checks[Check], confidence?, requires_approval, payload` | `confidence` chỉ cho suy luận; luôn `requires_approval = True` với hành động có hệ quả |
-
-Mọi `datetime` có múi giờ (dữ liệu mẫu dùng `+02:00`, giờ Paris đến 25/10/2026).
-
-**Loại hành động** (`action_type`) và tác động khi được duyệt:
-| `action_type` | `payload` tối thiểu | Tác động khi thực thi |
-|---|---|---|
-| `SEND_MESSAGE` | `to[]`, `text` | Ghi vào hộp thư đã gửi (giả lập) |
-| `LINK_PAYMENT` | `payment_id`, `participant_id`, `to?`, `message?` | Kiểm người tồn tại; từ chối đổi chủ khoản đã gắn bằng ID hoặc khớp email khi chưa có ID. Gắn thanh toán; nếu có `message` thì bắt buộc có `to`, ghi một tin vào outbox (`edited_description` thay nội dung nếu có) |
-| `MOVE_MEMBER` | `participant_id`, `from_group`, `to_group?`, `message?` | Sửa thành viên nhóm |
-| `UPDATE_GROUPS` | `groups[]` | Thay danh sách nhóm/phòng |
-| `SELECT_TRAVEL_PLAN` | `option_id` (do người chọn), `options[]` | Chỉ chấp nhận phương án có `valid = true`; ghi `logistics`, mở khóa vấn đề phụ thuộc |
-| `ESCALATE` | `note?` | Đánh dấu đã chuyển người; vấn đề đóng khi người đánh dấu đã xử lý |
-
----
-
-## 4. Vòng đời của một vấn đề
-
-```
-            detect_issues()                agent / planner             người duyệt           executor
- dữ liệu ─────────────────► open ──────────────────────► proposed ────────────────► approved ───────► resolved
-                              │                              │                         │
-                              │ (phụ thuộc chưa xong)          └──► needs_human ───────┤
-                              ▼                                                        └──► dismissed
-                           waiting
-```
-1. **Phát hiện:** `detect_issues(state)` chạy lại toàn bộ sau mỗi thay đổi. Vấn đề có ID ổn định nên trạng thái (đã duyệt, đã bỏ qua) được giữ qua các lần chạy.
-2. **Chờ:** vấn đề có `depends_on` chưa xong thì không đưa cho agent.
-3. **Đề xuất:** agent (hoặc planner) tạo đúng một `ProposedAction` cho mỗi vấn đề.
-4. **Duyệt:** người duyệt, sửa nội dung, hoặc bỏ qua.
-5. **Thực thi:** `executor.apply(state, action)` thay đổi dữ liệu. Sau đó phát hiện lại, nên vấn đề đã giải quyết biến mất và vấn đề phụ thuộc được mở khóa.
-
----
-
-## 5. Thành phần lõi
-
-### 5.1. Phát hiện vấn đề (`detect.py`) [đã có]
-| Loại | Chặn | Nguồn |
-|---|---|---|
-| `unmatched_payment` | Có nếu có ứng viên khớp; không nếu không ai khớp | `check_eligibility` + `match_person` |
-| `unpaid_membership` / `unpaid_participation` | Có | Đối chiếu đăng ký × thanh toán, loại người đang chờ xác nhận |
-| `multiple_group_membership`, `group_over_capacity` | Có | `check_groups` |
-| `no_logistics_plan`, `rooms_unassigned` | Có | Cài đặt sự kiện (WEI) |
-| `solo_participants` | Không | Người muốn có đội |
-| `unprocessed_message` | Không | Mỗi tin nhắn mới; agent tự phân loại |
-
-### 5.2. Công cụ cố định (`tools/`) [đã có]
-| Công cụ | Đầu vào → đầu ra | Ghi chú |
-|---|---|---|
-| `search_rules` | truy vấn → các mục quy chế liên quan | Tìm theo từ khóa trên từng mục `##` |
-| `check_eligibility` | trạng thái → `paid[]`, `unpaid[]`, `unmatched_payments[]` | Chỉ khớp chính xác theo email hoặc liên kết có sẵn |
-| `match_person` | `payment_id` → ứng viên kèm điểm, mức và tín hiệu | Điểm từ họ, tên, phần trước @, thời điểm. ≥ 0,98 đề xuất gắn; 0,70–0,98 hỏi người; < 0,70 khác người |
-| `check_groups` | trạng thái → vi phạm | Trùng thành viên, sai sĩ số |
-| `propose_groups` | danh sách người, cỡ nhóm → các nhóm | Tham lam, trải đều kỹ năng |
-
-### 5.3. Agent (`agent.py`) [đã có, chưa chạy với API]
-- **Mô hình:** OpenAI Chat Completions với gọi công cụ. Tên model lấy từ `OPENAI_MODEL` trong `.env`; mặc định `gpt-4.1`, model đã được đánh giá (T08, `eval/README.md`).
-- **Vòng lặp:** tối đa 8 bước. Mỗi bước: gọi mô hình → chạy công cụ được yêu cầu → trả kết quả. Kết thúc khi mô hình gọi `propose_action`.
-- **System prompt** gồm các quy tắc: phải tra quy chế trước khi trả lời; không bịa quy tắc (không có thì `ESCALATE`); không tự gộp danh tính; dữ liệu cá nhân, tiền, ngoại lệ luôn chuyển người; tin nhắn soạn theo ngôn ngữ người gửi, kèm dòng minh bạch AI.
-- **Công cụ đưa cho mô hình:** `get_event_summary`, `get_participant`, `search_rules`, `check_eligibility`, `match_person`, `check_groups`, `propose_groups`, `propose_action`.
-- **Không có** công cụ nào thực thi. `propose_action` chỉ ghi đề xuất.
-- **Tính agentic của P0 nằm ở đây.** Tin nhắn đến chỉ được gắn nhãn `unprocessed_message`; **không có luật cứng** kiểu "tin có chữ 'payé' thì gọi `match_person`". Agent tự đọc tin, tự chọn công cụ (tìm người gửi, xem thanh toán chưa gắn, chấm điểm danh tính), tự quyết định đề xuất hay hỏi người. Nếu P1 bị cắt, phần này vẫn phải chứng minh được đây là agent, không phải một workflow cố định.
-
-### 5.4. Lưu trữ (`store.py`) [cần làm]
-- Không dùng cơ sở dữ liệu. Mỗi sự kiện có `data/<event>/` (dữ liệu gốc, chỉ đọc) và `runtime/<event>/` (trạng thái sau khi thay đổi, hành động, hộp thư đã gửi, nhật ký).
-- Lệnh `reset` xóa `runtime/<event>/` để demo lại từ đầu.
-- `runtime/` nằm trong `.gitignore`.
-
-### 5.5. Thực thi (`executor.py`) [đã có]
-- `apply(state, action, edited_description=None, option_id=None) -> EventState`: áp tác động theo bảng ở mục 3 trên bản sao, ghi nhật ký, trả trạng thái mới.
-- Kiểm người nhận thanh toán tồn tại (`ValueError` nếu không); chặn đổi chủ thanh toán và chọn phương án không hợp lệ (`InvariantViolation`). ID chủ khoản có ưu tiên; khi chưa có ID, đối chiếu email không phân biệt hoa thường.
-- **Kiểm tra lại quy tắc nhóm trong phạm vi bị tác động.** Nếu một hành động làm sai quy tắc (ví dụ đội thành 5 người), từ chối, giữ nguyên trạng thái đầu vào và không ghi outbox/nhật ký.
-
----
-
-## 6. Planner chuyến đi (P1)
-
-### 6.1. Luồng xử lý
-Phân công: **LLM hiểu yêu cầu → code ghép và kiểm tra → LLM giải thích.** Điểm đến do người tổ chức cho.
-```
- yêu cầu bằng lời (có điểm đến)
-      │
-      ▼
- extract_constraints()  ── LLM, đầu ra có cấu trúc ──► Constraints {hard, soft, organizer_verified, clarifications}
-      │
-      ├── clarifications không rỗng? ──► ProposedAction ESCALATE (câu hỏi cho người tổ chức), dừng
-      ▼
- search_options()  ── Jinko hotel_search + đi lại minh họa ──► kết quả tìm kiếm
-      │                (khách sạn live/replay; ground_search trả 404 với khóa hiện tại)
-      ▼
- compose_packages()  ── CODE: ghép đi lại × chỗ ở thành phương án trọn gói, tính giá/người (cent)
-      │
-      ▼
- check_constraints()  ── CODE: mỗi ràng buộc cứng → Check(passed, detail, verified)  [đã có]
-      │                  chỉ Check có verified = True mới được loại phương án
-      │
-      ├── không phương án nào hợp lệ ──► diagnose() ──► ESCALATE kèm gợi ý nới        [đã có]
-      ▼
- rank()  ── xếp theo ưu tiên mềm hiện tại, rồi theo giá                                [đã có]
-      │
-      ▼
- explain()  ── LLM viết giải thích đánh đổi (không đổi thứ hạng)
-      │
-      ▼
- ProposedAction SELECT_TRAVEL_PLAN (mọi phương án kèm Check trong payload)             [đã có]
-```
-
-### 6.2. Hợp đồng (`planner/interface.py`) [đã có]
-```python
-TravelRequest(event_id, text, participants, origin, destination, depart_after, return_by=None,
-              catering: dict = ...)  # tùy chọn, mặc định rỗng
-Constraints(hard: dict, soft: list[str], organizer_verified: list[str], clarifications: list[str])
-TravelOption(id, transport: dict, lodging: dict, cost_per_person_cents: int, source: str,
-             cost_breakdown_per_person_cents: dict[str, int] = ...)  # tùy chọn, mặc định rỗng
-
-extract_constraints(req) -> Constraints
-plan_trip(req, constraints) -> ProposedAction      # SELECT_TRAVEL_PLAN hoặc ESCALATE
-```
-**Khóa ràng buộc cứng được hỗ trợ:** `participants`, `max_cost_per_person_cents`, `arrive_before` (HH:MM), `no_overnight`, `step_free_rooms` (luôn thuộc `organizer_verified`).
-
-Giá và trần ngân sách áp dụng cho toàn bộ gói được yêu cầu. Với WEI, ràng buộc ghi sẵn dùng trần 150€/người cho xe, lưu trú, thực phẩm và vận chuyển thực phẩm do hội sinh viên lo; phí tạm thu trong cả 97 khoản thanh toán cũng là 150€. `TravelRequest.catering` là trường tùy chọn, mặc định rỗng, mang phân bổ theo người từ `travel.catering`: demo 20€ thực phẩm và 2€ vận chuyển mỗi người (2000€ + 200€ cho 100 người), được cộng đúng một lần khi ghép gói. Gói dự phòng đã gồm các khoản này. `TravelOption.cost_breakdown_per_person_cents` là bảng chi phí tùy chọn, mặc định rỗng; nếu có, code kiểm tra từng khoản là số cent nguyên không âm và cộng đúng tổng, không cộng bảng này thêm lần nữa. Giá và lịch trình chưa được xác nhận; bản công khai dùng tên hội trung tính và vẫn chờ thành viên từng tham gia hoặc tổ chức WEI duyệt trước khi merge.
-
-**Hai loại ràng buộc cứng:**
-| Loại | Ví dụ | Dùng để loại phương án? |
-|---|---|---|
-| API xác minh được | Giá, giờ đến, đi qua đêm, số phòng khi tìm | Có |
-| Người tổ chức xác nhận | Phòng không bậc thang (Jinko chỉ có mô tả tiện nghi dạng chữ) | Không; hiện thành việc cần xác nhận | Thêm khóa mới = thêm một nhánh trong `check_option` và một bài kiểm thử.
-**Khóa ưu tiên mềm:** `fewer_changes`, `near_station`, `early_return`, `lower_cost`.
-
-### 6.3. Tách ràng buộc bằng LLM [đã có]
-- Dùng đầu ra có cấu trúc (JSON schema khớp `Constraints`).
-- Quy tắc cho mô hình: chỉ tách điều người dùng nói; chỗ mơ hồ ghi vào `clarifications` thay vì tự đoán (ví dụ ngân sách có gồm ăn uống không).
-- Yêu cầu WEI ngắn bằng giọng ban điều hành đã nêu rõ ăn uống, nhưng cố ý để ngỏ tiền thuê xe có nằm trong trần 150€ không. Luồng live cần hỏi lại phạm vi này, nhận câu trả lời toàn bộ gói rồi mới tìm phương án; `--recorded-constraints` dùng phạm vi toàn bộ gói đã ghi sẵn để chạy offline.
-- **Được đánh giá riêng** trên ~10 yêu cầu có đáp án (mục 8), vì tách sai thì cổng ràng buộc cũng vô dụng.
-
-### 6.4. Kết nối Jinko [đã có, giới hạn nhà cung cấp]
-| Mục | Chi tiết |
-|---|---|
-| Môi trường | `https://api.gojinko.com` (ghi đè bằng `JINKO_BASE_URL`); khóa thử hiện tại xác thực được ở đây, endpoint sandbox trả 401 |
-| Xác thực | Client gửi `X-API-Key`; không lưu khóa trong cache |
-| Đi lại | `POST /v1/ground_search` trả 404 với khóa hiện tại. Demo dùng xe thuê minh họa, chưa xác minh Jinko hỗ trợ thuê xe riêng |
-| Chỗ ở | `POST /v1/hotel_search` đã kiểm tra trực tiếp. `total_amount` là giá cả kỳ lưu trú cho một phòng bằng euro; cộng thuế chưa gồm rồi đổi sang cent. Demo nhân giá phòng đôi thành 50 phòng cho 100 người; `group_block_confirmed = False` |
-| Khả năng tiếp cận | Chỉ có trong `facilities` dạng chữ, không có trường đúng/sai. Vì vậy chỉ là gợi ý, cần người xác nhận |
-| Giá vé máy bay | Đơn vị nhỏ nhất (chia cho `decimal_places`); không dùng trong P1 |
-| Hạn token | Kết quả có thể hết hạn sau khoảng 30 phút; chỉ dùng để so sánh, không đặt |
-| Chế độ | `JINKO_MODE=live` gọi thật và lưu phản hồi vào `data/wei/jinko_cache/`; `replay` chỉ đọc bộ nhớ đệm. **Demo dùng `replay` với dữ liệu thật đã lưu** |
-| Đặt vé | Không làm. P2 mới thử đặt trên sandbox |
-
-### 6.5. Ghép phương án (`compose_packages`) [đã có]
-- Ghép đi lại × chỗ ở đủ sức chứa; giữ một gói cho mỗi phương án đi lại trước để bảng so sánh có lựa chọn đa dạng.
-- **Hoàn toàn bằng code, không dùng LLM.** Giá/người gồm đi lại, phần lưu trú chia cho nhóm (làm tròn lên) và ngân sách thực phẩm/vận chuyển thực phẩm nếu có; mọi khoản dùng số nguyên cent.
-- Giữ lại **cả phương án rẻ nhất vi phạm ràng buộc** để bảng so sánh cho thấy vì sao bị loại. Nếu tìm khách sạn không khả dụng, đọc các gói minh họa trọn gói trong `travel_options.json`.
-- Với cache hiện tại và trần demo 150€, C/E/F đạt các kiểm tra hỗ trợ ở 135,59€/140,59€/142,59€; F đứng đầu do về sớm hơn, C rẻ nhất trong các gói hợp lệ. Thử trần 120€ hoặc 90€ trả `ESCALATE`. Riêng bộ gói dự phòng, A/B/D đạt trần 150€ (D đứng đầu do về sớm), A/B đạt trần 120€. Giá phòng nhân theo nhóm không xác nhận còn đủ phòng, bếp hay quyền tổ chức hoạt động.
-
----
-
-## 7. API và giao diện web
-
-### 7.1. Endpoint [cần làm]
-| Phương thức | Đường dẫn | Mô tả |
-|---|---|---|
-| GET | `/api/events` | Danh sách sự kiện kèm số vấn đề chặn / không chặn / chờ duyệt / đã giải quyết |
-| GET | `/api/events/{event_id}` | Trạng thái tóm tắt, danh sách vấn đề, hành động |
-| POST | `/api/events/{event_id}/run` | Phát hiện lại + chạy agent cho vấn đề mở chưa có đề xuất |
-| POST | `/api/events/{event_id}/plan` | Chạy planner với `{text?, overrides?}` (ví dụ đổi ngân sách) |
-| GET | `/api/actions/{action_id}` | Chi tiết hành động (decision trace) |
-| POST | `/api/actions/{action_id}/approve` | `{edited_description?, option_id?}` → thực thi → trả trạng thái mới |
-| POST | `/api/actions/{action_id}/dismiss` | Bỏ qua |
-| GET | `/api/events/{event_id}/outbox` | Tin nhắn "đã gửi" (giả lập) |
-| POST | `/api/events/{event_id}/reset` | Xóa `runtime/`, về dữ liệu gốc |
-
-Định dạng JSON của `Issue` và `ProposedAction` giống hệt dataclass trong `models.py` (`dataclasses.asdict`). Giao diện chỉ phụ thuộc vào định dạng này.
-
-### 7.2. Giao diện web [cần làm]
-- **Bố cục** theo bản mô phỏng (https://claude.ai/artifact/JCKLf1tuJLtPUPsfXK1ox4): thẻ sự kiện → danh sách vấn đề (chặn trước) → chi tiết (đầu vào, decision trace, phép kiểm tra, hành động đề xuất có thể sửa, nút duyệt) → bảng so sánh phương án cho chuyến đi.
-- Trang tĩnh do FastAPI phục vụ, gọi API bằng `fetch`. Không cần bước build (xem quyết định D2).
-- Không có đăng nhập trong bản hackathon.
-
----
-
-## 8. Đánh giá [cần làm]
-```
-eval/
-  messages.jsonl        ~50 tin nhắn có nhãn: loại vấn đề, công cụ cần gọi, điều khoản đúng, có cần chuyển người
-  planning.jsonl    ~10 yêu cầu chuyến đi có nhãn: ràng buộc cứng/mềm đúng, có khả thi không
-  run_eval.py           chạy agent/planner, in bảng chỉ số, lưu kết quả vào eval/results/
-```
-**Đánh giá offline** (có đáp án do nhóm gán; chạy tự động):
-| Chỉ số | Mục tiêu |
-|---|---|
-| Hiểu đúng loại yêu cầu | Báo số thật |
-| Gọi đúng công cụ cần thiết | Báo số thật |
-| Trích đúng điều khoản | Báo số thật |
-| Chuyển người đúng lúc / không cần thiết | Báo cả hai |
-| Hành động vi phạm quy tắc bất biến | **0** |
-| Tách ràng buộc đúng | So từng khóa với đáp án |
-| Phát hiện không khả thi | Báo số thật |
-
-**Thử với người dùng thật** (chỉ báo khi có người tổ chức thật dùng thử, không phải chính nhóm):
-| Chỉ số | Cách đo |
-|---|---|
-| Đề xuất được duyệt nguyên văn | % trên các đề xuất người đó xem |
-| Số lần sửa | Đếm |
-| Thời gian tiết kiệm | Làm tay so với duyệt |
-| Nhận xét | Trích nguyên văn |
-
-Kết quả đưa vào README, kể cả trường hợp sai. Không gọi chỉ số offline là "tỷ lệ người dùng duyệt".
-
----
-
-## 9. Cấu trúc repo và quy trình làm việc chung
-
-### 9.1. Cấu trúc
-```
-bureau-agent/
-  README.md          trang điều hướng
-  TASKS.md           danh sách task để phân công
-  CONTRIBUTING.md    quy trình nhánh, pull request, quy tắc
-  bureau/
-    core/            models, loader, detect, store (T02), executor (T03)
-    tools/           rules, eligibility, identity, groups
-    agent/           prompts, tool_specs, loop
-    planner/         interface, planner, constraints, extract (T10), jinko (T11), compose (T12), explain (T13)
-    config.py  cli.py
-  api/               FastAPI (main.py)
-  web/               index.html, app.js, style.css, reference/mockup.html
-  data/              hackathon/, wei/  (chỉ đọc)
-  runtime/           trạng thái khi chạy (không commit)
-  eval/              cases/, run_eval.py
-  tests/             test_core, test_tools, test_planner, test_pending
-  docs/              ARCHITECTURE.md, product-proposal.md
-  .github/           workflows/tests.yml, pull_request_template.md
-```
-Mỗi thư mục có một `README.md` ngắn. Chỗ chưa cài đặt dùng `raise NotImplementedError("TASK Txx")`.
-
-### 9.2. Quy tắc làm việc
-| Quy tắc | Chi tiết |
-|---|---|
-| Nhánh | `main` luôn chạy được. Mỗi người làm trên nhánh riêng: `core/...`, `planner/...`, `web/...`, `eval/...` |
-| Gộp code | Pull request vào `main`; kiểm thử phải qua; một người khác xem nhanh trước khi gộp |
-| Ranh giới | Mỗi module có một người phụ trách (mục 11). Đổi `models.py` hoặc `planner/interface.py` phải báo cả nhóm trước, vì đó là hợp đồng chung |
-| Bí mật | Không commit `.env`, khóa API hay dữ liệu cá nhân thật. `.env.example` liệt kê tên biến |
-| Kiểm thử | Mọi quy tắc bất biến mới phải có một bài kiểm thử trong `tests/`. GitHub Actions chạy `python -m unittest` trên mỗi pull request |
-| Việc cần làm | GitHub Issues với nhãn `P0`, `P1`, `P2` và người phụ trách |
-| Ngôn ngữ | Code, commit, README bằng tiếng Anh (giám khảo quốc tế); tài liệu nội bộ có thể bằng tiếng Việt |
-| Thời điểm | Toàn bộ code được viết từ 25/09 09:00, trong thời gian thi; ghi rõ trong README để tránh bị coi là dự án có sẵn |
-
----
-
-## 10. Quyết định cần duyệt
-
-| # | Quyết định | Đề xuất | Phương án khác | Lý do đề xuất |
-|---|---|---|---|---|
-| D1 | Backend | **Python + FastAPI** | Flask | Lõi đã viết bằng Python; FastAPI tự sinh tài liệu API, dễ cho người làm giao diện |
-| D2 | Frontend | **HTML + JavaScript thuần, dựa trên bản mô phỏng**, do FastAPI phục vụ | React + Vite | Không cần bước build, tái dùng thẳng bản mô phỏng, ít thứ hỏng. Chọn React nếu người làm giao diện quen hơn hẳn |
-| D3 | Lưu trữ | **Tệp JSON** (`data/` chỉ đọc, `runtime/` khi chạy) | SQLite | Dữ liệu nhỏ, dễ xem, dễ reset khi demo |
-| D4 | Gọi LLM | **OpenAI Chat Completions + gọi công cụ**, model đặt trong `.env` | OpenAI Responses API; Dust | Đã viết và kiểm tra công cụ; ổn định, nhiều tài liệu |
-| D5 | Pipelex, Dust, Gradium | **Pipelex cho hai bước LLM của planner (tách ràng buộc, giải thích), dạng thử có giới hạn ~1,5 giờ (T10, T13)**; nếu không kịp thì dùng OpenAI structured output. Không dùng Dust, Gradium | Không dùng sponsor nào ngoài OpenAI, Jinko | Pipelex được làm cho các bước LLM có đầu ra có cấu trúc, lặp lại được, đúng hai bước này. Phần kiểm tra ràng buộc vẫn là Python thuần. Hai bước nằm sau một giao diện cố định nên đổi cách làm không ảnh hưởng phần khác |
-| D6 | Jinko | **Sandbox; demo ở chế độ replay với kết quả thật đã lưu** | Gọi trực tiếp khi demo | Demo không phụ thuộc mạng và credit |
-| D7 | Repo GitHub | **Riêng tư khi làm, công khai trước khi nộp** | Công khai từ đầu | Tránh lộ bí mật do sơ suất; bài nộp cần link xem được |
-| D8 | Tên repo | `bureau-agent` | | |
-| D9 | Phiên bản Python | **3.11** | 3.12 | Có sẵn trên máy của người code chính |
-
----
-
-## 11. Phân công và mốc thời gian
-Danh sách task, phụ thuộc và tiêu chí hoàn thành nằm trong [`TASKS.md`](../TASKS.md). Trưởng nhóm phân công người làm trong tệp đó.
-
-| Mốc | Việc | Tiêu chí xong |
-|---|---|---|
-| Thứ Sáu 25/09, tối | Duyệt kiến trúc; tạo repo; CI; mỗi người clone và chạy được kiểm thử | `python -m unittest discover -s tests -t .` qua trên máy mọi người |
-| Thứ Bảy 26/09, 12:00 | **P0 chạy trọn luồng**: agent thật + store + executor + API + giao diện cho hackathon | Duyệt một đề xuất trên giao diện làm vấn đề biến mất |
-| Thứ Bảy 26/09, 18:00 | P1: planner với Jinko (replay), bảng so sánh trên giao diện | Chạy được lựa chọn ở trần 150€ và chẩn đoán không khả thi ở trần 120€ |
-| Thứ Bảy 26/09, 23:00 | Bộ đánh giá chạy được; **ngừng thêm tính năng** | Có bảng chỉ số |
-| Chủ Nhật 27/09 | Sửa lỗi, README, video; nộp trước 22:00 | Chạy README trên máy khác |
-
-**Mốc cắt:** nếu 12:00 thứ Bảy P0 chưa chạy trọn luồng, tạm dừng P1.
-
----
-
-## 12. Rủi ro kỹ thuật
-| Rủi ro | Cách giảm |
-|---|---|
-| Model được cấp không hỗ trợ gọi công cụ tốt | Thử ngay khi có khóa; giữ prompt ngắn, công cụ ít; có thể đổi model trong `.env` |
-| Agent lặp không kết thúc | Giới hạn 8 bước; lỗi rõ ràng; kiểm thử với vài vấn đề mẫu |
-| Agent đề xuất hành động phá quy tắc | `executor` kiểm tra lại quy tắc bất biến trước khi ghi |
-| Lõi và planner ghép không khớp | Hợp đồng chung đã có; thay đổi hợp đồng phải báo cả nhóm |
-| Giao diện chờ API | Làm trước với tệp JSON mẫu đúng định dạng mục 7.1 |
-| Jinko lỗi, chậm, thiếu kết quả nhóm lớn | Chế độ replay; ghép nhiều phòng; không đủ thì chuyển người |
-| Xung đột khi nhiều người sửa cùng tệp | Ranh giới module theo người; pull request nhỏ, gộp thường xuyên |
-| Lộ khóa API | `.env` trong `.gitignore`; repo riêng tư đến trước khi nộp; kiểm tra lịch sử commit trước khi công khai |
+See the root [README](../README.md) for setup, live/demo links, results, and limitations. See [DEPLOY.md](DEPLOY.md) for the public demo deployment and [demo-script.md](demo-script.md) for the submission video flow.

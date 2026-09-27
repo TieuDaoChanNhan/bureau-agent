@@ -26,7 +26,7 @@ Python 3.14 and installed Chrome on Windows:
 - The 90% evaluation metric is retained. A scan of tracked/new source and the
   15 public assets found no credential-shaped values. The task's broad literal
   grep still matches existing documentation, dummy test keys and scanning code;
-  these are not credentials. `TASKS.md` was not edited to hide those matches.
+  these are not credentials. The scan findings are documented rather than hidden.
 
 Local server evidence (fake providers, **not public Render acceptance**):
 [browser one](../docs/screenshots/t20-local-server-session-one.png),
