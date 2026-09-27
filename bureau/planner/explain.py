@@ -1,7 +1,6 @@
 """LLM step 2 of the planner: explain the trade-offs between valid options (TASK T13).
 
 The explanation must not change the ranking or the checks computed in code.
-Pipelex or OpenAI, like extract.py.
 
 Design:
   - facts come from code only: the ranked valid options and every option's checks;

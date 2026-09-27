@@ -2,7 +2,7 @@
 
 No recorded constraints or travel options enter the model context. Ambiguities
 become questions for the organizer; provider failures never select a sample plan.
-See README.md for the Pipelex trial and provider decision (T10).
+See README.md for the provider decision.
 """
 from __future__ import annotations
 
