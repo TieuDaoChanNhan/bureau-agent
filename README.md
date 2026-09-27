@@ -30,6 +30,8 @@ Student and volunteer associations run real events (hackathons, integration week
 
 The work is not hard. It is **fragmented, repetitive and easy to get wrong**, and a mistake (a wrong payment link, a missing reply, a team over the limit) lands on a participant.
 
+This work relies on volunteers, and volunteering is declining. France counts **over 1.5 million active associations**, relying on about **22.5 million volunteers** ([Associathèque](https://www.associatheque.fr/fr/creer-association/chiffres-cles.html)). Yet the share of French people who volunteer fell from **40% in 2013 to 38% in 2019 and 34% in 2025**, and the French Senate names **exhaustion, ageing leadership and administrative burden** among the causes ([Sénat, 2025](https://www.senat.fr/questions/base/2025/qSEQ250605041.html); see also [*La France bénévole 2025*](https://recherches-solidarites.org/benevolat/)). Bureau Agent takes on the repetitive part of that administrative work; the volunteers keep the decisions.
+
 ## What Bureau Agent does
 
 One loop handles every kind of event:
