@@ -2,7 +2,7 @@
 
 Primary: native Python on **one free Render web service**. Backup:
 [Hugging Face Static Space](https://huggingface.co/spaces/bachbeo2007/bureau).
-The live demo is https://bureau-agent.onrender.com. The static revision has passed its public tour and isolation checks; see demo/VERIFICATION.md.
+The live demo is https://bureau-agent.onrender.com.
 
 ## Free-tier terms checked 26 September 2026
 
@@ -74,7 +74,7 @@ that shell, set `$env:DEMO_MODE='0'`; the public-demo tests enable it themselves
 Render builds with `pip install -r requirements.txt` and starts
 `uvicorn api.main:app --host 0.0.0.0 --port $PORT`. Each subsequent push to `main`
 deploys automatically. `autoDeployTrigger: commit` is the current Blueprint
-spelling of the task's `autoDeploy: true`. Keep the default single Uvicorn worker.
+spelling of `autoDeploy: true`. Keep the default single Uvicorn worker.
 Redeploying also resets each browser's sample data.
 
 Local equivalent, after installing requirements:
@@ -181,4 +181,3 @@ Repeat the static tour on the published Space and record its deployed revision.
 Record screenshots, URLs, commits, actual timings, the hard-limit confirmation
 and green CI links with the change. Local fake-client screenshots
 are explicitly local evidence; they cannot establish public live acceptance.
-See `demo/VERIFICATION.md` for completed local checks and outstanding items.

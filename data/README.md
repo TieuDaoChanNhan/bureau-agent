@@ -24,10 +24,9 @@ Payment values use `amount_cents`; `event.json` stores the configured membership
 | `rules.md` | One `## §N Title` section per rule; parsed into `Rule` objects |
 | `travel_options.json` | WEI only: illustrative full packages used as a fallback when Jinko hotel search is unavailable |
 
-## WEI source, assumptions and scenarios (T16 / issue #15)
+## WEI source, assumptions and scenarios
 
-**Source:** the project owner's description during implementation of
-[issue #15](https://github.com/TieuDaoChanNhan/bureau-agent/issues/15), on
+**Source:** the project owner's description on
 26 September 2026. WEI means *weekend d'intégration*. The supplied workflow for
 a French student association is to collect
 student registrations, check payments, hire buses, and find a resort-like venue
@@ -43,8 +42,7 @@ source and unconfirmed assumptions are also stored in `travel.provenance` so
 they survive loading and runtime persistence. Public demo fixtures use the neutral
 labels **Student association WEI (demo)** and **Unnamed student association**;
 no permission to publish a real association's identity was supplied. The scenario
-was written and reviewed by a team member who has taken part in a WEI (pectpait,
-PR #62); it reflects that experience, not an official association dataset.
+was written and reviewed by a team member who has taken part in a WEI (pectpait); it reflects that experience, not an official association dataset.
 
 | Field | Demo assumption, requiring organizer confirmation |
 |---|---|
@@ -233,7 +231,7 @@ On Windows, use `$env:PYTHONIOENCODING="utf-8"` in PowerShell if accented names 
 
 Create `data/<event_id>/` with at least `event.json` and `participants.json`. It appears automatically in the CLI and the API.
 
-## `wei/transport_options.json` (T14)
+## `wei/transport_options.json`
 Illustrative round-trip charter options from a campus in Palaiseau
 to the Trouville-Deauville search area, using two 53-seat coaches for 100 students
 (price per person in cents). They remain unverified because Jinko ground search
@@ -241,7 +239,7 @@ returned 404 for our key. Composition combines them with Jinko hotel rates and t
 demo catering budgets. `wei/event.json` → `travel.search` holds the hotel search
 parameters (city, dates, 50 double rooms, station).
 
-## `wei/jinko_cache/` (T11)
+## `wei/jinko_cache/`
 Raw Jinko responses saved by `JINKO_MODE=live` and read in `replay` mode (tests, demo), keyed by a
 hash of the request body. `hotel_search_*.json` is a real response from 2026-09-26: one double room
 in Deauville, 9–11 October 2026. The raw response is preserved; scaling its room

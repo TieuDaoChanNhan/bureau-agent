@@ -99,4 +99,4 @@ The organizer console shows detected issues, evidence, checks, proposals, tool t
 
 Unit tests cover deterministic rules, agent loop recovery with fake clients, API behavior, planner replay, data consistency, evaluation, and public-demo isolation. Browser tests cover the console tours. CI runs the test suite on pushes and pull requests; dependency consistency is checked from `uv.lock`.
 
-See the root [README](../README.md) for setup, live/demo links, results, and limitations. See [DEPLOY.md](DEPLOY.md) for the public demo deployment and [demo-script.md](demo-script.md) for the submission video flow.
+See the root [README](../README.md) for setup, live/demo links, results, and limitations. See [DEPLOY.md](DEPLOY.md) for the public demo deployment.

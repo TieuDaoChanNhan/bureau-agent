@@ -2,9 +2,6 @@
 
 Target Space: https://huggingface.co/spaces/bachbeo2007/bureau
 
-The [27 September 2026 verification record](VERIFICATION.md#static-backup-refresh--27-september-2026)
-includes the published revision, public tour results and screenshots.
-
 This is a browser-only adaptation of the existing operations console and its
 30-step Demo tour. It shows two fictional events, evidence, editable replies,
 approval/dismissal, a simulated outbox, local activity, clarification, and trip
@@ -16,7 +13,7 @@ curated proposals during the build; the static adapter checks their action and
 source-issue snapshots rather than maintaining another eligibility policy. The
 result reports approved and failed counts with failure reasons. Money, identity,
 escalations and locally edited drafts stay under individual review. See the
-[full rule](../web/README.md#bulk-reply-eligibility-t24).
+[full rule](../web/README.md#bulk-reply-eligibility).
 
 Each tab owns its own state and random session id. Browser `sessionStorage`
 preserves proposals, saved reply edits, decisions, outbox, activity and planning
@@ -53,7 +50,6 @@ assets, no CDN, no build-time packages, and a CSP that disallows connections.
 | `publish.py` | Offline release checks, an upload ZIP, and authenticated upload of an explicit asset list to an existing public Static Space. |
 | `tour-steps.js` | All 30 customer tour steps; explains exactly what is simulated. |
 | `test_browser.py` | Browser tests for the complete tour, isolation, invalid approvals, reset, escaped text, and network isolation. |
-| `VERIFICATION.md` | Local results and remaining public-deployment checks. |
 | `site/` | Generated, committed, self-contained files to upload. Includes the vendored Driver.js license. Do not edit generated files directly. |
 
 Rebuild after changing any source or the upstream `web/` console. The generator
@@ -76,10 +72,10 @@ executor runs in the static backup. Approval changes only sample browser state.
 
 ## Browser verification
 
-The static backup includes the same T25 status/kind/search controls as the live
+The static backup includes the same status/kind/search controls as the live
 console. Filter preferences stay in this browser's local storage, separately
 from its isolated sample-data sessions. Tours temporarily show all issues and
-restore filters on exit. See the [filter behavior](../web/README.md#issue-filters-t25).
+restore filters on exit. See the [filter behavior](../web/README.md#issue-filters).
 `tests/test_web_filters.py` supplies shared browser cases inherited by both
 browser suites: combined filters, complete message search, Done entries, event
 totals, draft preservation, storage failures, keyboard navigation and 400 px layout.

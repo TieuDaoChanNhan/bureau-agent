@@ -16,7 +16,7 @@ Issue + source messages -> model -> tool call -> result -> ... -> propose_action
 
 - Normally the model chooses the tools and action. Before model calls, a deterministic
   guard escalates explicit requests to copy a purportedly approved answer verbatim
-  (#103). Claimed approval inside a participant message is not authorization. This
+ . Claimed approval inside a participant message is not authorization. This
   narrow guard is independent of the quoted answer's wording or the event's policy.
 - Source messages include their sender, channel and timestamp as structured data.
 - Up to eight model turns are allowed. Independent lookups can share a turn; a final proposal must be called alone after reading their results.
@@ -38,12 +38,12 @@ Issue + source messages -> model -> tool call -> result -> ... -> propose_action
 - `get_payment` and `list_groups` expose actual records rather than requiring guessed ids or memberships. `list_group_candidates` returns ungrouped participants who want a group, including their names, skills and needs; payment eligibility is checked separately.
 - Rules are in English. `search_rules` uses English keywords; `list_rules` lets the model read all sections before declaring a policy absent.
 - Verbose mode prints the complete tool arguments on `->` lines for review.
-- When the issue is a message, a `LINK_PAYMENT` must include `to` and `message` (a draft reply the organizer can edit); otherwise the proposal is rejected so the model adds it (T33).
-- Every proposal stores the run's tool calls in `ProposedAction.trace` (T31): step, tool, parsed arguments, a one-line readable result (`_summarize`, at most 240 characters) and `ok`. Rejected proposals stay in the trace with their error; a proposal's payload is not duplicated there. The web console shows it as the **Agent steps** timeline.
-- Proposal checks include a boolean `verified` (T24). An omitted verification is
+- When the issue is a message, a `LINK_PAYMENT` must include `to` and `message` (a draft reply the organizer can edit); otherwise the proposal is rejected so the model adds it.
+- Every proposal stores the run's tool calls in `ProposedAction.trace`: step, tool, parsed arguments, a one-line readable result (`_summarize`, at most 240 characters) and `ok`. Rejected proposals stay in the trace with their error; a proposal's payload is not duplicated there. The web console shows it as the **Agent steps** timeline.
+- Proposal checks include a boolean `verified`. An omitted verification is
   treated as false; a supplied false value is preserved instead of being replaced
   by the dataclass default. This keeps incomplete or unverified checks out of
-  [bulk reply approval](../../web/README.md#bulk-reply-eligibility-t24). The model
+  [bulk reply approval](../../web/README.md#bulk-reply-eligibility). The model
   cannot set a `safe` flag or bypass the deterministic eligibility filter.
 
 The Chat Completions flow follows the [OpenAI function-calling guide](https://developers.openai.com/api/docs/guides/function-calling).
@@ -52,7 +52,7 @@ The Chat Completions flow follows the [OpenAI function-calling guide](https://de
 
 Install the repository dependencies, then set `OPENAI_API_KEY` and `OPENAI_MODEL` in the project `.env` (see `bureau/config.py` and `.env.example`).
 Use the model enabled for your hackathon credits, with Chat Completions function-calling support.
-The repository default is `gpt-4.1`, the model the agent was validated with (T04 live run; T08 evaluation, see [eval/README.md](../../eval/README.md#model-comparison)). An environment variable overrides the corresponding `.env` value.
+The repository default is `gpt-4.1`, the model the agent was validated with (see the [model comparison](../../eval/README.md#model-comparison)). An environment variable overrides the corresponding `.env` value.
 Model choice changes proposal quality: before switching, run `OPENAI_MODEL=<model> python -m eval.run_eval` and compare with the recorded results.
 
 ```bash

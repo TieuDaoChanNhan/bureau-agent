@@ -11,8 +11,8 @@ uvicorn api.main:app --reload     # http://127.0.0.1:8000  (docs at /docs)
 | GET | `/api/events` | done (runtime state, sample fallback) |
 | GET | `/api/events/{event_id}` | done (re-detected issues, stored statuses and actions) |
 | POST | `/api/events/{event_id}/run?limit=5` | done (bounded proposals only) |
-| POST | `/api/events/{event_id}/messages` | done (T32: add an incoming message; returns the summary and the new `issue_id`) |
-| POST | `/api/events/{event_id}/plan` | done (T14: planner proposal for `no_logistics_plan`; optional `overrides` for what-if) |
+| POST | `/api/events/{event_id}/messages` | done (add an incoming message; returns the summary and the new `issue_id`) |
+| POST | `/api/events/{event_id}/plan` | done (planner proposal for `no_logistics_plan`; optional `overrides` for what-if) |
 | GET | `/api/actions/{action_id}` | done |
 | POST | `/api/actions/{action_id}/approve` | done (executor validation, optional edits/selection) |
 | POST | `/api/actions/{action_id}/dismiss` | done (issue status only) |
@@ -25,8 +25,8 @@ JSON bodies are the dataclasses of `bureau/core/models.py` (`dataclasses.asdict`
 
 `approve`, `dismiss`, and `reset` return the same summary as the event GET:
 `{id, name, counts, issues, actions, travel, logistics, records, meta, safe_replies}`. `meta` carries the event
-card context from `settings.display` (type, dates, place) and the participant count (T33). `records` maps ids to display
-names (`participants`, `groups`, `payments`) so the UI can show names instead of ids (T23). `run` adds `remaining` and `errors` to
+card context from `settings.display` (type, dates, place) and the participant count. `records` maps ids to display
+names (`participants`, `groups`, `payments`) so the UI can show names instead of ids. `run` adds `remaining` and `errors` to
 that summary. GET routes do not write runtime files.
 Issues are re-detected for each summary; repaired issues disappear, and dependent
 issues are unlocked immediately after a travel plan is approved. Completed
@@ -64,10 +64,10 @@ Tests use a temporary runtime directory and a fake agent, without external calls
 python -m unittest tests.test_api -v
 ```
 
-## Bulk reply approval (T24)
+## Bulk reply approval
 
 The eligibility policy lives in `bureau/core/bulk_approval.py` and is documented
-in [web/README.md](../web/README.md#bulk-reply-eligibility-t24). Event summaries
+in [web/README.md](../web/README.md#bulk-reply-eligibility). Event summaries
 include `safe_replies` for the toolbar count. The read-only preview route returns
 `{event_id, limit, replies: [{id, title, to, text, rules, revision}]}` without writing
 files. `limit` is the maximum confirmation size; the UI previews that many at once.
@@ -88,16 +88,16 @@ outbox was written: the result asks the organizer to inspect the outbox, and a
 retry checks existing action ids before execution to avoid duplicate replies.
 No transactional guarantee across filesystem writes or multiple workers is added.
 
-## Adding a message (T32)
+## Adding a message
 `POST /api/events/{event_id}/messages` with `{"sender": str, "channel": "email" | "discord" | "form", "text": str}`
 (sender 1–200 characters, text 1–4000, not blank; otherwise 422). The message gets the next free id
 `liveNN`, a timezone-aware `received_at`, and is saved in runtime `state.json`; detection turns it into
 `message:liveNN`, returned as `issue_id`. Run the agent on it with `run?issue_id=`. Reset removes it.
 The text is data for the agent, never instructions.
 
-## Planning a trip (T14)
+## Planning a trip
 `POST /api/events/{event_id}/plan` with an optional body `{"text"?: str, "overrides"?: {key: value}, "recorded"?: bool}`.
-Constraints are extracted from the request text by the LLM (T10); `recorded: true` uses the constraints
+Constraints are extracted from the request text by the LLM; `recorded: true` uses the constraints
 recorded with the event instead (offline demo). Without an OpenAI key and without `recorded`, the route
 returns 503; unusable model output returns 422 and a provider failure 502, and nothing is stored.
 When the planner has questions it returns `ESCALATE` with `payload.clarifications` and does not search;

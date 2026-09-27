@@ -9,7 +9,7 @@ The event state and everything that reads or changes it.
 | `detect.py` | Finds issues with fixed code; issue ids are deterministic fingerprints | done |
 | `store.py` | Runtime persistence under `runtime/<event>/`, status merge after re-detection | done |
 | `executor.py` | Applies an **approved** action; re-checks invariants | done |
-| `bulk_approval.py` | The authoritative eligibility filter and snapshot revision for human-confirmed bulk replies (T24) | done |
+| `bulk_approval.py` | The authoritative eligibility filter and snapshot revision for human-confirmed bulk replies | done |
 
 ## Rules of this layer
 - Only `executor.apply` changes participants, payments, groups, travel and the outbox. The API also stores proposals, issue statuses and organizer-added messages.
@@ -24,11 +24,11 @@ match). Rejected actions leave the input state, outbox and audit log unchanged.
 validation; `edited_description` overrides that reply, as for `SEND_MESSAGE`.
 Group validation remains scoped to the groups and members affected by the action.
 For messages explicitly requesting a verbatim copy of a purportedly approved
-answer, the executor accepts only escalation (#103). It rechecks the source
+answer, the executor accepts only escalation. It rechecks the source
 message before any outbox or audit write, including for stale or edited drafts;
 approval does not bypass this guard. Ordinary quoted code is not itself a trigger.
 
-`save_state` also stores messages, so messages added at runtime (T32) survive reloads; an older
+`save_state` also stores messages, so messages added at runtime survive reloads; an older
 `state.json` without them keeps the sample messages.
 
 `store.load_outbox(event_id)` returns simulated messages, or an empty list before
@@ -48,7 +48,7 @@ state and save it once, rather than saving a new action then writing an old stat
 | `unprocessed_message` | no | `message:<message_id>` |
 
 Bulk approval uses the conservative rule documented in
-[web/README.md](../../web/README.md#bulk-reply-eligibility-t24). It requires passed,
+[web/README.md](../../web/README.md#bulk-reply-eligibility). It requires passed,
 verified checks and reviewed public rule citations, excludes inferences and
 sensitive subjects, and returns a read-only preview. The API rechecks each
 snapshot before calling the existing executor; the policy itself never writes.
