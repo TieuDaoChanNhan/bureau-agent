@@ -47,7 +47,7 @@ assets, no CDN, no build-time packages, and a CSP that disallows connections.
 
 Rebuild after changing any source or the upstream `web/` console. The generator
 fails when a required replacement no longer matches, so upstream changes need
-review rather than silently breaking the demo. Keep `TASKS.md` unchanged.
+review rather than silently breaking the demo.
 
 ## What is simulated
 
