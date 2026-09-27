@@ -46,7 +46,10 @@ class DemoSessions:
         self.next_cleanup = 0.0
 
     async def __call__(self, scope, receive, send):
-        if scope["type"] != "http" or not config.DEMO_MODE or scope.get("path") == "/health":
+        path = scope.get("path", "")
+        # Only the page and the API need a sandbox; static files and 404s never create one.
+        if (scope["type"] != "http" or not config.DEMO_MODE
+                or not (path == "/" or path.startswith("/api/"))):
             return await self.app(scope, receive, send)
         now = time.time()
         if now >= self.next_cleanup:

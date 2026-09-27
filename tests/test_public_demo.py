@@ -54,6 +54,23 @@ class PublicDemoTests(unittest.TestCase):
     def run_issue(self, issue="message:m01", client=None):
         return (client or self.client).post("/api/events/hackathon/run", params={"issue_id": issue})
 
+    def test_batch_without_key_replays_saved_examples_and_leaves_the_rest_pending(self):
+        response = self.client.post("/api/events/hackathon/run", params={"limit": 50})
+        self.assertEqual(200, response.status_code, response.text)
+        summary = response.json()
+        self.assertTrue(summary["replay"])
+        self.assertTrue(summary["actions"])
+        self.assertGreater(summary["remaining"], 0)
+        self.assertEqual([], self.fake.requests)
+
+    def test_static_files_and_unknown_paths_create_no_session(self):
+        fresh = self.browser()
+        for path in ("/web/app.js", "/web/style.css", "/no-such-page", "/health"):
+            response = fresh.get(path)
+            self.assertNotIn(COOKIE, response.cookies, path)
+        self.assertEqual({self.client.cookies.get(COOKIE)} - {None},
+                         {p.name for p in self.runtime.iterdir() if p.is_dir()} if self.runtime.exists() else set())
+
     def test_two_browsers_approve_reset_outbox_and_paths_are_isolated(self):
         other = self.browser()
         pristine = other.get("/api/events/hackathon").json()

@@ -5,13 +5,25 @@ fixed corpus with expected answers, independent of an organizer session. Message
 and planning runs call the configured LLM and incur API usage; unit tests inject
 scripted clients or extractors without a key.
 
+**Headline results** (the numbers quoted in the main README):
+
+| Suite | Result | Section |
+|---|---|---|
+| Messages, 50 cases | 45/50 correct action type (90%) | [Recorded baseline](#recorded-baseline) |
+| Safety, 70 cases × 3 | 20/210 unsafe before the fixes, 0/210 after | [Expanded safety comparison](#expanded-safety-comparison-t51), [Fenced-answer injection fix](#fenced-answer-injection-fix-103) |
+| Planning, 20 requests | hard fields 20/20, clarification 18/20, feasibility 12/12, ranking 6/6 | [Unsupported trip restrictions](#unsupported-trip-restrictions-102) |
+
+The sections below are a chronological log: later runs supersede earlier ones, and earlier
+results are kept for comparison. Raw JSON reports are Git-ignored; each run lists its commit,
+dataset SHA-256 and report file name. Task codes such as T24 and numbers such as #103 refer to this repository's GitHub issues
+and pull requests, where each change was specified and reviewed.
+
 | File | Content |
 |---|---|
 | `cases/messages.jsonl` | 50 labeled cases: all 25 fixture messages plus 25 independently written paraphrases |
 | `cases/safety.jsonl` | 70 held-out adversarial and control cases, including 46 added in T51 |
 | `cases/planning.jsonl` | 20 labeled trip requests: eight historical 40-person cases and 12 current WEI cases, with constraints, clarification, feasibility and optional preference/verification/ranking labels |
 | `cases/planning_options.json` | Original illustrative transport/lodging-only packages for the 40-person planning corpus; meals are excluded |
-| `cases/safety.jsonl` | 24 held-out adversarial and control cases (T46): prompt injection, impersonation, pressure, personal data, benign controls |
 | `run_eval.py` | Runs the real agent and LLM constraint extraction with recorded travel options, prints metrics, writes timestamped JSON to ignored `eval/results/` |
 
 ## Run
@@ -159,6 +171,8 @@ Case labels never enter extraction or search. The offline tests inject constrain
 to verify harness wiring and cached-package outcomes; only the live run measures extraction.
 
 ### Recorded expanded planning run
+
+*Earlier run, superseded by the final run under [Unsupported trip restrictions](#unsupported-trip-restrictions-102).*
 
 2026-09-27, 11:58:56–11:59:13 UTC, `gpt-4.1`, Python 3.13.12, one run of 20 cases
 at `c6c8b51b274c645e0857b83e25ab983a46192bc5`. Jinko used saved replay data; no

@@ -94,7 +94,10 @@ def main(argv=None) -> None:
                    help="Use recorded fixture constraints for an offline demo instead of calling the LLM")
     p.set_defaults(fn=cmd_plan)
     args = parser.parse_args(argv)
-    args.fn(args)
+    try:
+        args.fn(args)
+    except RuntimeError as exc:  # e.g. no OPENAI_API_KEY: one clear line, no traceback
+        raise SystemExit(f"bureau: {exc}") from None
 
 
 if __name__ == "__main__":

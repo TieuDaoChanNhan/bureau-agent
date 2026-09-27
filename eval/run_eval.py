@@ -616,4 +616,7 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except RuntimeError as exc:  # e.g. no OPENAI_API_KEY: one clear line, no traceback
+        raise SystemExit(f"eval: {exc}") from None

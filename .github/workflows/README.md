@@ -17,10 +17,5 @@ no earlier than 27 September 2026 in Europe/Paris and stops at the configured
 results timestamp. Disable it afterwards. Setup and free-tier limits are in
 [`docs/DEPLOY.md`](../../docs/DEPLOY.md).
 
-The browser workflow also runs the live HTTP console with fake model responses
-and with a zero-call cap. `keepalive.yml` pings the single Render service every
-10 minutes during judging only. Configure repository variables `RENDER_DEMO_URL`,
-`DEMO_KEEPALIVE_ENABLED=true` and `DEMO_KEEPALIVE_UNTIL` (results timestamp with
-timezone). Requests begin no earlier than Sunday 27 September 2026 in Paris and
-stop at the configured timestamp. Disable the workflow after results. See
-[deployment](../../docs/DEPLOY.md) for setup and current free-tier limits.
+The public demo is kept awake by an external monitor (UptimeRobot) that requests `/health`
+every five minutes; GitHub schedules proved unreliable, so `keepalive.yml` is only a backup.

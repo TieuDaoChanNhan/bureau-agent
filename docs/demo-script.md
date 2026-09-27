@@ -4,7 +4,7 @@ Record [Bureau Agent on Render](https://bureau-agent.onrender.com/#top). Use **S
 
 **Voice-over production:** generate the French narration with **Gradium**, using access provided by the hackathon sponsor. Generate one clip per timeline row, check the pronunciation of names and amounts, and fit each clip to its scene at a natural pace. Align both subtitle tracks to the generated audio and include the Gradium credit on the end card below.
 
-This is the recording script for [issue #16](https://github.com/TieuDaoChanNhan/bureau-agent/issues/16). The target export is **1 minute 58 seconds, including a 3-second end card**, leaving two seconds below the submission limit. The interactive tour takes about three minutes; the video cuts waiting time and time spent reading the tour popovers. The team's [Vietnamese recording notes are in issue #76](https://github.com/TieuDaoChanNhan/bureau-agent/issues/76#issuecomment-5855218962), outside the tracked repository files.
+This is the recording script for [issue #16](https://github.com/TieuDaoChanNhan/bureau-agent/issues/16). The target export is **1 minute 58 seconds, including a 3-second end card**, leaving two seconds below the submission limit. The interactive tour takes about three minutes; the video cuts waiting time and time spent reading the tour popovers.
 
 ## Story and features
 

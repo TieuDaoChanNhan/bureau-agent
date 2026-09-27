@@ -2,8 +2,7 @@
 
 Primary: native Python on **one free Render web service**. Backup:
 [Hugging Face Static Space](https://huggingface.co/spaces/bachbeo2007/bureau).
-The Render URL is not assigned yet; replace the pending README entry after
-deployment. The static revision has passed its public tour and isolation checks; see demo/VERIFICATION.md.
+The live demo is https://bureau-agent.onrender.com. The static revision has passed its public tour and isolation checks; see demo/VERIFICATION.md.
 
 ## Free-tier terms checked 26 September 2026
 
@@ -18,13 +17,13 @@ Render can restart free instances at any time. There is no persistent disk.
 Build minutes and outbound bandwidth have separate allowances. Without a payment
 method, exhausting them disables builds or suspends services instead of billing
 overages. Keep one service, no paid resources or payment method. Render may also
-suspend unusually high outbound traffic. Copy these dated terms into the PR.
+suspend unusually high outbound traffic.
 
-## Test the branch before merging
+## Test a branch before merging
 
-Push `t20-deploy` to GitHub and open a PR, leaving `main` unchanged. For a
+Push the branch to GitHub and open a PR, leaving `main` unchanged. For a
 pre-merge Render test, choose **New → Web Service**, connect the GitHub repository
-through **Git Provider**, and select branch **t20-deploy**. If a service already
+through **Git Provider**, and select that branch. If a service already
 exists, change its linked branch instead of creating another service.
 
 Keep the root directory empty, choose Python and **Free**, use
@@ -106,7 +105,7 @@ with session, UTC day, purpose and model. Reset does not clear quota usage.
 not a durable cross-restart spending guarantee. The independent OpenAI project
 hard limit is required to protect credit across resets. A strict daily cap across
 redeploys requires durable shared accounting, outside this single ephemeral
-service design. Do not mark that stronger guarantee complete in the PR.
+service design.
 
 Each browser has an opaque HttpOnly/SameSite cookie and files under
 `runtime/<session>/<event>/`. HTTPS cookies are Secure. The API serializes requests
@@ -169,7 +168,7 @@ The ZIP is `demo/artifacts/bureau-static.zip`. Do not upload the whole repositor
 Leave Space Variables and Secrets empty. Static assets include Geist fonts,
 licenses, the real 90% evaluation metric and a CSP blocking API connections.
 
-## Public acceptance and PR evidence
+## Public acceptance checks
 
 Run all 30 tour steps on the Render URL with a live key in a private window.
 Keep another browser open and verify its proposals, approvals, outbox and Reset
@@ -179,7 +178,7 @@ Disable keep-alive, close all demo windows, wait at least 20 minutes, then recor
 the next request's elapsed wake time. Re-enable keep-alive only for judging.
 Repeat the static tour on the published Space and record its deployed revision.
 
-Put screenshots, URLs, commits, actual timings, hard-limit confirmation, the
-dated terms above and green CI links in the PR. Local fake-client screenshots
+Record screenshots, URLs, commits, actual timings, the hard-limit confirmation
+and green CI links with the change. Local fake-client screenshots
 are explicitly local evidence; they cannot establish public live acceptance.
 See `demo/VERIFICATION.md` for completed local checks and outstanding items.

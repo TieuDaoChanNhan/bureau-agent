@@ -101,7 +101,7 @@ All evaluations run the real agent (`gpt-4.1`) on fictional, labeled cases; deta
 | Unnecessary questions to organizers | **6** | 15 |
 | Invariant violations | **0** | 1 |
 
-**Safety** (70 adversarial and control cases the prompt was not tuned on, run 3 times = 210 attempts):
+**Safety** (70 adversarial and control cases, not used to write the prompt, run 3 times = 210 attempts):
 
 | | First run | After our fixes |
 |---|---|---|
@@ -112,7 +112,7 @@ All evaluations run the real agent (`gpt-4.1`) on fictional, labeled cases; deta
 | Pressure and exceptions handled | 33/33 | **33/33** |
 | Ordinary questions answered (no false refusal) | 51/51 | **51/51** |
 
-The three weaknesses found (an unverified sender, a fake "pre-approved" answer, a transport restriction the planner dropped) were fixed **in code, not in the prompt**, and re-measured. Limits: the corpus is small and synthetic (46 of the 70 cases were written with an AI assistant that had not read the agent prompt), it covers one event, and 3 of 210 attempts ended without a proposal (step limit). It is evidence, not a guarantee.
+The three weaknesses found (an unverified sender, a fake "pre-approved" answer, a transport restriction the planner dropped) were fixed **in code, not in the prompt**, and re-measured. Because the fixes were developed against failures in this corpus, the after-fix column is regression evidence, not an independent test. Limits: the corpus is small and synthetic (46 of the 70 cases were written with an AI assistant that had not read the agent prompt), it covers one event, and 3 of 210 attempts ended without a proposal (step limit). It is evidence, not a guarantee.
 
 **Trip planning** (20 requests, 12 on the current 100-student weekend): constraints extracted 20/20, clarification when needed 18/20, feasible or not after clarification 12/12, exact ranking of valid packages 6/6.
 
@@ -124,14 +124,14 @@ The three weaknesses found (an unverified sender, a fake "pre-approved" answer, 
 [bureau-agent.onrender.com](https://bureau-agent.onrender.com) runs the live agent (`gpt-4.1`). Each browser gets its own copy of the sample data. A shared daily limit on model calls applies; beyond it, proposals come from clearly labelled saved examples. Free hosting: if the site was idle, the first load can take up to a minute.
 
 ### Locally
-Requires Python 3.11+. The live agent needs an OpenAI API key; **without a key, set `DEMO_MODE=1`** in `.env` and the console replays saved examples.
+Requires Python 3.11+ (on Windows without the `py` launcher, use `python -m venv .venv`). The live agent needs an OpenAI API key; **without a key, set `DEMO_MODE=1`** in `.env` and the console replays saved examples.
 
 **macOS / Linux**
 ```bash
 git clone https://github.com/TieuDaoChanNhan/bureau-agent.git && cd bureau-agent
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env            # then put your key in OPENAI_API_KEY=... (or set DEMO_MODE=1)
+cp .env.example .env            # then put your key in OPENAI_API_KEY=... (or change DEMO_MODE=0 to 1)
 uvicorn api.main:app --reload   # open http://127.0.0.1:8000
 ```
 
@@ -140,8 +140,9 @@ uvicorn api.main:app --reload   # open http://127.0.0.1:8000
 git clone https://github.com/TieuDaoChanNhan/bureau-agent.git; cd bureau-agent
 py -3.11 -m venv .venv; .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-Copy-Item .env.example .env     # then put your key in OPENAI_API_KEY=... (or set DEMO_MODE=1)
-$env:PYTHONIOENCODING="utf-8"; python -m uvicorn api.main:app --reload
+Copy-Item .env.example .env     # then put your key in OPENAI_API_KEY=... (or change DEMO_MODE=0 to 1)
+$env:PYTHONUTF8="1"             # UTF-8 console output (€, ≤) for this session
+python -m uvicorn api.main:app --reload
 ```
 
 **With [uv](https://docs.astral.sh/uv/)** (any OS; same locked versions)
@@ -165,14 +166,14 @@ python -m eval.run_eval --suite safety --repeats 3   # needs a key
 
 | Layer | Folder | Role |
 |---|---|---|
-| Core | [`bureau/core/`](bureau/core/README.md) | Data model, issue detection (fixed checks), storage, the **executor** (the only code that changes data, after approval), the safe-reply rule |
+| Core | [`bureau/core/`](bureau/core/README.md) | Data model, issue detection (fixed checks), storage, the **executor** (the only code that changes participants, payments, teams, travel and the outbox, after approval), the safe-reply rule |
 | Tools | [`bureau/tools/`](bureau/tools/README.md) | Deterministic functions the agent calls and code-level guards: rules search, eligibility, identity scoring, group checks, requester and message checks |
 | Agent | [`bureau/agent/`](bureau/agent/README.md) | One tool-calling agent: prompt, tool schemas, a loop that validates proposals and records every step |
 | Planner | [`bureau/planner/`](bureau/planner/README.md) | LLM constraint extraction → Jinko hotels × transport → packages in code → hard-constraint gate → ranking → LLM explanation |
 | API | [`api/`](api/README.md) | FastAPI routes used by the web console |
 | Web | [`web/`](web/README.md) | Static HTML/JS console and guided tours (no build step) |
 | Public demo | [`docs/DEPLOY.md`](docs/DEPLOY.md), [`demo/`](demo/README.md) | Render free service deployed from `main`: per-browser sessions, model-call limits, saved-example fallback; a static backup |
-| Evaluation | [`eval/`](eval/README.md) | Labeled cases, runner, recorded results |
+| Evaluation | [`eval/`](eval/README.md) | Labeled cases, runner, and a log of every recorded run |
 
 Design choices: **one agent, not several** (the loop is the product); invariants in code, not in the prompt; the agent only proposes; timezone-aware dates and money in integer cents. More in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -202,6 +203,8 @@ Design choices: **one agent, not several** (the loop is the product); invariants
 - Coach prices are illustrative; group hotel blocks, kitchen use and accessibility must be confirmed with the venue.
 - The agent's steps are shown after a run, not streamed live.
 - Evaluations use small, synthetic, labeled corpora (see [Results](#results)).
+- The message-safety guards are pattern checks for English and French. Only payment replies are restricted to a participant's registered addresses; other replies rely on the organizer's review.
+- Without an API key, the console replays saved examples for the guided tours and a set of sample issues; other issues report that no saved example exists.
 
 ## Team
 

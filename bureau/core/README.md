@@ -12,7 +12,7 @@ The event state and everything that reads or changes it.
 | `bulk_approval.py` | The authoritative eligibility filter and snapshot revision for human-confirmed bulk replies (T24) | done |
 
 ## Rules of this layer
-- Only `executor.apply` changes state. Nothing else writes.
+- Only `executor.apply` changes participants, payments, groups, travel and the outbox. The API also stores proposals, issue statuses and organizer-added messages.
 - Money is integer cents. Datetimes are timezone-aware.
 - Changing `models.py` changes the contract for everyone: announce it before merging.
 
