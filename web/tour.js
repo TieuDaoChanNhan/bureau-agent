@@ -385,7 +385,7 @@ function tourWatch(step) {
       status.textContent = "The agent is working… the tour continues by itself.";
     }
     const failed = !ui.busy && $("#run").classList.contains("error");
-    if (status && failed) status.textContent = `Something went wrong: ${$("#runText").textContent}. Use Skip step, or Close.`;
+    if (status && failed) status.textContent = `Something went wrong: ${$("#runText").textContent} Click the highlighted button again, or use Skip step.`;
     else if (status && Date.now() - tourState.started > 120000) status.textContent = "This is taking long. Use Skip step to continue.";
   }, 400);
 }

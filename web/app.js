@@ -26,10 +26,27 @@ const PILL = {
   waiting: ["p-wait", "Waiting"], running: ["p-run", "Running…"], failed: ["p-fail", "Agent failed"], resolved: ["p-res", "Resolved"], dismissed: ["p-rej", "Dismissed"],
 };
 
+// A request never blocks the console for good (T52): every call gives up after API_TIMEOUT_MS, and
+// network errors or a restarting server (Render redeploys after each merge) get a message saying what to do.
+const API_TIMEOUT_MS = 120000;
 async function api(path, options = {}) {
-  const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+  let res;
+  try {
+    res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options, signal: controller.signal });
+  } catch (err) {
+    throw new Error(err.name === "AbortError"
+      ? "The server did not answer within 2 minutes. Try again; if it keeps happening, reload the page."
+      : "The server cannot be reached (it may be restarting after an update). Wait a minute, then try again.");
+  } finally {
+    clearTimeout(timer);
+  }
   const body = await res.json().catch(() => null);
   if (!res.ok) {
+    if ([502, 503, 504].includes(res.status) && !(body && body.detail)) {
+      throw new Error(`${res.status}: the server is restarting or overloaded. Wait a minute, then try again.`);
+    }
     const detail = body && body.detail ? (typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail)) : res.statusText;
     throw new Error(`${res.status}: ${detail}`);
   }
