@@ -166,7 +166,7 @@ Design choices: **one agent, not several** (the loop is the product); invariants
 
 Van Khue NGUYEN, Xuan Bach HOANG, Gia Bao DINH and Huy PHAN (X-IA Hackathon #1). GitHub: [@TieuDaoChanNhan](https://github.com/TieuDaoChanNhan), [@0x2ee08](https://github.com/0x2ee08), [@pectpait](https://github.com/pectpait), [@hoanxuanbach](https://github.com/hoanxuanbach).
 
-How we worked: issues, pull requests and reviews ([CONTRIBUTING.md](CONTRIBUTING.md), [TASKS.md](TASKS.md)). Internal planning documents under `docs/` are in Vietnamese.
+How we worked: issues, pull requests, reviews, and documented engineering decisions ([CONTRIBUTING.md](CONTRIBUTING.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
 
 ## License
 

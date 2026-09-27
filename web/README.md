@@ -13,8 +13,7 @@ uvicorn api.main:app --reload     # then open http://127.0.0.1:8000
 | `app.js` | State, API calls, rendering and event handlers |
 | `tour.js` | The guided product tours (T34, T38): the full `STEPS` list, the `QUICK` tour built from it, and the logic that waits for each action |
 | `vendor/` | Driver.js 1.3.1 (MIT, licence in `DRIVER_LICENSE`), vendored so the tour works offline and when deployed |
-| `style.css` | Design tokens (light and dark) and components, taken from the mockup |
-| `reference/mockup.html` | Target design: the interactive mockup with hard-coded sample data |
+| `style.css` | Design tokens (light and dark) and console components |
 
 ## Layout (T35)
 - **Hero** (first screen): value proposition, three numbers (issues detected in the sample, the 90% evaluation

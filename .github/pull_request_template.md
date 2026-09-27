@@ -5,7 +5,7 @@ T__ · Closes #
 -
 
 ## "Done when" checklist
-Copy the checklist of the task from TASKS.md and tick each item.
+Copy the checklist from the linked GitHub issue and tick each item.
 - [ ]
 
 ## How to check
