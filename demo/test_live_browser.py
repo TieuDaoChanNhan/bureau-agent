@@ -259,6 +259,18 @@ class LiveConsoleTests(IssueFilterChecks, unittest.TestCase):
         self.assertTrue((runtime / "fake_calls.jsonl").exists())
         self.assertTrue(page.locator("#demoModeNotice").is_hidden())
 
+    def test_quick_tour_with_a_slow_server(self):
+        """A slow response used to re-render the console after the next step was highlighted, and the
+        tour's overlay then blocked the real click on "Plan the trip"."""
+        url, _ = self.server("live")
+        page = self.page(url)
+
+        # Delay every event read in the page, as a server waking up or redeploying does.
+        page.evaluate(r"""() => { const f = window.fetch;
+            window.fetch = (url, opts) => f(url, opts).then(r => /\/api\/events\/[a-z]+(\/outbox)?$/.test(url)
+                && !(opts && opts.method) ? new Promise(ok => setTimeout(() => ok(r), 1500)) : r); }""")
+        self.quick_tour(page)
+
     def test_quick_tour_replays_at_zero_limit(self):
         url, runtime = self.server("limit")
         page = self.page(url)
