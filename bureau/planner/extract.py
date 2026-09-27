@@ -101,6 +101,18 @@ types are unsupported. Never drop them just because hard has a fixed schema.
 Do not put ordinary trip context, stated soft preferences, or supported fields
 (including organizer-verified step_free_rooms) in unsupported_requirements.
 An empty list means there are no additional hard requirements to verify.
+
+Before returning, distinguish restrictions from mentions: 'budget includes coach
+hire' or 'autocar, hébergement et repas inclus' describes package costs, not a
+coach-only restriction. 'Trains only; coaches forbidden' is a restriction. A
+comfortable hotel near a station described as preferable is a preference, not a
+mandatory unsupported condition. Preserve supported preferences without adding
+lower_cost just because a budget was stated.
+If accessibility is not requested, leave step_free_rooms null and do not ask
+about accessible rooms. An absent optional need is not an ambiguity. An approximate
+budget with an undecided ceiling stays null. If a request names an arrival limit
+and asks to relax it without naming a replacement, retain the named limit and
+ask for the new limit; do not silently remove it.
 """
 
 
