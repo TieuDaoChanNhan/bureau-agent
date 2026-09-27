@@ -8,6 +8,7 @@ Deterministic functions the agent calls through `bureau/agent/tool_specs.py`. No
 | `eligibility.py` | `check_eligibility(state)` | `paid`, `unpaid` participant ids and `unmatched_payments` (exact matches only) |
 | `identity.py` | `match_person(state, payment_id)` | candidates with score, band and signals |
 | `groups.py` | `check_groups(state, kind)` / `propose_groups(state, ids, size)` | violations / a greedy grouping |
+| `requester.py` | `requester_problem(state, action_type, payload, issue_id)` | why a proposal acts for someone who did not ask, or `None` (T50): a payment reply goes only to the participant's registered addresses; a team change asked by a message needs the member's registered address as sender. Enforced by the agent loop and the executor. |
 
 ## Identity bands (`identity.py`)
 | Score | Band | What the agent may do |
