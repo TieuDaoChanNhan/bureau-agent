@@ -9,6 +9,7 @@ Deterministic functions the agent calls through `bureau/agent/tool_specs.py`. No
 | `identity.py` | `match_person(state, payment_id)` | candidates with score, band and signals |
 | `groups.py` | `check_groups(state, kind)` / `propose_groups(state, ids, size)` | violations / a greedy grouping |
 | `requester.py` | `requester_problem(state, action_type, payload, issue_id)` | why a proposal acts for someone who did not ask, or `None` (T50): a payment reply goes only to the participant's registered addresses; a team change asked by a message needs the member's registered address as sender. Enforced by the agent loop and the executor. |
+| `message_safety.py` | `untrusted_answer_source` / `message_instruction_problem` | detects explicit demands to copy a purportedly approved answer verbatim; the loop escalates before model calls, and proposal/executor checks prevent a stale draft from bypassing the guard (#103) |
 
 ## Identity bands (`identity.py`)
 | Score | Band | What the agent may do |
